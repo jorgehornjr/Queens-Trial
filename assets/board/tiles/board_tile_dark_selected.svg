@@ -1,0 +1,38 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="80" height="80" fill="#F5F5F5"/>
+<g id="Export &#38; Godot Handoff / Root">
+<rect width="1600" height="1100" transform="translate(-1264 -644)" fill="#071C2D"/>
+<g id="Godot Export Grid">
+<rect x="-1192" y="-448" width="1456" height="780" rx="16" fill="#172B27"/>
+<g id="Export Card / Dark / Selected">
+<rect x="-119.5" y="-57.5" width="319" height="319" rx="11.5" fill="#071C2D"/>
+<rect x="-119.5" y="-57.5" width="319" height="319" rx="11.5" stroke="#C7A94A"/>
+<g id="Export/80x80/board_tile_dark_selected" clip-path="url(#clip0_3_7)">
+<g id="Dark / Selected">
+<g clip-path="url(#clip1_3_7)">
+<mask id="path-3-inside-1_3_7" fill="white">
+<path d="M0 8C0 3.58172 3.58172 0 8 0H72C76.4183 0 80 3.58172 80 8V72C80 76.4183 76.4183 80 72 80H8C3.58172 80 0 76.4183 0 72V8Z"/>
+</mask>
+<path d="M0 8C0 3.58172 3.58172 0 8 0H72C76.4183 0 80 3.58172 80 8V72C80 76.4183 76.4183 80 72 80H8C3.58172 80 0 76.4183 0 72V8Z" fill="#263A35"/>
+<path id="state-layer" d="M0 8C0 3.58172 3.58172 0 8 0H72C76.4183 0 80 3.58172 80 8V72C80 76.4183 76.4183 80 72 80H8C3.58172 80 0 76.4183 0 72V8Z" fill="#C7A94A" fill-opacity="0.219608"/>
+<g id="state-marker">
+<g id="marker/selected-diamonds">
+<path id="Vector" d="M16 11L21 16L16 21L11 16L16 11ZM64 11L69 16L64 21L59 16L64 11ZM16 59L21 64L16 69L11 64L16 59ZM64 59L69 64L64 69L59 64L64 59Z" fill="#C7A94A"/>
+</g>
+</g>
+</g>
+<path d="M8 0V3H72V0V-3H8V0ZM80 8H77V72H80H83V8H80ZM72 80V77H8V80V83H72V80ZM0 72H3V8H0H-3V72H0ZM8 80V77C5.23858 77 3 74.7614 3 72H0H-3C-3 78.0751 1.92487 83 8 83V80ZM80 72H77C77 74.7614 74.7614 77 72 77V80V83C78.0751 83 83 78.0751 83 72H80ZM72 0V3C74.7614 3 77 5.23858 77 8H80H83C83 1.92487 78.0751 -3 72 -3V0ZM8 0V-3C1.92487 -3 -3 1.92487 -3 8H0H3C3 5.23858 5.23858 3 8 3V0Z" fill="#C7A94A" mask="url(#path-3-inside-1_3_7)"/>
+</g>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_3_7">
+<rect width="80" height="80" fill="white"/>
+</clipPath>
+<clipPath id="clip1_3_7">
+<path d="M0 8C0 3.58172 3.58172 0 8 0H72C76.4183 0 80 3.58172 80 8V72C80 76.4183 76.4183 80 72 80H8C3.58172 80 0 76.4183 0 72V8Z" fill="white"/>
+</clipPath>
+</defs>
+</svg>
