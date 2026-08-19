@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bxpv5yaka1h3x"]
+
+[ext_resource type="Script" uid="uid://bfon40kejq6v4" path="res://scripts/core/teste_fase_generator.gd" id="1_p4j08"]
+
+[node name="Node" type="Node" unique_id=1892490516]
+script = ExtResource("1_p4j08")
