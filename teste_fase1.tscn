@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cbie1ewtxhjvd"]
+
+[ext_resource type="Script" uid="uid://cwh26a8080p5o" path="res://scripts/fase1_primos.gd" id="1_2py20"]
+
+[node name="Node" type="Node" unique_id=1547239318]
+script = ExtResource("1_2py20")
