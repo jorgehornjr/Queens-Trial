@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cbie1ewtxhjvd"]
 
 [ext_resource type="Script" uid="uid://cwh26a8080p5o" path="res://scripts/fase1_primos.gd" id="1_2py20"]
-[ext_resource type="Script" uid="uid://cb7n7hrsfqdgh" path="res://scripts/fase3_multiplos.gd" id="2_a7yj6"]
+[ext_resource type="Script" uid="uid://df8ii026if30l" path="res://scripts/fase4_multiplos.gd" id="2_a7yj6"]
 
 [node name="Node" type="Node" unique_id=1547239318]
 script = ExtResource("1_2py20")
