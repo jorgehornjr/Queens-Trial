@@ -1,11 +1,11 @@
-# Godot 4 generated files
+# Godot generated files
 .godot/
 
-# Godot export output
+# Export output
 builds/
 exports/
 
-# Mono / C# generated files (caso o projeto passe a utilizá-los)
+# Mono / C# generated files
 .mono/
 data_*/
 mono_crash.*.json
@@ -20,7 +20,10 @@ mono_crash.*.json
 Thumbs.db
 desktop.ini
 
-# Temporary and backup files
+# Temporary, QA and backup files
+tmp/
+temp/
+.docx-review/
 *.tmp
 *.temp
 *.bak
@@ -28,3 +31,7 @@ desktop.ini
 
 # Logs
 *.log
+
+# Local Trello credentials and synchronization state
+tools/trello/trello.local.ps1
+tools/trello/.trello-state.json

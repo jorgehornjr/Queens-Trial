@@ -1,66 +1,66 @@
 # Queen's Trial
 
-Jogo educacional digital com estética medieval sombria, inspirado em tabuleiro e xadrez, desenvolvido para apoiar o aprendizado de matemática de estudantes do 6º ano do Ensino Fundamental.
+Queen's Trial é um jogo de estratégia educacional desenvolvido em Godot. A apresentação acontece em uma arena 3D, enquanto regras, posições e validações usam uma grade lógica 2D de 5 x 5 casas.
 
-O projeto busca integrar o conteúdo matemático às decisões do jogador: o aprendizado acontece durante a navegação, a escolha de movimentos e os desafios do tabuleiro, em vez de aparecer apenas como perguntas separadas do gameplay.
+## Estado atual
 
-## Contexto acadêmico
+Este repositório contém somente o scaffold técnico inicial do novo projeto:
 
-- **Instituição:** Centro Universitário Católica de Santa Catarina
-- **Curso:** Engenharia de Software
-- **Projeto:** PAC / Projeto Extensionista
-- **Professora:** Beatriz Michelson Reichert
-- **Equipe:** João Eduardo Capelari, Jorge Luiz Horn Júnior, Lorenzo Foralosso Kochemborger e Matheus Henrique Pompeu
+- tabuleiro 3D gerado por código a partir de coordenadas `Vector2i`;
+- casa central permanentemente reservada para a Rainha;
+- safe spot visível;
+- jogador com movimento discreto por WASD e animação por `Tween`;
+- catálogo data-driven com a progressão das dez fases;
+- gerenciador mínimo para iniciar e reiniciar fases, preservando a semente procedural;
+- testes das regras fundamentais da grade e do catálogo.
 
-## Tecnologias e plataforma
+Ainda não estão implementados o loop completo dos éditos, os ataques animados, a geração procedural das fases 7 e 9, o julgamento da Rainha ou a arte final.
 
-- Godot 4
-- GDScript
-- Windows
-- Tabuleiro 8x8
-- Controle principalmente por mouse
+## Fonte de verdade
 
-## Escopo
+As regras de gameplay estão consolidadas em [docs/Queens Trial - Especificacao Consolidada de Gameplay.docx](docs/Queens%20Trial%20-%20Especificacao%20Consolidada%20de%20Gameplay.docx). Outros documentos e protótipos anteriores não devem ser usados como requisito.
 
-A versão acadêmica tem **10 fases obrigatórias**:
+## Como executar
 
-| Fases | Conteúdo ou mecânica principal |
-| --- | --- |
-| 1–2 | Números primos |
-| 3–4 | Múltiplos |
-| 5–6 | Navegação, safe spots e contagem de passos |
-| 7–8 | Torres |
-| 9 | Torre e Bispo |
-| 10 | Torre, Bispo e Cavalo |
+1. Instale o Godot 4.7 ou uma versão compatível.
+2. Importe a pasta que contém `project.godot`.
+3. Execute o projeto com `F6` ou pelo botão de reprodução.
+4. Use `W`, `A`, `S` e `D` para mover o jogador uma casa por pressionamento.
 
-Consulte [docs/PROJECT_SCOPE.md](docs/PROJECT_SCOPE.md) para o escopo detalhado e [docs/MILESTONES.md](docs/MILESTONES.md) para o cronograma.
-
-## Estrutura do repositório
+O scaffold também pode ser iniciado pelo terminal:
 
 ```text
-assets/   arte, áudio e fontes
-data/     definições data-driven de fases e diálogos
-docs/     documentação do projeto
-scenes/   cenas Godot organizadas por domínio
-scripts/  código GDScript organizado por responsabilidade
-ui/       recursos visuais e temas de interface
+godot --path .
 ```
 
-## Como começar
+## Testes
 
-1. Instale uma versão estável do Godot 4.
-2. Clone este repositório.
-3. Quando `project.godot` estiver disponível, importe a pasta no Godot.
-4. Consulte [docs/GIT_GUIDE.md](docs/GIT_GUIDE.md) antes de iniciar uma tarefa.
+Execute as verificações sem abrir a janela do jogo:
 
-## Documentação
+```text
+godot --headless --path . --script res://tests/run_all.gd
+```
 
-- [Escopo](docs/PROJECT_SCOPE.md)
-- [Arquitetura](docs/ARCHITECTURE.md)
-- [Guia de Git](docs/GIT_GUIDE.md)
-- [Equipe](docs/TEAM.md)
-- [Marcos e entregas](docs/MILESTONES.md)
+## Planejamento no Trello
 
-## Licença
+O quadro da equipe pode ser reconstruído e sincronizado pela API a partir do plano versionado em `tools/trello/board-plan.json`. As credenciais ficam somente no computador de quem executa o script.
 
-Queen’s Trial é um projeto acadêmico sem fins lucrativos desenvolvido pelos integrantes da equipe. O código-fonte e os demais materiais do projeto não possuem, atualmente, uma licença pública de redistribuição.
+Consulte [tools/trello/README.md](tools/trello/README.md) para conferir a prévia e aplicar o plano no Trello.
+
+## Estrutura
+
+```text
+assets/              arte, áudio, materiais, modelos, texturas e efeitos
+data/phases/         catálogo e futuras configurações das fases
+docs/                especificação consolidada
+scenes/              cenas organizadas por domínio
+scripts/             lógica separada da apresentação
+tests/               testes executáveis em modo headless
+tools/trello/         plano e automação local do quadro da equipe
+```
+
+## Limite arquitetural
+
+A grade lógica é a autoridade do estado. Cenas 3D apenas convertem casas em posições físicas e exibem o resultado; não devem decidir movimento por física, pathfinding ou IA.
+
+Permanece pendente a decisão final sobre o que acontece com as peças depois do primeiro ataque. O scaffold oferece ocupação de casas, mas não assume automaticamente que as peças permanecerão na grade.
