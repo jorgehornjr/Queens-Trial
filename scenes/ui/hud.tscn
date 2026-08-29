@@ -35,6 +35,7 @@ corner_radius_bottom_left = 8
 script = ExtResource("1_hud")
 
 [node name="TopPanel" type="PanelContainer" parent="."]
+visible = false
 offset_left = 24.0
 offset_top = 24.0
 offset_right = 474.0

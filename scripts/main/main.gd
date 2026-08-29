@@ -3,12 +3,10 @@ extends Node
 @onready var phase_manager: PhaseManager = $PhaseManager
 @onready var board: Board3D = $World/Board
 @onready var player: GridPlayer = $World/Player
-@onready var camera: Camera3D = $World/Camera3D
 @onready var hud: GameHUD = $HUD
 
 
 func _ready() -> void:
-	camera.look_at(Vector3.ZERO, Vector3.UP)
 	phase_manager.phase_started.connect(_on_phase_started)
 	phase_manager.phase_restarted.connect(_on_phase_restarted)
 	player.cell_changed.connect(_on_player_cell_changed)

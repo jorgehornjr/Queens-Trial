@@ -27,7 +27,23 @@ temp/
 *.tmp
 *.temp
 *.bak
+*.blend1
 *~
+
+# Local 3D experimentation; only the exported board model is versioned
+/assets/models/board/*
+!/assets/models/board/queens_trial_board.glb
+/assets/models/pieces/*
+!/assets/models/pieces/.gitkeep
+
+# Generation and prototype files that are not required at runtime
+/scripts/effects/
+/scripts/pieces/*
+!/scripts/pieces/.gitkeep
+/tools/blender/
+
+# Godot import sidecars are regenerated locally
+*.import
 
 # Logs
 *.log

@@ -1,17 +1,18 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/main/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/gameplay/fase_manager.gd" id="2_phase"]
 [ext_resource type="PackedScene" path="res://scenes/board/Board.tscn" id="3_board"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="4_player"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="5_hud"]
+[ext_resource type="Script" path="res://scripts/camera/third_person_camera.gd" id="6_camera"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
 background_color = Color(0.018, 0.022, 0.07, 1)
 ambient_light_source = 3
 ambient_light_color = Color(0.38, 0.42, 0.70, 1)
-ambient_light_energy = 0.62
+ambient_light_energy = 0.40
 tonemap_mode = 2
 
 [node name="Main" type="Node"]
@@ -29,22 +30,44 @@ board_path = NodePath("../Board")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="World"]
 rotation_degrees = Vector3(-56, -28, 0)
-light_color = Color(0.80, 0.86, 1, 1)
-light_energy = 1.15
+light_color = Color(1, 0.86, 0.72, 1)
+light_energy = 0.74
 shadow_enabled = true
 
 [node name="AccentLight" type="OmniLight3D" parent="World"]
-position = Vector3(0, 4.5, 0)
+position = Vector3(0, 13, 3)
 light_color = Color(0.58, 0.36, 1, 1)
-light_energy = 4.0
-omni_range = 11.0
+light_energy = 1.8
+omni_range = 42.0
+
+[node name="FillLight" type="OmniLight3D" parent="World"]
+position = Vector3(-18, 18, -12)
+light_color = Color(0.46, 0.55, 1, 1)
+light_energy = 1.25
+omni_range = 48.0
+
+[node name="UnderglowLight" type="OmniLight3D" parent="World"]
+position = Vector3(0, -4.5, 0)
+light_color = Color(0.40, 0.08, 1, 1)
+light_energy = 3.2
+omni_range = 32.0
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="World"]
 environment = SubResource("Environment_main")
 
-[node name="Camera3D" type="Camera3D" parent="World"]
-position = Vector3(8.6, 9.6, 9.2)
+[node name="ThirdPersonCamera" type="Node3D" parent="World" node_paths=PackedStringArray("target_path")]
+script = ExtResource("6_camera")
+target_path = NodePath("../Player")
+
+[node name="SpringArm3D" type="SpringArm3D" parent="World/ThirdPersonCamera"]
+rotation_degrees = Vector3(-28, 0, 0)
+spring_length = 15.0
+margin = 0.25
+
+[node name="Camera3D" type="Camera3D" parent="World/ThirdPersonCamera/SpringArm3D"]
 current = true
-fov = 48.0
+fov = 55.0
+near = 0.15
+far = 160.0
 
 [node name="HUD" parent="." instance=ExtResource("5_hud")]
