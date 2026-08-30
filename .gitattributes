@@ -1,6 +1,7 @@
 * text=auto eol=lf
 
 *.gd text eol=lf
+*.uid text eol=lf
 *.tscn text eol=lf
 *.tres text eol=lf
 *.godot text eol=lf
@@ -19,3 +20,6 @@
 *.mp3 binary
 *.ttf binary
 *.otf binary
+*.docx binary
+*.glb binary
+*.blend binary

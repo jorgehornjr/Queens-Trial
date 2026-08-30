@@ -1,11 +1,11 @@
-[gd_scene format=3 uid="uid://cpybiv47b53n4"]
+[gd_scene load_steps=3 format=3 uid="uid://bx5u4oen55e2h"]
 
-[ext_resource type="Script" uid="uid://csc1huvfxrt68" path="res://scripts/board/board.gd" id="1_6puts"]
-[ext_resource type="Script" uid="uid://dmlg00jfluas8" path="res://scripts/gameplay/fase_manager.gd" id="2_4vko3"]
+[ext_resource type="Script" uid="uid://dqgdiyvpkgxck" path="res://scripts/board/board.gd" id="1_board"]
+[ext_resource type="PackedScene" path="res://assets/models/board/queens_trial_board.glb" id="2_board_visual"]
 
-[node name="Board" type="Node2D" unique_id=43978610]
-script = ExtResource("1_6puts")
+[node name="Board" type="Node3D" unique_id=1567871270]
+script = ExtResource("1_board")
 
-[node name="FaseManager" type="Node" parent="." unique_id=1539034982]
-script = ExtResource("2_4vko3")
-board_path = NodePath("..")
+[node name="BoardVisual" parent="." instance=ExtResource("2_board_visual")]
+
+[node name="Markers" type="Node3D" parent="." unique_id=1891264786]

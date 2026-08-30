@@ -1,100 +1,58 @@
+class_name PhaseManager
 extends Node
 
-signal fase_iniciada(numero, dados_fase)
-signal fase_concluida(numero)
-signal fase_reiniciada(numero)
-signal bloco_concluido(numero_bloco)
-signal jogo_concluido()
+signal phase_started(phase_number: int, phase_data: Dictionary, phase_seed: int)
+signal phase_restarted(phase_number: int, phase_seed: int)
+signal campaign_completed
 
-const TOTAL_FASES := 20
-const FASES_POR_BLOCO := 4
+const Catalog = preload("res://scripts/data/phase_catalog.gd")
 
-@export var board_path: NodePath
-@export var avancar_automaticamente: bool = true
+@export_range(1, 10) var initial_phase := 1
+@export var auto_start := true
 
-var board: Node
-var gerador
-var numero_fase_atual: int = 1
-var dados_fase_atual: Dictionary = {}
-var casas_corretas_selecionadas: Array = []
+var campaign: Dictionary = {}
+var current_phase := 0
+var current_phase_data: Dictionary = {}
+var current_seed := 0
+
 
 func _ready() -> void:
-	board = get_node(board_path)
-	gerador = preload("res://scripts/core/fase_generator.gd").new()
-	board.casa_selecionada.connect(_on_casa_selecionada)
-	iniciar_fase(numero_fase_atual)
+	campaign = Catalog.load_campaign()
+	var validation_errors := Catalog.validate_campaign(campaign)
+	if not validation_errors.is_empty():
+		for error in validation_errors:
+			push_error(error)
+		return
+	if auto_start:
+		call_deferred("start_phase", initial_phase)
 
-func iniciar_fase(numero: int) -> void:
-	if numero < 1 or numero > TOTAL_FASES:
-		push_error("Índice de fase inválido: %d (deve ser entre 1 e %d)" % [numero, TOTAL_FASES])
+
+func start_phase(phase_number: int, seed_override: int = -1) -> void:
+	var phase_data := Catalog.find_phase(campaign, phase_number)
+	if phase_data.is_empty():
+		push_error("Fase fora da campanha: %d" % phase_number)
 		return
 
-	numero_fase_atual = numero
-	dados_fase_atual = gerador.gerar_fase(numero)
-	limpar_selecao()
-	_aplicar_fase_ao_board()
-	fase_iniciada.emit(numero, dados_fase_atual)
-	print("Fase %d iniciada (%s)" % [numero, dados_fase_atual.get("modo", "?")])
+	current_phase = phase_number
+	current_phase_data = phase_data
+	if String(phase_data.get("configuration", "fixed")) == "procedural":
+		current_seed = seed_override if seed_override >= 0 else randi()
+	else:
+		current_seed = 0
 
-func reiniciar_fase() -> void:
-	iniciar_fase(numero_fase_atual)
-	fase_reiniciada.emit(numero_fase_atual)
+	phase_started.emit(current_phase, current_phase_data.duplicate(true), current_seed)
 
-func avancar_proxima_fase() -> void:
-	if numero_fase_atual >= TOTAL_FASES:
-		jogo_concluido.emit()
-		print("Todas as %d fases concluídas! Jogo finalizado." % TOTAL_FASES)
+
+func restart_phase() -> void:
+	if current_phase == 0:
 		return
+	var preserved_seed := current_seed
+	start_phase(current_phase, preserved_seed)
+	phase_restarted.emit(current_phase, preserved_seed)
 
-	if numero_fase_atual % FASES_POR_BLOCO == 0:
-		var numero_bloco = numero_fase_atual / FASES_POR_BLOCO
-		bloco_concluido.emit(numero_bloco)
-		print("Bloco %d concluído! Diálogo da Rainha desbloqueado." % numero_bloco)
 
-	iniciar_fase(numero_fase_atual + 1)
-
-func limpar_selecao() -> void:
-	casas_corretas_selecionadas.clear()
-	for row in range(8):
-		for col in range(8):
-			board.definir_estado(Vector2i(col, row), board.TileState.NORMAL)
-
-func _aplicar_fase_ao_board() -> void:
-	if dados_fase_atual["modo"] == "selecao":
-		for coord in dados_fase_atual["valores"]:
-			board.definir_valor(coord, dados_fase_atual["valores"][coord])
-	else: # navegacao
-		# Placeholder: destaca o safe spot pra debug visual.
-		# O sistema de fases navegação (outro membro) deve tratar
-		# movimento do Viajante e zona de ataque de verdade.
-		board.definir_selecionavel(dados_fase_atual["safe_spot"], true)
-
-func _on_casa_selecionada(coordenada: Vector2i, valor) -> void:
-	if dados_fase_atual["modo"] == "selecao":
-		_processar_selecao(coordenada)
-	else:
-		_processar_navegacao(coordenada)
-
-func _processar_selecao(coordenada: Vector2i) -> void:
-	var solucoes = dados_fase_atual["solucoes"]
-	if coordenada in solucoes and not (coordenada in casas_corretas_selecionadas):
-		casas_corretas_selecionadas.append(coordenada)
-		board.definir_selecionado(coordenada, true)
-		if casas_corretas_selecionadas.size() == solucoes.size():
-			_concluir_fase()
-	elif not (coordenada in solucoes):
-		print("Casa errada, reiniciando fase.")
-		reiniciar_fase()
-
-func _processar_navegacao(coordenada: Vector2i) -> void:
-	if coordenada == dados_fase_atual["safe_spot"]:
-		_concluir_fase()
-	else:
-		print("Casa fora do safe spot, reiniciando fase.")
-		reiniciar_fase()
-
-func _concluir_fase() -> void:
-	fase_concluida.emit(numero_fase_atual)
-	print("Fase %d concluída!" % numero_fase_atual)
-	if avancar_automaticamente:
-		avancar_proxima_fase()
+func advance_phase() -> void:
+	if current_phase >= 10:
+		campaign_completed.emit()
+		return
+	start_phase(current_phase + 1)

@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "source": "docs/Queens Trial - Especificacao Consolidada de Gameplay.docx",
+  "phases": [
+    {
+      "number": 1,
+      "resolution": "moves",
+      "edict_count": 1,
+      "seconds_per_edict": 0,
+      "first_pair": [],
+      "second_pair": [],
+      "pair_order": "horizontal_first",
+      "focus": "Um edito e movimento basico",
+      "configuration": "fixed"
+    },
+    {
+      "number": 2,
+      "resolution": "moves",
+      "edict_count": 2,
+      "seconds_per_edict": 0,
+      "first_pair": [],
+      "second_pair": [],
+      "pair_order": "horizontal_first",
+      "focus": "Dois editos e safe spot",
+      "configuration": "fixed"
+    },
+    {
+      "number": 3,
+      "resolution": "moves",
+      "edict_count": 2,
+      "seconds_per_edict": 0,
+      "first_pair": ["rook", "rook"],
+      "second_pair": [],
+      "pair_order": "horizontal_first",
+      "focus": "Introducao dos ataques",
+      "configuration": "fixed"
+    },
+    {
+      "number": 4,
+      "resolution": "moves",
+      "edict_count": 2,
+      "seconds_per_edict": 0,
+      "first_pair": ["rook", "rook"],
+      "second_pair": ["rook", "rook"],
+      "pair_order": "horizontal_first",
+      "focus": "Duas ondas",
+      "configuration": "fixed"
+    },
+    {
+      "number": 5,
+      "resolution": "moves",
+      "edict_count": 2,
+      "seconds_per_edict": 0,
+      "first_pair": ["bishop", "bishop"],
+      "second_pair": ["rook", "rook"],
+      "pair_order": "horizontal_first",
+      "focus": "Introducao do Bispo",
+      "configuration": "fixed"
+    },
+    {
+      "number": 6,
+      "resolution": "timer",
+      "edict_count": 2,
+      "seconds_per_edict": 15,
+      "first_pair": ["bishop", "bishop"],
+      "second_pair": ["rook", "rook"],
+      "pair_order": "horizontal_first",
+      "focus": "Introducao do cronometro",
+      "configuration": "fixed"
+    },
+    {
+      "number": 7,
+      "resolution": "timer",
+      "edict_count": 2,
+      "seconds_per_edict": 15,
+      "first_pair": ["rook", "rook"],
+      "second_pair": ["bishop", "bishop"],
+      "pair_order": "horizontal_first",
+      "focus": "Troca de leitura",
+      "configuration": "procedural"
+    },
+    {
+      "number": 8,
+      "resolution": "timer",
+      "edict_count": 2,
+      "seconds_per_edict": 15,
+      "first_pair": ["rook", "bishop"],
+      "second_pair": ["rook", "bishop"],
+      "pair_order": "announced_dynamic",
+      "focus": "Pares mistos",
+      "configuration": "fixed"
+    },
+    {
+      "number": 9,
+      "resolution": "timer",
+      "edict_count": 2,
+      "seconds_per_edict": 15,
+      "first_pair": ["rook", "bishop"],
+      "second_pair": ["rook", "bishop"],
+      "pair_order": "announced_dynamic",
+      "focus": "Pares mistos dificeis",
+      "configuration": "procedural"
+    },
+    {
+      "number": 10,
+      "resolution": "timer",
+      "edict_count": 2,
+      "seconds_per_edict": 15,
+      "first_pair": ["rook", "bishop"],
+      "second_pair": ["rook", "bishop"],
+      "pair_order": "announced_dynamic",
+      "focus": "Desafio final",
+      "configuration": "fixed"
+    }
+  ]
+}
