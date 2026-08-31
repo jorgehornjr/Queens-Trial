@@ -1,11 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://bx5u4oen55e2h"]
+[gd_scene format=3 uid="uid://cpybiv47b53n4"]
 
 [ext_resource type="Script" uid="uid://dqgdiyvpkgxck" path="res://scripts/board/board.gd" id="1_board"]
-[ext_resource type="PackedScene" path="res://assets/models/board/queens_trial_board.glb" id="2_board_visual"]
+[ext_resource type="PackedScene" uid="uid://hfeqrtj75475" path="res://assets/models/board/queens_trial_board.glb" id="2_board_visual"]
 
 [node name="Board" type="Node3D" unique_id=1567871270]
 script = ExtResource("1_board")
 
-[node name="BoardVisual" parent="." instance=ExtResource("2_board_visual")]
+[node name="BoardVisual" parent="." unique_id=1349187211 instance=ExtResource("2_board_visual")]
 
 [node name="Markers" type="Node3D" parent="." unique_id=1891264786]

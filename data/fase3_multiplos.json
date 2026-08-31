@@ -1,0 +1,14 @@
+{
+	"areas": [
+		3,
+		4,
+		6,
+		9
+	],
+	"fase": 3,
+	"numero_alvo": 5,
+	"solucao_indice": 0,
+	"tempo_limite": 30,
+	"tipo": "multiplo",
+	"x_inicial": 2
+}
