@@ -1,0 +1,17 @@
+{
+	"areas": [
+		5,
+		9,
+		13,
+		15,
+		18,
+		21
+	],
+	"dificuldade": "dificil",
+	"fase": 4,
+	"numero_alvo": 11,
+	"solucao_indice": 2,
+	"tempo_limite": 30,
+	"tipo": "multiplo",
+	"x_inicial": 20
+}

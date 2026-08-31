@@ -6,6 +6,6 @@
 [node name="Board" type="Node3D" unique_id=1567871270]
 script = ExtResource("1_board")
 
-[node name="BoardVisual" parent="." unique_id=1677874829 instance=ExtResource("2_board_visual")]
+[node name="BoardVisual" parent="." unique_id=1349187211 instance=ExtResource("2_board_visual")]
 
 [node name="Markers" type="Node3D" parent="." unique_id=1891264786]
