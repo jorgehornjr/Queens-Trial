@@ -9,6 +9,7 @@ func _initialize() -> void:
 	_test_attack_geometry()
 	_test_campaign_catalog()
 	_test_fase1_dados_completos()
+	_test_fase2_dados_completos()
 	_test_input_map()
 	_test_procedural_seed_is_preserved()
 	if failures.is_empty():
@@ -60,6 +61,25 @@ func _test_fase1_dados_completos() -> void:
 
 	# Caso de falha: um caminho de catálogo inexistente não deve
 	# retornar um valor padrão disfarçado (sem fallback).
+	var catalogo_invalido := Catalog.load_campaign("res://data/phases/arquivo_que_nao_existe.json")
+	_expect(catalogo_invalido.is_empty(), "Um caminho de catálogo inválido deve retornar vazio, nunca um valor padrão disfarçado.")
+func _test_fase2_dados_completos() -> void:
+	# Caso feliz: a fase 2 carrega com os dados previstos na especificação
+	# (dois éditos, ainda sem peças — introduz o safe spot).
+	var campaign := Catalog.load_campaign()
+	var fase2 := Catalog.find_phase(campaign, 2)
+
+	_expect(not fase2.is_empty(), "A fase 2 deve existir no catálogo.")
+	_expect(int(fase2.get("number", -1)) == 2, "O número da fase 2 deve ser 2.")
+	_expect(String(fase2.get("resolution", "")) == "moves", "A fase 2 deve usar resolução por movimentos, não por tempo.")
+	_expect(int(fase2.get("edict_count", -1)) == 2, "A fase 2 deve ter dois éditos (solução prevista pela especificação).")
+	_expect(int(fase2.get("seconds_per_edict", -1)) == 0, "A fase 2 não deve ter limite de tempo por édito.")
+	_expect((fase2.get("first_pair", null) as Array).is_empty(), "A fase 2 ainda não deve ter peças no primeiro par.")
+	_expect((fase2.get("second_pair", null) as Array).is_empty(), "A fase 2 ainda não deve ter peças no segundo par.")
+	_expect(String(fase2.get("pair_order", "")) == "horizontal_first", "A ordem dos pares da fase 2 deve ser horizontal_first.")
+	_expect(String(fase2.get("configuration", "")) == "fixed", "A fase 2 deve ser configuração fixa, não procedural.")
+
+	# Caso de falha: mesma garantia de "sem fallback" aplicada à fase 2.
 	var catalogo_invalido := Catalog.load_campaign("res://data/phases/arquivo_que_nao_existe.json")
 	_expect(catalogo_invalido.is_empty(), "Um caminho de catálogo inválido deve retornar vazio, nunca um valor padrão disfarçado.")
 func _test_input_map() -> void:
