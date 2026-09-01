@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cpybiv47b53n4"]
 
 [ext_resource type="Script" uid="uid://dqgdiyvpkgxck" path="res://scripts/board/board.gd" id="1_board"]
-[ext_resource type="PackedScene" uid="uid://hfeqrtj75475" path="res://assets/models/board/queens_trial_board.glb" id="2_board_visual"]
+[ext_resource type="PackedScene" uid="uid://bhjafm3axfrat" path="res://assets/models/board/queens_trial_board.glb" id="2_board_visual"]
 
 [node name="Board" type="Node3D" unique_id=1567871270]
 script = ExtResource("1_board")
