@@ -4,7 +4,7 @@ const BoardStateModel = preload("res://scripts/board/board_state.gd")
 const Catalog = preload("res://scripts/data/phase_catalog.gd")
 const PhaseManagerModel = preload("res://scripts/gameplay/fase_manager.gd")
 const RookResolverModel = preload("res://scripts/pieces/rook_resolver.gd")
-const AttackEventModel = preload("res://scripts/gameplay/attack_event.gd.gd")
+const AttackEventModel = preload("res://scripts/gameplay/attack_event.gd")
 var failures := PackedStringArray()
 func _initialize() -> void:
 	_test_board_state()

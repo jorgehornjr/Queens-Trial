@@ -1,11 +1,12 @@
-extends Node
+class_name DeslocamentoExterno
+extends RefCounted
 
 const NUMERAIS_VALOR := {"II": 2, "III": 3, "IV": 4}
 const NUMERAIS_TEXTO := {2: "II", 3: "III", 4: "IV"}
 const TAMANHO_GRADE := 5
 const CASA_RAINHA := Vector2i(2, 2) # coluna 3, linha 3 (1-indexado) -- centro da grade 5x5
 
-func calcular_deslocamento(origem_externa: String, valor, posicao_fixa: int) -> Dictionary:
+static func calcular_deslocamento(origem_externa: String, valor, posicao_fixa: int) -> Dictionary:
 	var valor_num = valor if typeof(valor) == TYPE_INT else NUMERAIS_VALOR.get(valor, -1)
 
 	if not valor_num in [2, 3, 4]:
