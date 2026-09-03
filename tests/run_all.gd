@@ -4,6 +4,8 @@ const BoardStateModel = preload("res://scripts/board/board_state.gd")
 const Catalog = preload("res://scripts/data/phase_catalog.gd")
 const PhaseManagerModel = preload("res://scripts/gameplay/fase_manager.gd")
 const CameraRig = preload("res://scripts/camera/board_orbit_camera.gd")
+const RookResolverModel = preload("res://scripts/pieces/rook_resolver.gd")
+const AttackEventModel = preload("res://scripts/gameplay/attack_event.gd")
 var failures := PackedStringArray()
 func _initialize() -> void:
 	call_deferred("_run_tests")
@@ -24,6 +26,8 @@ func _run_tests() -> void:
 	_test_forward_plus_configuration()
 	_test_input_map()
 	_test_procedural_seed_is_preserved()
+	_test_rook_resolution()
+	_test_attack_event()
 	if failures.is_empty():
 		print("OK: scaffold validado (grade, ataques e campanha).")
 		quit(0)
@@ -501,6 +505,49 @@ func _test_procedural_seed_is_preserved() -> void:
 	manager.restart_phase()
 	_expect(manager.current_seed == 240826, "Reiniciar uma fase procedural deve preservar a semente.")
 	manager.free()
+
+
+func _test_rook_resolution() -> void:
+	var state = BoardStateModel.new()
+	var hit_result := RookResolverModel.resolve_pair(
+		state,
+		[Vector2i(2, 0), Vector2i(0, 4)],
+		Vector2i(2, 3),
+	)
+	_expect(hit_result["player_hit"], "Jogador na coluna da Torre (2,0) deve ser atingido.")
+
+	var miss_result := RookResolverModel.resolve_pair(
+		state,
+		[Vector2i(0, 0)],
+		Vector2i(1, 3),
+	)
+	_expect(not miss_result["player_hit"], "Jogador fora da linha/coluna da Torre não deve ser atingido.")
+
+	var single_rook := RookResolverModel.resolve_pair(
+		state,
+		[Vector2i(0, 0)],
+		Vector2i(4, 4),
+	)
+	_expect(single_rook["attacked_cells"].size() == 8, "Uma Torre sozinha deve gerar oito casas atacadas na grade 5x5.")
+
+
+func _test_attack_event() -> void:
+	var event := AttackEventModel.new()
+	var cells: Array[Vector2i] = [Vector2i(2, 0), Vector2i(2, 1), Vector2i(2, 3)]
+
+	var hit := event.resolve(cells, Vector2i(2, 3), Vector2i(4, 0))
+	_expect(hit["player_hit"], "Jogador na lista de casas atacadas deve ser marcado como atingido.")
+	_expect(not hit["success"], "Ser atingido nunca deve contar como sucesso, mesmo fora do safe spot.")
+
+	var safe := event.resolve(cells, Vector2i(4, 0), Vector2i(4, 0))
+	_expect(safe["reached_safe_spot"], "Jogador na casa do safe spot deve ser reconhecido.")
+	_expect(safe["success"], "Chegar ao safe spot sem ser atingido deve contar como sucesso.")
+
+	var hit_on_safe_spot := event.resolve(cells, Vector2i(2, 3), Vector2i(2, 3))
+	_expect(not hit_on_safe_spot["success"], "Safe spot coberto por ataque não deve contar como sucesso.")
+	event.free()
+
+
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		failures.append(message)

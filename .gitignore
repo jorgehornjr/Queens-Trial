@@ -55,6 +55,8 @@ temp/
 !/scripts/pieces/.gitkeep
 !/scripts/pieces/piece_visual_animator.gd
 !/scripts/pieces/piece_visual_animator.gd.uid
+!/scripts/pieces/rook_resolver.gd
+!/scripts/pieces/rook_resolver.gd.uid
 # Utilitários locais de preparação, sem dependências no jogo.
 /tools/
 
