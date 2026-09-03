@@ -17,7 +17,6 @@ var movement_locked := false
 var _initialized := false
 var _board: Node
 
-
 func _ready() -> void:
 	call_deferred("_initialize_on_board")
 
@@ -44,7 +43,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	else:
 		return
 
-	_try_move(relative_direction_for_action(facing_direction, action))
+	var view_camera := get_viewport().get_camera_3d()
+	var view_yaw := view_camera.global_rotation.y if view_camera != null else 0.0
+	_try_move(camera_direction_for_action(view_yaw, action))
 	get_viewport().set_input_as_handled()
 
 
@@ -116,6 +117,14 @@ func _on_move_finished(previous_cell: Vector2i) -> void:
 	rotation.y = wrapf(rotation.y, -PI, PI)
 	movement_locked = false
 	cell_changed.emit(current_cell, previous_cell)
+
+
+static func camera_direction_for_action(camera_yaw: float, action: StringName) -> Vector2i:
+	# The game remains cardinal/cell-based, even when the view is diagonal.
+	# Quantize the camera, never the player's last heading; exact ties use the next sector.
+	var sector := posmod(int(floor((camera_yaw + PI / 4.0) / (PI / 2.0))), 4)
+	var forwards: Array[Vector2i] = [Vector2i.UP, Vector2i.LEFT, Vector2i.DOWN, Vector2i.RIGHT]
+	return relative_direction_for_action(forwards[sector], action)
 
 
 static func relative_direction_for_action(facing: Vector2i, action: StringName) -> Vector2i:
