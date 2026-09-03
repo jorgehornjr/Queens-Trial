@@ -1,24 +1,44 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1_player"]
 
-[sub_resource type="StandardMaterial3D" id="Material_player"]
-albedo_color = Color(0.47, 0.31, 0.88, 1)
-metallic = 0.18
-roughness = 0.32
+[sub_resource type="StandardMaterial3D" id="MarkerMaterial"]
+albedo_color = Color(0.12, 0.64, 0.95, 1)
+metallic = 0.25
+roughness = 0.30
 emission_enabled = true
-emission = Color(0.10, 0.05, 0.27, 1)
-emission_energy_multiplier = 0.45
+emission = Color(0.025, 0.19, 0.32, 1)
+emission_energy_multiplier = 0.5
 
-[sub_resource type="CapsuleMesh" id="Mesh_player"]
-radius = 0.42
-height = 1.30
-radial_segments = 32
-rings = 8
+[sub_resource type="SphereMesh" id="MarkerMesh"]
+material = SubResource("MarkerMaterial")
+radius = 1.25
+height = 2.5
+radial_segments = 48
+rings = 24
+
+[sub_resource type="StandardMaterial3D" id="BaseMaterial"]
+albedo_color = Color(0.07, 0.12, 0.21, 1)
+metallic = 0.45
+roughness = 0.35
+
+[sub_resource type="CylinderMesh" id="BaseMesh"]
+material = SubResource("BaseMaterial")
+top_radius = 1.5
+bottom_radius = 1.65
+height = 0.28
+radial_segments = 48
 
 [node name="Player" type="Node3D"]
 script = ExtResource("1_player")
+surface_offset = 0.16
 
-[node name="Body" type="MeshInstance3D" parent="."]
-mesh = SubResource("Mesh_player")
-material_override = SubResource("Material_player")
+[node name="Placeholder" type="Node3D" parent="."]
+
+[node name="Base" type="MeshInstance3D" parent="Placeholder"]
+position = Vector3(0, 0.14, 0)
+mesh = SubResource("BaseMesh")
+
+[node name="Orb" type="MeshInstance3D" parent="Placeholder"]
+position = Vector3(0, 1.48, 0)
+mesh = SubResource("MarkerMesh")

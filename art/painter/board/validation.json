@@ -1,0 +1,12 @@
+{
+  "source": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\models\\board\\queens_trial_board.glb",
+  "source_sha256": "4e940beca9c9b782687e1611dfdaf1287d9e1d783ec67e1202f1c0d10a8c5b5e",
+  "tiles": 25,
+  "mesh_objects": 36,
+  "texture_sets": 27,
+  "removed_star_components": 2,
+  "tile_size": 7.6,
+  "board_width": 48.0,
+  "embedded_textures_in_raw": 0,
+  "note": "Raw FBX/GLB/BLEND share new per-material UVs. Runtime asset retains the previous atlas."
+}
