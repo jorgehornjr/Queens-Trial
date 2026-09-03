@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dw8yst27ogi65"
+path="res://.godot/imported/08. Lost in the Moment.ogg-35cb72e1333f50eececc87e80b2ff86f.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/music/08. Lost in the Moment.ogg"
+dest_files=["res://.godot/imported/08. Lost in the Moment.ogg-35cb72e1333f50eececc87e80b2ff86f.oggvorbisstr"]
+
+[params]
+
+loop=true
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

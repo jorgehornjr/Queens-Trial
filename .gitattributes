@@ -23,3 +23,9 @@
 *.docx binary
 *.glb binary
 *.blend binary
+
+# Assets de grande porte gerenciados por Git LFS.
+assets/environment/fab_nebula/TC_Skybox_05.hdr filter=lfs diff=lfs merge=lfs -text
+assets/environment/fab_nebula/TC_Skybox_05_Alpha.hdr filter=lfs diff=lfs merge=lfs -text
+assets/environment/fab_nebula/TC_Flowmap.hdr filter=lfs diff=lfs merge=lfs -text
+assets/environment/spacecraft/space_station.glb filter=lfs diff=lfs merge=lfs -text

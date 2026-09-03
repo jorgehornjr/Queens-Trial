@@ -1,5 +1,8 @@
 # Godot generated files
 .godot/
+/Deleted/
+__pycache__/
+*.py[cod]
 
 # Export output
 builds/
@@ -21,7 +24,8 @@ Thumbs.db
 desktop.ini
 
 # Temporary, QA and backup files
-tmp/
+tmp/*
+!/tmp/.gdignore
 temp/
 .docx-review/
 *.tmp
@@ -33,17 +37,35 @@ temp/
 # Local 3D experimentation; only the exported board model is versioned
 /assets/models/board/*
 !/assets/models/board/queens_trial_board.glb
+!/assets/models/board/queens_trial_board_no_star.glb
+!/assets/models/board/painter/
 /assets/models/pieces/*
 !/assets/models/pieces/.gitkeep
+!/assets/models/pieces/bispo.glb
+!/assets/models/pieces/bispo_sem_textura.glb
+!/assets/models/pieces/torre.glb
+!/assets/models/pieces/torre_sem_textura.glb
+!/assets/models/pieces/animated/
+!/assets/models/pieces/bispo_images/
+!/assets/models/pieces/bispo_images/.gitkeep
 
 # Generation and prototype files that are not required at runtime
 /scripts/effects/
 /scripts/pieces/*
 !/scripts/pieces/.gitkeep
-/tools/blender/
+!/scripts/pieces/piece_visual_animator.gd
+!/scripts/pieces/piece_visual_animator.gd.uid
+# Utilitários locais de preparação, sem dependências no jogo.
+/tools/
 
 # Godot import sidecars are regenerated locally
 *.import
+# Preserve the HDR compression, mipmaps and memory limits for the space sky.
+!/assets/environment/fab_nebula/TC_Skybox_05.hdr.import
+!/assets/environment/fab_nebula/TC_Skybox_05_Alpha.hdr.import
+!/assets/environment/fab_nebula/TC_Flowmap.hdr.import
+!/assets/textures/board/painter/*.png.import
+!/assets/audio/music/*.ogg.import
 
 # Logs
 *.log

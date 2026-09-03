@@ -1,11 +1,40 @@
-[gd_scene format=3 uid="uid://cpybiv47b53n4"]
+[gd_scene load_steps=6 format=3 uid="uid://cpybiv47b53n4"]
 
 [ext_resource type="Script" uid="uid://dqgdiyvpkgxck" path="res://scripts/board/board.gd" id="1_board"]
-[ext_resource type="PackedScene" uid="uid://hfeqrtj75475" path="res://assets/models/board/queens_trial_board.glb" id="2_board_visual"]
+[ext_resource type="PackedScene" path="res://scenes/board/PaintedBoard.tscn" id="2_board_visual"]
+[ext_resource type="PackedScene" path="res://scenes/pieces/rook.tscn" id="3_rook"]
+[ext_resource type="PackedScene" path="res://scenes/pieces/bishop.tscn" id="4_bishop"]
+[ext_resource type="PackedScene" path="res://scenes/environment/board_levitation.tscn" id="5_mist"]
 
 [node name="Board" type="Node3D" unique_id=1567871270]
 script = ExtResource("1_board")
 
 [node name="BoardVisual" parent="." unique_id=1349187211 instance=ExtResource("2_board_visual")]
+
+[node name="LevitationMist" parent="." instance=ExtResource("5_mist")]
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+
+[node name="NorthWest" type="Marker3D" parent="SpawnPoints" groups=["piece_spawn"]]
+position = Vector3(-21, 0.16, -21)
+
+[node name="NorthEast" type="Marker3D" parent="SpawnPoints" groups=["piece_spawn"]]
+position = Vector3(21, 0.16, -21)
+
+[node name="SouthEast" type="Marker3D" parent="SpawnPoints" groups=["piece_spawn"]]
+position = Vector3(21, 0.16, 21)
+
+[node name="SouthWest" type="Marker3D" parent="SpawnPoints" groups=["piece_spawn"]]
+position = Vector3(-21, 0.16, 21)
+
+[node name="PreviewPieces" type="Node3D" parent="."]
+
+[node name="Rook" parent="PreviewPieces" instance=ExtResource("3_rook")]
+position = Vector3(-21, 0.16, -21)
+rotation_degrees = Vector3(0, 45, 0)
+
+[node name="Bishop" parent="PreviewPieces" instance=ExtResource("4_bishop")]
+position = Vector3(21, 0.16, -21)
+rotation_degrees = Vector3(0, -45, 0)
 
 [node name="Markers" type="Node3D" parent="." unique_id=1891264786]
