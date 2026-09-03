@@ -22,11 +22,11 @@ corner_radius_bottom_left = 15
 script = ExtResource("1_hud")
 
 [node name="TopPanel" type="PanelContainer" parent="."]
-visible = false
+visible = true
 offset_left = 36.0
 offset_top = 36.0
 offset_right = 711.0
-offset_bottom = 216.0
+offset_bottom = 372.0
 theme_override_styles/panel = SubResource("Style_top")
 
 [node name="Content" type="VBoxContainer" parent="TopPanel"]
@@ -46,3 +46,37 @@ text = "Um édito e movimento básico  •  por movimentos"
 theme_override_colors/font_color = Color(0.60, 0.82, 1, 1)
 theme_override_font_sizes/font_size = 20
 text = "Jogador  •  coluna 1  •  linha 5"
+
+[node name="EditoOrder1Label" type="Label" parent="TopPanel/Content"]
+theme_override_colors/font_color = Color(0.72, 0.74, 0.86, 1)
+theme_override_font_sizes/font_size = 20
+text = "1ª ordem  •  —"
+
+[node name="EditoOrder2Label" type="Label" parent="TopPanel/Content"]
+theme_override_colors/font_color = Color(0.72, 0.74, 0.86, 1)
+theme_override_font_sizes/font_size = 20
+text = "2ª ordem  •  —"
+
+[node name="StateLabel" type="Label" parent="TopPanel/Content"]
+theme_override_colors/font_color = Color(0.72, 0.74, 0.86, 1)
+theme_override_font_sizes/font_size = 20
+text = "Estado  •  Aguardando início"
+
+[node name="BottomPanel" type="PanelContainer" parent="."]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 36.0
+offset_top = -111.0
+offset_right = -36.0
+offset_bottom = -36.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("Style_bottom")
+
+[node name="StatusLabel" type="Label" parent="BottomPanel"]
+theme_override_colors/font_color = Color(0.93, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "Scaffold técnico: use WASD para mover e R para reiniciar a fase."
+autowrap_mode = 2
