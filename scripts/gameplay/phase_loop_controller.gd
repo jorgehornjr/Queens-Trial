@@ -42,8 +42,6 @@ func _ready() -> void:
 	_edito_machine.falha.connect(_on_falha)
 	_edito_machine.sucesso.connect(_on_sucesso)
 
-	_hud.connect_to_edito_machine(_edito_machine)
-
 	_phase_manager.phase_started.connect(_on_phase_started)
 
 
@@ -133,5 +131,4 @@ func _on_falha(motivos: Array) -> void:
 
 
 func _on_sucesso() -> void:
-	_hud.show_success()
 	_phase_manager.advance_phase()
