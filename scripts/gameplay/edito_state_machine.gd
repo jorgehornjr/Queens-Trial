@@ -42,6 +42,8 @@ func configurar_fase(lista_editos: Array, posicao_inicial: Vector2i) -> bool:
 	editos = lista_editos
 	indice_edito_atual = 0
 	posicao_jogador = posicao_inicial
+	# Configurar uma fase reinicia o ciclo, inclusive após FINALIZADO.
+	estado_atual = Estado.SELECAO_PAR
 	_transicionar(Estado.SELECAO_PAR)
 	_iniciar_edito_atual()
 	return true

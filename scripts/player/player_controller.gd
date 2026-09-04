@@ -16,6 +16,7 @@ var facing_direction := Vector2i.UP
 var movement_locked := false
 var _initialized := false
 var _board: Node
+var _move_tween: Tween
 
 func _ready() -> void:
 	call_deferred("_initialize_on_board")
@@ -52,6 +53,9 @@ func _unhandled_input(event: InputEvent) -> void:
 func reset_to_start() -> void:
 	if not _initialized:
 		return
+	if _move_tween != null:
+		_move_tween.kill()
+		_move_tween = null
 	var previous_cell := current_cell
 	current_cell = starting_cell
 	facing_direction = Vector2i.UP
@@ -93,6 +97,7 @@ func _try_move(direction: Vector2i) -> void:
 	movement_locked = true
 
 	var tween := create_tween()
+	_move_tween = tween
 	tween.set_parallel(true)
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_IN_OUT)
@@ -114,6 +119,7 @@ func _try_move(direction: Vector2i) -> void:
 
 
 func _on_move_finished(previous_cell: Vector2i) -> void:
+	_move_tween = null
 	rotation.y = wrapf(rotation.y, -PI, PI)
 	movement_locked = false
 	cell_changed.emit(current_cell, previous_cell)

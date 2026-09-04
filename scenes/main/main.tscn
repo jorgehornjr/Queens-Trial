@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="5_hud"]
 [ext_resource type="Script" uid="uid://dr7p31qgm4hak" path="res://scripts/camera/board_orbit_camera.gd" id="6_camera"]
 [ext_resource type="PackedScene" path="res://scenes/environment/celestial_space.tscn" id="7_space"]
+[ext_resource type="Script" path="res://scripts/gameplay/phase_loop_controller.gd" id="8_loop"]
 
 [node name="Main" type="Node" unique_id=1396135177]
 script = ExtResource("1_main")
@@ -67,5 +68,12 @@ current = true
 fov = 50.0
 near = 0.15
 far = 120000.0
+
+[node name="PhaseLoopController" type="Node" parent="."]
+script = ExtResource("8_loop")
+phase_manager_path = NodePath("../PhaseManager")
+board_path = NodePath("../World/Board")
+player_path = NodePath("../World/Player")
+hud_path = NodePath("../HUD")
 
 [node name="HUD" parent="." unique_id=949474998 instance=ExtResource("5_hud")]
