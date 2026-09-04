@@ -37,6 +37,10 @@ var _edito_machine: Node = null
 var _total_editos: int = 0
 
 
+func _ready() -> void:
+	_reset_edito_display()
+
+
 func set_phase(phase_number: int, phase_data: Dictionary, phase_seed: int) -> void:
 	phase_label.text = "FASE %02d / 10" % phase_number
 	var resolution := "por movimentos"
@@ -87,6 +91,11 @@ func show_failure(motivos: Array) -> void:
 ## estado_mudou) para refletir a ordem do édito atual, o valor em numeral
 ## romano e o estado do gameplay em tempo real.
 func connect_to_edito_machine(machine: Node) -> void:
+	if not is_node_ready():
+		# Evita crash se for chamado antes de @onready resolver os Labels
+		# (ex.: HUD instanciada e conectada no mesmo frame por outro nó).
+		await ready
+
 	if _edito_machine == machine:
 		return
 	if _edito_machine != null:
