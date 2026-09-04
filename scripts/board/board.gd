@@ -7,22 +7,23 @@ const Constants = preload("res://scripts/core/game_constants.gd")
 const BoardStateModel = preload("res://scripts/board/board_state.gd")
 
 @export_category("Geometry")
-@export_range(1.0, 12.0, 0.1) var tile_size := 5.6
+@export_range(1.0, 12.0, 0.1) var tile_size := 7.6
 @export var safe_spot := Vector2i(4, 0)
 
-@export_category("Dynamic Markers")
-@export var safe_spot_color := Color("56d6a5")
+@export_category("Staging Preview")
+@export var show_preview_pieces := true
 
 @onready var board_visual: Node3D = $BoardVisual
+@onready var spawn_points_root: Node3D = $SpawnPoints
+@onready var preview_pieces_root: Node3D = $PreviewPieces
 @onready var markers_root: Node3D = $Markers
 
 var state
-
-
 func _ready() -> void:
 	state = BoardStateModel.new()
 	if board_visual == null:
 		push_error("O modelo 3D definitivo do tabuleiro não foi carregado.")
+	preview_pieces_root.visible = show_preview_pieces
 	if not state.set_safe_spot(safe_spot):
 		push_warning("Safe spot inválido; usando a casa padrão.")
 		safe_spot = state.safe_spot
@@ -31,7 +32,6 @@ func _ready() -> void:
 
 func build_visuals() -> void:
 	_clear_children(markers_root)
-	_create_safe_spot_marker()
 	board_built.emit()
 
 
@@ -60,30 +60,21 @@ func manhattan_distance(origin: Vector2i, destination: Vector2i) -> int:
 	return state.manhattan_distance(origin, destination)
 
 
-func _create_safe_spot_marker() -> void:
-	var marker := MeshInstance3D.new()
-	marker.name = "SafeSpotMarker"
-	var mesh := CylinderMesh.new()
-	mesh.top_radius = tile_size * 0.28
-	mesh.bottom_radius = tile_size * 0.28
-	mesh.height = 0.08
-	mesh.radial_segments = 48
-	marker.mesh = mesh
-	marker.position = grid_to_world(state.safe_spot) + Vector3(0.0, 0.07, 0.0)
-	marker.material_override = _make_material(safe_spot_color, 1.15)
-	markers_root.add_child(marker)
+func get_spawn_marker(corner_name: StringName) -> Marker3D:
+	var points_root := spawn_points_root
+	if points_root == null:
+		points_root = get_node_or_null("SpawnPoints") as Node3D
+	if points_root == null:
+		return null
+	return points_root.get_node_or_null(NodePath(String(corner_name))) as Marker3D
 
 
-func _make_material(color: Color, emission_energy: float = 0.0) -> StandardMaterial3D:
-	var material := StandardMaterial3D.new()
-	material.albedo_color = color
-	material.metallic = 0.08
-	material.roughness = 0.42
-	if emission_energy > 0.0:
-		material.emission_enabled = true
-		material.emission = color
-		material.emission_energy_multiplier = emission_energy
-	return material
+func get_spawn_transform(corner_name: StringName) -> Transform3D:
+	var marker := get_spawn_marker(corner_name)
+	if marker == null:
+		push_warning("Ponto de spawn externo desconhecido: %s" % corner_name)
+		return global_transform
+	return marker.global_transform
 
 
 func _clear_children(parent: Node) -> void:

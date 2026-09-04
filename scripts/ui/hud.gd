@@ -1,40 +1,9 @@
 class_name GameHUD
 extends CanvasLayer
 
-## HUD do loop de fases 1-4. Além do scaffold técnico existente (fase, posição,
-## status), esta versão mostra as duas ordens do édito da fase (com o valor
-## em numeral romano) e o estado atual do gameplay, tudo alimentado pelos
-## sinais de EditoStateMachine — a HUD nunca consulta nós internos do
-## tabuleiro para se atualizar.
-
-const EditoMachineModel = preload("res://scripts/gameplay/edito_state_machine.gd")
-
-const _NUMERAIS_ROMANOS := {2: "II", 3: "III", 4: "IV"}
-
-const _NOMES_ESTADO := {
-	EditoMachineModel.Estado.SELECAO_PAR: "Seleção do par",
-	EditoMachineModel.Estado.AGUARDANDO_MOVIMENTO: "Aguardando movimento",
-	EditoMachineModel.Estado.PRIMEIRA_PECA: "Resolvendo 1ª peça",
-	EditoMachineModel.Estado.SEGUNDA_PECA: "Resolvendo 2ª peça",
-	EditoMachineModel.Estado.ATAQUE: "Ataque",
-	EditoMachineModel.Estado.JULGAMENTO: "Julgamento",
-}
-
-const _COR_EM_ANDAMENTO := Color(0.60, 0.82, 1, 1)
-const _COR_SUCESSO := Color(0.53, 0.90, 0.60, 1)
-const _COR_FALHA := Color(0.94, 0.42, 0.42, 1)
-const _COR_AGUARDANDO := Color(0.72, 0.74, 0.86, 1)
-
 @onready var phase_label: Label = $TopPanel/Content/PhaseLabel
 @onready var rule_label: Label = $TopPanel/Content/RuleLabel
 @onready var position_label: Label = $TopPanel/Content/PositionLabel
-@onready var edito_order_1_label: Label = $TopPanel/Content/EditoOrder1Label
-@onready var edito_order_2_label: Label = $TopPanel/Content/EditoOrder2Label
-@onready var state_label: Label = $TopPanel/Content/StateLabel
-@onready var status_label: Label = $BottomPanel/StatusLabel
-
-var _edito_machine: Node = null
-var _total_editos: int = 0
 
 
 func _ready() -> void:
@@ -50,8 +19,6 @@ func set_phase(phase_number: int, phase_data: Dictionary, phase_seed: int) -> vo
 	if String(phase_data.get("configuration", "fixed")) == "procedural":
 		seed_suffix = "  •  semente %d" % phase_seed
 	rule_label.text = "%s  •  %s%s" % [phase_data.get("focus", ""), resolution, seed_suffix]
-	status_label.text = "Scaffold técnico: use WASD para mover e R para reiniciar a fase."
-	_reset_edito_display()
 
 
 func set_player_cell(cell: Vector2i) -> void:

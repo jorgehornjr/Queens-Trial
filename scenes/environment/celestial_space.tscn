@@ -1,0 +1,186 @@
+[gd_scene load_steps=29 format=3]
+
+[ext_resource type="Script" path="res://scripts/environment/celestial_space.gd" id="1_space"]
+[ext_resource type="Texture2D" path="res://assets/environment/fab_nebula/TC_Skybox_05.hdr" id="2_panorama"]
+[ext_resource type="Texture2D" path="res://assets/environment/earth_blue_marble_may.jpg" id="3_earth"]
+[ext_resource type="Texture2D" path="res://assets/environment/earth_clouds.png" id="4_clouds"]
+[ext_resource type="Texture2D" path="res://assets/environment/star_glow.png" id="5_star"]
+[ext_resource type="Shader" path="res://shaders/earth_atmosphere.gdshader" id="6_atmosphere"]
+[ext_resource type="Shader" path="res://shaders/earth_clouds.gdshader" id="7_cloud_shader"]
+[ext_resource type="Texture2D" path="res://assets/environment/moon_lroc_color_2k.jpg" id="8_moon"]
+[ext_resource type="Shader" path="res://shaders/cinematic_nebula.gdshader" id="9_nebula_shader"]
+[ext_resource type="Texture2D" path="res://assets/environment/fab_nebula/TC_Skybox_05_Alpha.hdr" id="10_nebula_mask"]
+[ext_resource type="Texture2D" path="res://assets/environment/fab_nebula/TC_Flowmap.hdr" id="11_flow_reference"]
+[ext_resource type="PackedScene" path="res://assets/environment/fab_nebula/earth.glb" id="12_earth_model"]
+[ext_resource type="Script" path="res://scripts/environment/cinematic_earth.gd" id="13_cinematic_earth"]
+[ext_resource type="Shader" path="res://shaders/earth_cinematic_atmosphere.gdshader" id="14_planet_atmosphere"]
+[ext_resource type="Script" path="res://scripts/environment/solar_system.gd" id="15_solar_system"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_space"]
+shader = ExtResource("9_nebula_shader")
+shader_parameter/panorama = ExtResource("2_panorama")
+shader_parameter/nebula_mask = ExtResource("10_nebula_mask")
+shader_parameter/flow_reference = ExtResource("11_flow_reference")
+
+[sub_resource type="Sky" id="Sky_space"]
+radiance_size = 3
+process_mode = 3
+sky_material = SubResource("ShaderMaterial_space")
+
+[sub_resource type="Environment" id="Environment_space"]
+background_mode = 2
+sky = SubResource("Sky_space")
+background_energy_multiplier = 0.80
+ambient_light_source = 3
+ambient_light_color = Color(0.42, 0.46, 0.72, 1)
+ambient_light_energy = 0.36
+reflected_light_source = 2
+tonemap_mode = 2
+glow_enabled = true
+glow_normalized = true
+glow_intensity = 0.85
+glow_strength = 1.0
+glow_bloom = 0.0
+glow_hdr_threshold = 1.3
+glow_hdr_scale = 1.0
+glow_levels/2 = 0.45
+glow_levels/3 = 0.8
+glow_levels/4 = 0.5
+glow_levels/5 = 0.3
+ssao_enabled = true
+ssao_radius = 1.4
+ssao_intensity = 0.7
+ssao_power = 1.2
+ssil_enabled = true
+ssil_radius = 4.0
+ssil_intensity = 0.45
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.0
+volumetric_fog_length = 180.0
+volumetric_fog_detail_spread = 1.0
+volumetric_fog_ambient_inject = 0.0
+volumetric_fog_sky_affect = 1.0
+
+[sub_resource type="StandardMaterial3D" id="EarthMaterial"]
+albedo_texture = ExtResource("3_earth")
+metallic = 0.02
+roughness = 0.76
+emission_enabled = true
+emission = Color(0.34, 0.42, 0.56, 1)
+emission_energy_multiplier = 0.18
+emission_texture = ExtResource("3_earth")
+
+[sub_resource type="SphereMesh" id="EarthMesh"]
+material = SubResource("EarthMaterial")
+radius = 13.0
+height = 26.0
+radial_segments = 96
+rings = 64
+
+[sub_resource type="ShaderMaterial" id="CloudMaterial"]
+render_priority = 1
+shader = ExtResource("7_cloud_shader")
+shader_parameter/cloud_texture = ExtResource("4_clouds")
+shader_parameter/cloud_tint = Color(0.84, 0.92, 1, 1)
+shader_parameter/cloud_opacity = 0.52
+shader_parameter/cloud_emission = 0.09
+
+[sub_resource type="SphereMesh" id="CloudMesh"]
+material = SubResource("CloudMaterial")
+radius = 13.2
+height = 26.4
+radial_segments = 96
+rings = 64
+
+[sub_resource type="ShaderMaterial" id="AtmosphereMaterial"]
+render_priority = 2
+shader = ExtResource("6_atmosphere")
+shader_parameter/atmosphere_color = Color(0.15, 0.62, 1, 0.72)
+shader_parameter/rim_power = 2.45
+shader_parameter/glow_strength = 2.25
+
+[sub_resource type="SphereMesh" id="AtmosphereMesh"]
+material = SubResource("AtmosphereMaterial")
+radius = 13.68
+height = 27.36
+radial_segments = 96
+rings = 64
+
+[sub_resource type="StandardMaterial3D" id="MoonMaterial"]
+albedo_texture = ExtResource("8_moon")
+albedo_color = Color(0.82, 0.84, 0.9, 1)
+metallic = 0.0
+roughness = 0.96
+emission_enabled = true
+emission = Color(0.16, 0.18, 0.25, 1)
+emission_energy_multiplier = 0.11
+emission_texture = ExtResource("8_moon")
+
+[sub_resource type="SphereMesh" id="MoonMesh"]
+material = SubResource("MoonMaterial")
+radius = 3.8
+height = 7.6
+radial_segments = 64
+rings = 40
+
+[sub_resource type="ShaderMaterial" id="DistantAtmosphereMaterial"]
+render_priority = 2
+shader = ExtResource("14_planet_atmosphere")
+
+[sub_resource type="SphereMesh" id="DistantAtmosphereMesh"]
+material = SubResource("DistantAtmosphereMaterial")
+radius = 5.10
+height = 10.20
+radial_segments = 192
+rings = 128
+
+[node name="CelestialSpace" type="Node3D"]
+script = ExtResource("1_space")
+star_texture = ExtResource("5_star")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_space")
+
+[node name="Earth" type="Node3D" parent="."]
+visible = false
+position = Vector3(0, -9, -100)
+rotation_degrees = Vector3(4, -76, -5)
+
+[node name="EarthSurface" type="MeshInstance3D" parent="Earth"]
+mesh = SubResource("EarthMesh")
+
+[node name="EarthClouds" type="MeshInstance3D" parent="Earth"]
+mesh = SubResource("CloudMesh")
+
+[node name="EarthAtmosphere" type="MeshInstance3D" parent="Earth"]
+mesh = SubResource("AtmosphereMesh")
+
+[node name="Moon" type="MeshInstance3D" parent="."]
+visible = false
+position = Vector3(-42, -2, -92)
+rotation_degrees = Vector3(8, 142, -6)
+mesh = SubResource("MoonMesh")
+
+[node name="StarField" type="MultiMeshInstance3D" parent="."]
+visible = false
+
+[node name="DistantEarth" type="Node3D" parent="."]
+position = Vector3(2100, -1000, -7200)
+rotation_degrees = Vector3(0, -95, -12)
+scale = Vector3(220, 220, 220)
+script = ExtResource("13_cinematic_earth")
+
+[node name="Model" parent="DistantEarth" instance=ExtResource("12_earth_model")]
+
+[node name="Atmosphere" type="MeshInstance3D" parent="DistantEarth"]
+visible = false
+mesh = SubResource("DistantAtmosphereMesh")
+cast_shadow = 0
+
+[node name="PlanetSun" type="DirectionalLight3D" parent="DistantEarth"]
+light_color = Color(1, 0.94, 0.86, 1)
+light_energy = 1.65
+light_cull_mask = 2
+
+[node name="SolarSystem" type="Node3D" parent="."]
+script = ExtResource("15_solar_system")

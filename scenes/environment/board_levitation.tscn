@@ -1,0 +1,38 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Shader" path="res://shaders/board_levitation_fog.gdshader" id="1_fog"]
+[ext_resource type="Shader" path="res://shaders/board_nebula_volume.gdshader" id="2_volume"]
+
+[sub_resource type="ShaderMaterial" id="MistMaterial"]
+shader = ExtResource("1_fog")
+
+[sub_resource type="FastNoiseLite" id="CloudNoise"]
+seed = 74021
+frequency = 0.07
+fractal_octaves = 4
+
+[sub_resource type="NoiseTexture3D" id="CloudField"]
+width = 96
+height = 96
+depth = 96
+seamless = true
+noise = SubResource("CloudNoise")
+
+[sub_resource type="BoxMesh" id="VolumeBounds"]
+size = Vector3(68, 12, 68)
+
+[sub_resource type="ShaderMaterial" id="NebulaVolumeMaterial"]
+shader = ExtResource("2_volume")
+shader_parameter/cloud_noise = SubResource("CloudField")
+
+[node name="LevitationMist" type="FogVolume" groups=["presentation_only"]]
+position = Vector3(0, -6, 0)
+size = Vector3(72, 14, 72)
+material = SubResource("MistMaterial")
+
+[node name="NebulaVolume" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.8, 0)
+mesh = SubResource("VolumeBounds")
+material_override = SubResource("NebulaVolumeMaterial")
+cast_shadow = 0
+gi_mode = 0
