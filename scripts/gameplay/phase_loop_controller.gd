@@ -42,6 +42,8 @@ func _ready() -> void:
 	_edito_machine.falha.connect(_on_falha)
 	_edito_machine.sucesso.connect(_on_sucesso)
 
+	_hud.connect_to_edito_machine(_edito_machine)
+
 	_phase_manager.phase_started.connect(_on_phase_started)
 
 
@@ -57,6 +59,16 @@ func _on_phase_started(phase_number: int, phase_data: Dictionary, _phase_seed: i
 
 
 func _setup_edito_machine() -> void:
+	var safe_cell: Array = _current_phase_data.get("safe_spot", [])
+	if safe_cell.size() != 2:
+		push_error("A fase precisa definir um safe spot válido.")
+		return
+	var safe_spot := Vector2i(int(safe_cell[0]), int(safe_cell[1]))
+	if not _board.state.set_safe_spot(safe_spot):
+		push_error("Safe spot inválido para a fase: %s" % safe_spot)
+		return
+	_board.safe_spot = safe_spot
+
 	var editos := _build_editos(_current_phase_data)
 	if not _edito_machine.configurar_fase(editos, _player.current_cell):
 		push_error("Não foi possível configurar os éditos da fase atual.")
@@ -66,12 +78,13 @@ func _setup_edito_machine() -> void:
 
 func _build_editos(phase_data: Dictionary) -> Array:
 	var edict_count := int(phase_data.get("edict_count", 1))
-	var valores := [2, 3, 4]
-	valores.shuffle()
+	var valores: Array = phase_data.get("edict_values", [])
+	if valores.size() != edict_count:
+		return []
 	var editos: Array = []
 	for i in range(edict_count):
 		var par_key := "first_pair" if i == 0 else "second_pair"
-		editos.append({"valor": valores[i], "par": par_key})
+		editos.append({"valor": int(valores[i]), "par": par_key})
 	return editos
 
 
@@ -131,4 +144,5 @@ func _on_falha(motivos: Array) -> void:
 
 
 func _on_sucesso() -> void:
+	_hud.show_success()
 	_phase_manager.advance_phase()

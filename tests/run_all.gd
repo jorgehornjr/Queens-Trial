@@ -212,7 +212,8 @@ func _test_board_camera() -> void:
 	var main := (load("res://scenes/main/main.tscn") as PackedScene).instantiate()
 	root.add_child(main)
 	var rig := main.get_node("World/BoardCamera") as CameraRig
-	_expect(main.get_node_or_null("HUD/BottomPanel") == null, "A faixa inferior de instruções deve ser removida.")
+	_expect(main.get_node_or_null("HUD/BottomPanel/StatusLabel") is Label,
+		"A HUD restaurada deve conter o texto usado para as mensagens de status.")
 	_expect(main.get_node_or_null("World/Board/Markers/SafeSpotMarker") == null, "O círculo visual do safe spot deve ser removido.")
 	var music := main.get_node("Music") as AudioStreamPlayer
 	_expect(music.stream is AudioStreamOggVorbis and music.stream.loop and music.autoplay,
