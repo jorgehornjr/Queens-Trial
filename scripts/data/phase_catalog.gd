@@ -48,5 +48,20 @@ static func validate_campaign(campaign: Dictionary) -> PackedStringArray:
 		var is_procedural := String(phase.get("configuration", "")) == "procedural"
 		if should_be_procedural != is_procedural:
 			errors.append("Configuração fixa/procedural incorreta na fase %d." % phase_number)
+		errors.append_array(validate_piece_borders(phase))
 
+	return errors
+
+
+static func validate_piece_borders(phase: Dictionary) -> PackedStringArray:
+	var errors := PackedStringArray()
+	var occupied_sides := {}
+	for wave in phase.get("piece_waves", []):
+		for definition in wave:
+			var side := String(definition.get("side", ""))
+			if side not in ["left", "right", "top", "bottom"]:
+				errors.append("Borda inválida na fase %s." % phase.get("number", "?"))
+			elif occupied_sides.has(side):
+				errors.append("A fase %s deve ter no máximo uma peça por borda (%s)." % [phase.get("number", "?"), side])
+			occupied_sides[side] = true
 	return errors

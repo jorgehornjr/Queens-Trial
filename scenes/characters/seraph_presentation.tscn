@@ -1,0 +1,33 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/characters/seraph_presentation.gd" id="1_seraph"]
+[ext_resource type="PackedScene" path="res://assets/models/characters/seraph/seraph.glb" id="2_model"]
+[ext_resource type="PackedScene" path="res://assets/models/props/astraia/astraia_orb.scn" id="3_orb"]
+
+[node name="Seraph" type="Node3D" groups=["presentation_only"]]
+script = ExtResource("1_seraph")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+scale = Vector3(55, 55, 55)
+
+[node name="OrbAttachment" type="BoneAttachment3D" parent="Model/Seraph/Skeleton3D"]
+bone_name = "eye"
+
+[node name="AstraiaOrb" parent="Model/Seraph/Skeleton3D/OrbAttachment" instance=ExtResource("3_orb")]
+position = Vector3(0, 0.02, 0)
+rotation_degrees = Vector3(55, 0, 0)
+scale = Vector3(1.15, 1.15, 1.15)
+
+[node name="CharacterKey" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-30, -32, 0)
+light_color = Color(1, 0.91, 0.76, 1)
+light_energy = 1.45
+light_cull_mask = 64
+shadow_enabled = true
+directional_shadow_max_distance = 180.0
+
+[node name="CharacterFill" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-12, 42, 0)
+light_color = Color(0.48, 0.58, 1, 1)
+light_energy = 0.48
+light_cull_mask = 64

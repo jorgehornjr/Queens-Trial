@@ -9,7 +9,6 @@ extends Node
 
 func _ready() -> void:
 	phase_manager.phase_started.connect(_on_phase_started)
-	player.cell_changed.connect(_on_player_cell_changed)
 	player.restart_requested.connect(phase_manager.restart_phase)
 
 
@@ -25,7 +24,3 @@ func _on_phase_started(phase_number: int, phase_data: Dictionary, phase_seed: in
 	board_camera.enter_gameplay()
 	hud.set_phase(phase_number, phase_data, phase_seed)
 	player.reset_to_start()
-
-
-func _on_player_cell_changed(cell: Vector2i, _previous_cell: Vector2i) -> void:
-	hud.set_player_cell(cell)

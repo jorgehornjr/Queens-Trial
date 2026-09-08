@@ -2,13 +2,14 @@
 
 [ext_resource type="Script" uid="uid://cvmq4sg8qu4uk" path="res://scripts/main/main.gd" id="1_main"]
 [ext_resource type="Script" uid="uid://bl34wxk44gv43" path="res://scripts/gameplay/fase_manager.gd" id="2_phase"]
-[ext_resource type="AudioStream" uid="uid://dw8yst27ogi65" path="res://assets/audio/music/08. Lost in the Moment.ogg" id="2_yyfjg"]
+[ext_resource type="AudioStream" uid="uid://dw11klffylf2o" path="res://assets/audio/music/5.21 Ascension.ogg" id="2_yyfjg"]
 [ext_resource type="PackedScene" uid="uid://cpybiv47b53n4" path="res://scenes/board/Board.tscn" id="3_board"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="4_player"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="5_hud"]
 [ext_resource type="Script" uid="uid://dr7p31qgm4hak" path="res://scripts/camera/board_orbit_camera.gd" id="6_camera"]
 [ext_resource type="PackedScene" path="res://scenes/environment/celestial_space.tscn" id="7_space"]
 [ext_resource type="Script" path="res://scripts/gameplay/phase_loop_controller.gd" id="8_loop"]
+[ext_resource type="PackedScene" path="res://scenes/characters/seraph_presentation.tscn" id="9_seraph"]
 
 [node name="Main" type="Node" unique_id=1396135177]
 script = ExtResource("1_main")
@@ -27,6 +28,10 @@ auto_start = false
 [node name="CelestialSpace" parent="World" unique_id=1594488942 instance=ExtResource("7_space")]
 
 [node name="Board" parent="World" unique_id=1435105260 instance=ExtResource("3_board")]
+show_preview_pieces = false
+
+[node name="Seraph" parent="World" instance=ExtResource("9_seraph")]
+position = Vector3(0, -52.5, -39)
 
 [node name="Player" parent="World" unique_id=355192643 instance=ExtResource("4_player")]
 board_path = NodePath("../Board")
@@ -55,10 +60,10 @@ omni_range = 48.0
 
 [node name="UnderglowLight" type="OmniLight3D" parent="World" unique_id=2008105095]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.5, 0)
-light_color = Color(0.4, 0.08, 1, 1)
-light_energy = 3.2
+light_color = Color(0.42, 0.14, 0.78, 1)
+light_energy = 0.88
 light_cull_mask = 1
-omni_range = 32.0
+omni_range = 27.0
 
 [node name="BoardCamera" type="Node3D" parent="World" unique_id=1202704203]
 script = ExtResource("6_camera")

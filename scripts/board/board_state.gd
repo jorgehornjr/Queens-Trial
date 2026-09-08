@@ -13,7 +13,6 @@ func _init() -> void:
 
 func reset() -> void:
 	_occupants.clear()
-	_occupants[Constants.QUEEN_CELL] = &"queen"
 
 
 func is_inside(cell: Vector2i) -> bool:
@@ -34,7 +33,7 @@ func can_player_enter(cell: Vector2i) -> bool:
 
 
 func set_safe_spot(cell: Vector2i) -> bool:
-	if not is_inside(cell) or cell == Constants.QUEEN_CELL:
+	if not is_inside(cell):
 		return false
 	safe_spot = cell
 	return true
@@ -43,14 +42,12 @@ func set_safe_spot(cell: Vector2i) -> bool:
 func set_occupant(cell: Vector2i, occupant: StringName) -> bool:
 	if not is_inside(cell) or occupant.is_empty():
 		return false
-	if cell == Constants.QUEEN_CELL and occupant != &"queen":
-		return false
 	_occupants[cell] = occupant
 	return true
 
 
 func clear_occupant(cell: Vector2i) -> bool:
-	if cell == Constants.QUEEN_CELL or not _occupants.has(cell):
+	if not _occupants.has(cell):
 		return false
 	_occupants.erase(cell)
 	return true

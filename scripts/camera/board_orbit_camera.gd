@@ -2,13 +2,17 @@ class_name BoardOrbitCamera
 extends Node3D
 
 @export var board_path := NodePath("../Board")
-@export_range(20.0, 55.0, 1.0) var elevation_degrees := 32.0
+@export_range(18.0, 55.0, 1.0) var elevation_degrees := 30.0
 @export_range(0.05, 0.6, 0.01) var orbit_sensitivity := 0.22
 @export_range(1.0, 2.5, 0.05) var max_zoom_ratio := 1.7
 @export_range(1.0, 2.5, 0.01) var zoom_ratio := 1.08
 @export var yaw_degrees := 0.0
 @export var start_in_presentation := true
 @export_range(10.0, 25.0, 1.0) var presentation_elevation_degrees := 18.0
+@export_range(1.0, 2.5, 0.01) var presentation_zoom_ratio := 1.0
+@export_range(35.0, 90.0, 1.0) var gameplay_fov := 60.0
+@export_range(35.0, 90.0, 1.0) var presentation_fov := 50.0
+@export_range(0.0, 12.0, 0.1) var gameplay_vertical_focus := 8.0
 @export_range(0.2, 4.0, 0.1) var transition_seconds := 1.8
 
 @onready var camera: Camera3D = $Camera3D
@@ -20,7 +24,9 @@ var _distance := 1.0
 var _dragging := false
 var _mouse_before_drag := Vector2.ZERO
 var _previous_mouse_mode := Input.MOUSE_MODE_VISIBLE
-var _active_elevation := 32.0
+var _active_elevation := 30.0
+var _active_zoom_ratio := 1.0
+var _active_vertical_focus := 0.0
 var _mode_transition: Tween
 var gameplay_mode := false
 
@@ -36,6 +42,9 @@ func _ready() -> void:
 	_yaw = deg_to_rad(yaw_degrees)
 	gameplay_mode = not start_in_presentation
 	_active_elevation = elevation_degrees if gameplay_mode else presentation_elevation_degrees
+	_active_zoom_ratio = zoom_ratio if gameplay_mode else presentation_zoom_ratio
+	_active_vertical_focus = gameplay_vertical_focus if gameplay_mode else 0.0
+	camera.fov = gameplay_fov if gameplay_mode else presentation_fov
 	update_framing(0.0, true)
 
 
@@ -43,15 +52,26 @@ func enter_gameplay(instant := false) -> void:
 	if gameplay_mode:
 		return
 	gameplay_mode = true
+	# Gameplay always starts square to the board, even if presentation was orbited.
+	yaw_degrees = 0.0
+	_yaw = 0.0
 	if _mode_transition != null:
 		_mode_transition.kill()
 	if instant:
 		_active_elevation = elevation_degrees
+		_active_zoom_ratio = zoom_ratio
+		_active_vertical_focus = gameplay_vertical_focus
+		camera.fov = gameplay_fov
 		update_framing(0.0, true)
 		return
 	_mode_transition = create_tween()
 	_mode_transition.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_mode_transition.set_parallel(true)
 	_mode_transition.tween_property(self, "_active_elevation", elevation_degrees, transition_seconds)
+	_mode_transition.tween_property(self, "_active_zoom_ratio", zoom_ratio, transition_seconds)
+	_mode_transition.tween_property(self, "_active_vertical_focus", gameplay_vertical_focus, transition_seconds)
+	_mode_transition.tween_property(camera, "fov", gameplay_fov, transition_seconds)
+	_mode_transition.chain().tween_callback(func(): _mode_transition = null)
 
 
 func _process(delta: float) -> void:
@@ -62,14 +82,19 @@ func update_framing(delta: float, snap := false) -> void:
 	if not is_instance_valid(_board):
 		return
 	zoom_ratio = clampf(zoom_ratio, 1.0, max_zoom_ratio)
+	presentation_zoom_ratio = clampf(presentation_zoom_ratio, 1.0, max_zoom_ratio)
+	if gameplay_mode and _mode_transition == null:
+		_active_zoom_ratio = zoom_ratio
 	var weight := 1.0 if snap else 1.0 - exp(-12.0 * delta)
 	_yaw = lerp_angle(_yaw, deg_to_rad(yaw_degrees), weight)
 	global_position = _board.global_position
 	camera.global_basis = Basis.from_euler(Vector3(deg_to_rad(-_active_elevation), _yaw, 0.0))
 	minimum_distance = fit_distance(camera.global_basis)
 	# Distância mínima evita cortes durante interpolação e redimensionamento.
-	_distance = maxf(minimum_distance, lerpf(_distance, minimum_distance * zoom_ratio, weight))
-	camera.global_position = global_position + camera.global_basis.z * _distance
+	_distance = maxf(minimum_distance, lerpf(_distance, minimum_distance * _active_zoom_ratio, weight))
+	# Moving the lens upward without changing its basis lowers the board in the
+	# composition. Gameplay gains a steeper view while retaining the upper sky.
+	camera.global_position = global_position + Vector3.UP * _active_vertical_focus + camera.global_basis.z * _distance
 
 
 func fit_distance(view_basis: Basis) -> float:
@@ -108,7 +133,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
 			var direction := -1.0 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0
-			zoom_ratio = clampf(zoom_ratio * pow(1.10, direction * maxf(event.factor, 1.0)), 1.0, max_zoom_ratio)
+			if gameplay_mode:
+				zoom_ratio = clampf(zoom_ratio * pow(1.10, direction * maxf(event.factor, 1.0)), 1.0, max_zoom_ratio)
+				_active_zoom_ratio = zoom_ratio
+			else:
+				presentation_zoom_ratio = clampf(presentation_zoom_ratio * pow(1.10, direction * maxf(event.factor, 1.0)), 1.0, max_zoom_ratio)
+				_active_zoom_ratio = presentation_zoom_ratio
 			get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion and _dragging:
 		# Órbita horizontal com inclinação e centro fixos.

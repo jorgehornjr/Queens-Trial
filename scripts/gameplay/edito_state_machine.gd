@@ -74,7 +74,7 @@ func registrar_movimento(direcao: Vector2i) -> bool:
 		return false
 
 	var destino = posicao_jogador + direcao
-	if not _dentro_da_grade(destino) or destino == Vector2i(2, 2): # casa central da Rainha
+	if not _dentro_da_grade(destino):
 		return false # não consome passo, conforme a especificação
 
 	posicao_jogador = destino

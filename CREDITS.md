@@ -32,13 +32,16 @@ Inventário dos recursos e contribuições audiovisuais de Queen's Trial.
 | Buraco negro (2 instâncias) | `assets/environment/solar_system/black_hole.glb` | Nestaeric | [Fab](https://www.fab.com/listings/2c168db8-91b4-464a-8185-761331000e60) | [Fab Standard License](https://www.fab.com/eula) — categoria Personal. |
 | Sci-Fi Space Station | `assets/environment/spacecraft/space_station.glb` | Helindu.Art | [Fab](https://www.fab.com/listings/4237db4c-394a-4770-9ea0-1af1fa1da1f6) | [Fab Standard License](https://www.fab.com/eula) — categoria Personal. |
 | Basic Satellite (2 instâncias) | `assets/environment/spacecraft/basic_satellite.glb` | Extraordinaire Commercial Arts | [Fab](https://www.fab.com/listings/bcba7b7c-1516-4f9a-bfb9-0037cbea2a20) | [Fab Standard License](https://www.fab.com/eula) — categoria Personal. |
+| Seraph | `assets/models/character/seraph/seraph.glb` | SpatialNeglect | [SketchFab](https://sketchfab.com/3d-models/seraph-c7e798e782a74e3eb3a0b9fbb1ea89c5) | CC Attribution |
+| Astraía | `assets/models/props/astraia/astraia_orb.scn` | Quentin Otani | [SketchFab](https://sketchfab.com/3d-models/astraia-c0f37ac567d34fa8881ed7a79b335c4d) | CC Attribution |
+| Battlemage Wizard | `assets/models/characters/wizard` | Axinovium | [Fab](https://www.fab.com/listings/2674e2d5-a1e2-40a8-9fd4-084223a8b1d7) | CC Attribution |
 
 **Adaptação e integração audiovisual:** Jorge Horn — composição, escala, posicionamento, materiais e movimentos dos corpos celestes e veículos. As texturas extraídas dos modelos acompanham os créditos de seus respectivos criadores.
 
 ## Tabuleiro, peças e materiais
 
-- **Tabuleiro — Jorge Horn:** modelagem no Blender, texturização e acabamento no Substance 3D Painter. Modelos em `assets/models/board`, kit em `art/painter/board` e cena `scenes/board/PaintedBoard.tscn`.
-- **Bispo e torre — Jorge Horn:** modelagem no Blender e preparação visual dos halos para rotação independente no Godot. Arquivos `assets/models/pieces/animated/bispo_plain.glb` e `torre_plain.glb`. A versão atual usa modelos sem texturas; texturização no Substance 3D Painter prevista para N2.
+- **Tabuleiro — Jorge Horn:** modelagem no Blender, texturização e acabamento no Substance 3D Painter. A versão de execução está consolidada em `scenes/board/PaintedBoard.tscn`; os arquivos-fonte editáveis ficam no arquivo local recuperável `Deleted/`, fora do jogo e do Git.
+- **Bispo e torre — Jorge Horn:** modelagem, texturização e preparação visual dos halos para rotação independente no Godot. Versões de execução em `assets/models/pieces/animated/bispo.glb` e `torre.glb`; os arquivos-fonte editáveis ficam no arquivo local recuperável `Deleted/`.
 - **Materiais de biblioteca — Adobe Substance 3D Assets:** recursos disponibilizados pela Adobe e seus licenciantes, aplicados e ajustados por Jorge Horn no tabuleiro. Mapas finais em `assets/textures/board/painter`. Sujeitos aos [termos do Adobe Substance 3D Assets](https://www.adobe.com/go/substance3dassets).
 
 ## Texturas auxiliares
@@ -47,28 +50,15 @@ Inventário dos recursos e contribuições audiovisuais de Queen's Trial.
 
 ## Soundtrack
 
-### Lost in the Moment
+### Ascension
 
-- **Arquivo:** `assets/audio/music/08. Lost in the Moment.ogg` — trilha atual.
-- **Jogo:** Wuthering Waves.
-- **Álbum:** She Who Defies All Measures (Original Game Soundtrack).
-- **Composição e arranjo:** jixwang.
-- **Artistas creditados no lançamento:** Wuthering Waves e jixwang.
-- **Violoncelista:** Yuki Mizuno.
-- **Lançamento:** 19 de setembro de 2025.
-- **Fonograma:** ℗ 2025 KURO GAMES.
-- **Licença para Queen's Trial:** autorização específica não comprovada.
-
-### Close in the Distance
-
-- **Arquivo:** `assets/audio/music/47. Close in the Distance.ogg` — faixa alternativa.
-- **Jogo:** FINAL FANTASY XIV: Endwalker.
-- **Álbum:** ENDWALKER: FINAL FANTASY XIV Original Soundtrack
-- **Composição:** Masayoshi Soken.
-- **Letra:** Tom Mills.
-- **Voz:** Jason Charles Miller.
-- **Lançamento do álbum:** 23 de fevereiro de 2022.
-- **Publicação:** SQUARE ENIX MUSIC. © SQUARE ENIX.
+- **Arquivo:** `assets/audio/music/5.21 Ascension.ogg` — trilha atual.
+- **Jogo:** Final Fantasy XVI.
+- **Álbum:** FINAL FANTASY XVI Original Soundtrack.
+- **Composição e arranjo:** Masayoshi Soken (arranjo com colaboração de Takafumi Imamura).
+- **Artistas creditados no lançamento:** Masayoshi Soken.
+- **Lançamento:** 19 de julho de 2023.
+- **Fonograma:** ℗ 2023 SQUARE ENIX CO., LTD.
 - **Licença para Queen's Trial:** autorização específica não comprovada.
 
 Os créditos musicais identificam as obras e seus titulares, mas não representam autorização de uso. Projeto acadêmico sem fins de lançamento público.
