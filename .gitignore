@@ -24,8 +24,7 @@ Thumbs.db
 desktop.ini
 
 # Temporary, QA and backup files
-tmp/*
-!/tmp/.gdignore
+/tmp/
 temp/
 .docx-review/
 *.tmp
@@ -62,14 +61,8 @@ temp/
 # Utilitários locais de preparação, sem dependências no jogo.
 /tools/
 
-# Godot import sidecars are regenerated locally
-*.import
-# Preserve the HDR compression, mipmaps and memory limits for the space sky.
-!/assets/environment/fab_nebula/TC_Skybox_05.hdr.import
-!/assets/environment/fab_nebula/TC_Skybox_05_Alpha.hdr.import
-!/assets/environment/fab_nebula/TC_Flowmap.hdr.import
-!/assets/textures/board/painter/*.png.import
-!/assets/audio/music/*.ogg.import
+# Godot sidecars remain versioned because they preserve project-specific import
+# settings. Only the generated .godot/ cache above stays local.
 
 # Logs
 *.log
