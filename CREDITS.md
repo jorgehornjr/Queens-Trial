@@ -37,8 +37,8 @@ Inventário dos recursos e contribuições audiovisuais de Queen's Trial.
 
 ## Tabuleiro, peças e materiais
 
-- **Tabuleiro — Jorge Horn:** modelagem no Blender, texturização e acabamento no Substance 3D Painter. Modelos em `assets/models/board`, kit em `art/painter/board` e cena `scenes/board/PaintedBoard.tscn`.
-- **Bispo e torre — Jorge Horn:** modelagem no Blender e preparação visual dos halos para rotação independente no Godot. Arquivos `assets/models/pieces/animated/bispo_plain.glb` e `torre_plain.glb`. A versão atual usa modelos sem texturas; texturização no Substance 3D Painter prevista para N2.
+- **Tabuleiro — Jorge Horn:** modelagem no Blender, texturização e acabamento no Substance 3D Painter. A versão de execução está consolidada em `scenes/board/PaintedBoard.tscn`; os arquivos-fonte editáveis ficam no arquivo local recuperável `Deleted/`, fora do jogo e do Git.
+- **Bispo e torre — Jorge Horn:** modelagem, texturização e preparação visual dos halos para rotação independente no Godot. Versões de execução em `assets/models/pieces/animated/bispo.glb` e `torre.glb`; os arquivos-fonte editáveis ficam no arquivo local recuperável `Deleted/`.
 - **Materiais de biblioteca — Adobe Substance 3D Assets:** recursos disponibilizados pela Adobe e seus licenciantes, aplicados e ajustados por Jorge Horn no tabuleiro. Mapas finais em `assets/textures/board/painter`. Sujeitos aos [termos do Adobe Substance 3D Assets](https://www.adobe.com/go/substance3dassets).
 
 ## Texturas auxiliares
@@ -61,7 +61,7 @@ Inventário dos recursos e contribuições audiovisuais de Queen's Trial.
 
 ### Close in the Distance
 
-- **Arquivo:** `assets/audio/music/47. Close in the Distance.ogg` — faixa alternativa.
+- **Arquivo:** faixa alternativa arquivada localmente em `Deleted/`, fora do jogo e do Git.
 - **Jogo:** FINAL FANTASY XIV: Endwalker.
 - **Álbum:** ENDWALKER: FINAL FANTASY XIV Original Soundtrack
 - **Composição:** Masayoshi Soken.

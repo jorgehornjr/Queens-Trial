@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Shader" path="res://shaders/board_levitation_fog.gdshader" id="1_fog"]
 [ext_resource type="Shader" path="res://shaders/board_nebula_volume.gdshader" id="2_volume"]
+[ext_resource type="Script" path="res://scripts/environment/levitation_mist.gd" id="3_runtime"]
 
 [sub_resource type="ShaderMaterial" id="MistMaterial"]
 shader = ExtResource("1_fog")
@@ -25,10 +26,10 @@ size = Vector3(68, 12, 68)
 shader = ExtResource("2_volume")
 shader_parameter/cloud_noise = SubResource("CloudField")
 
-[node name="LevitationMist" type="FogVolume" groups=["presentation_only"]]
+[node name="LevitationMist" type="Node3D" groups=["presentation_only"]]
 position = Vector3(0, -6, 0)
-size = Vector3(72, 14, 72)
-material = SubResource("MistMaterial")
+script = ExtResource("3_runtime")
+fog_material = SubResource("MistMaterial")
 
 [node name="NebulaVolume" type="MeshInstance3D" parent="."]
 position = Vector3(0, -0.8, 0)

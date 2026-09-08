@@ -57,6 +57,8 @@ temp/
 !/scripts/pieces/piece_visual_animator.gd.uid
 !/scripts/pieces/rook_resolver.gd
 !/scripts/pieces/rook_resolver.gd.uid
+!/scripts/pieces/enemy_piece_controller.gd
+!/scripts/pieces/enemy_piece_controller.gd.uid
 # Utilitários locais de preparação, sem dependências no jogo.
 /tools/
 

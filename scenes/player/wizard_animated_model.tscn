@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/models/characters/wizard/mixamo/breathing_idle.fbx" id="1_rig"]
+[ext_resource type="Script" path="res://scripts/player/wizard_animated_model.gd" id="2_script"]
+
+[node name="WizardAnimatedModel" type="Node3D"]
+script = ExtResource("2_script")
+
+[node name="Rig" parent="." instance=ExtResource("1_rig")]

@@ -19,7 +19,7 @@ func _run_tests() -> void:
 	_test_external_piece_spawn_points()
 	_test_painter_board_materials()
 	_test_player_visual()
-	_test_untextured_piece_halos()
+	_test_textured_piece_halos()
 	await _test_board_camera()
 	_test_celestial_environment()
 	_test_solar_system()
@@ -40,17 +40,17 @@ func _test_board_state() -> void:
 	_expect(state.is_inside(Vector2i(0, 0)), "A origem deve pertencer à grade.")
 	_expect(state.is_inside(Vector2i(4, 4)), "A última casa deve pertencer à grade.")
 	_expect(not state.is_inside(Vector2i(5, 4)), "Coluna 5 deve ficar fora da grade 5 x 5.")
-	_expect(not state.can_player_enter(Constants.QUEEN_CELL), "A casa da Rainha deve ser bloqueada.")
+	_expect(state.can_player_enter(Constants.QUEEN_CELL), "A casa central deve estar liberada para o jogador.")
 	_expect(state.manhattan_distance(Vector2i(0, 0), Vector2i(3, 2)) == 5, "A distância deve ser Manhattan.")
-	_expect(not state.set_safe_spot(Constants.QUEEN_CELL), "A casa central não pode ser safe spot.")
+	_expect(state.set_safe_spot(Constants.QUEEN_CELL), "A casa central deve poder receber o safe spot.")
 func _test_attack_geometry() -> void:
 	var state = BoardStateModel.new()
 	var rook_cells: Array[Vector2i] = state.rook_attack_cells(Vector2i(2, 0))
 	_expect(rook_cells.size() == 8, "A Torre deve atacar oito casas em uma grade 5 x 5.")
-	_expect(rook_cells.has(Vector2i(2, 4)), "A Torre deve atacar através da Rainha.")
+	_expect(rook_cells.has(Vector2i(2, 4)), "A Torre deve alcançar a borda oposta da grade.")
 	var bishop_cells: Array[Vector2i] = state.bishop_attack_cells(Vector2i(0, 0))
 	_expect(bishop_cells.size() == 4, "O Bispo no canto deve atacar quatro casas.")
-	_expect(bishop_cells.has(Vector2i(3, 3)), "O Bispo deve atacar através da Rainha.")
+	_expect(bishop_cells.has(Vector2i(3, 3)), "O Bispo deve percorrer a diagonal completa.")
 func _test_campaign_catalog() -> void:
 	var campaign := Catalog.load_campaign()
 	var catalog_errors := Catalog.validate_campaign(campaign)
@@ -155,10 +155,13 @@ func _test_painter_board_materials() -> void:
 				widened_bars += 1
 				_expect(is_equal_approx(minf(size.x, size.z), 0.28), "As barras douradas devem cobrir os vãos de 0,20.")
 	_expect(widened_bars == 8, "As oito divisórias internas devem ser engrossadas.")
-	var mist := board.get_node("LevitationMist") as FogVolume
+	var mist := board.get_node("LevitationMist") as Node3D
 	_expect(mist != null and mist.position.y < -1.0, "A névoa deve ficar abaixo do tabuleiro.")
 	_expect(mist.is_in_group("presentation_only"), "A névoa não deve ampliar o enquadramento da câmera.")
-	_expect(mist.get_children().size() == 1, "A névoa deve usar um único volume de filamentos, sem planos sobrepostos.")
+	_expect(mist.get_children().size() == 2, "A névoa deve ter um volume de filamentos e um FogVolume criado em execução.")
+	var fog := mist.get_node("VolumetricMist") as FogVolume
+	_expect(fog != null and fog.position == Vector3.ZERO and fog.size == Vector3(72, 14, 72),
+		"O volume em execução deve preservar a posição e o tamanho originais.")
 	var nebula := mist.get_node("NebulaVolume") as MeshInstance3D
 	_expect(nebula.mesh is BoxMesh, "O suporte dos filamentos deve ter volume, não ser uma superfície plana.")
 	var nebula_material := nebula.material_override as ShaderMaterial
@@ -167,7 +170,6 @@ func _test_painter_board_materials() -> void:
 	_expect(nebula.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, "O volume decorativo não deve lançar sombras sólidas.")
 	_expect(nebula.position.y + mist.position.y + (nebula.mesh as BoxMesh).size.y * 0.5 < 0.0, "O volume inteiro deve permanecer abaixo das casas.")
 	_expect(materials.size() == 27, "Os 27 conjuntos exportados devem estar conectados.")
-	_expect(ResourceLoader.exists("res://assets/models/board/queens_trial_board_no_star.glb"), "O visual anterior deve permanecer preservado.")
 	board.free()
 
 func _test_player_visual() -> void:
@@ -175,14 +177,15 @@ func _test_player_visual() -> void:
 	_expect(player != null, "A cena do jogador deve continuar instanciável.")
 	if player == null:
 		return
-	_expect(player.get_node_or_null("Placeholder/Orb") is MeshInstance3D, "O jogador deve usar o marcador esférico provisório.")
-	_expect(player.get_node_or_null("Visual") == null, "O marcador não deve instanciar o animador antigo.")
-	_expect(player.find_children("*", "AnimationPlayer", true, false).is_empty(), "O marcador não deve possuir animações de personagem.")
+	_expect(player.get_node_or_null("Placeholder") == null, "O marcador provisório deve ter sido removido.")
+	_expect(player.get_node_or_null("Model") is Node3D, "O jogador deve instanciar o Battlemage Wizard.")
+	_expect(not player.find_children("*", "MeshInstance3D", true, false).is_empty(), "O Wizard deve carregar sua malha 3D.")
+	_expect(is_equal_approx(player.move_duration, 0.62), "O Wizard deve concluir automaticamente cada passo na grade.")
 	_expect(not ResourceLoader.exists("res://scenes/player/traveler_player.tscn"), "O viajante antigo deve estar fora do projeto ativo.")
 	player.free()
 
 
-func _test_untextured_piece_halos() -> void:
+func _test_textured_piece_halos() -> void:
 	for piece_name in ["rook", "bishop"]:
 		var piece := (load("res://scenes/pieces/" + piece_name + ".tscn") as PackedScene).instantiate()
 		root.add_child(piece)
@@ -193,11 +196,14 @@ func _test_untextured_piece_halos() -> void:
 		var body_transforms: Array[Transform3D] = []
 		for mesh: MeshInstance3D in body:
 			body_transforms.append(mesh.transform)
-		for mesh: MeshInstance3D in animator.find_children("*", "MeshInstance3D", true, false):
+		var textured_surfaces := 0
+		var model := animator.get_node("Model")
+		for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
 			for surface in mesh.mesh.get_surface_count():
 				var material := mesh.get_active_material(surface) as StandardMaterial3D
-				_expect(material == null or (material.albedo_texture == null and material.normal_texture == null),
-					"As peças devem usar o visual neutro sem texturas, preservando a geometria.")
+				if material != null and (material.albedo_texture != null or material.normal_texture != null):
+					textured_surfaces += 1
+		_expect(textured_surfaces > 0, "A peça deve recuperar as texturas originais: " + piece_name)
 		if animator.halo_pivot != null:
 			var before := animator.halo_pivot.transform
 			animator._process(1.0)
@@ -211,10 +217,26 @@ func _test_untextured_piece_halos() -> void:
 func _test_board_camera() -> void:
 	var main := (load("res://scenes/main/main.tscn") as PackedScene).instantiate()
 	root.add_child(main)
+	var original_size := root.size
+	root.size = Vector2i(1920, 1080)
+	await process_frame
 	var rig := main.get_node("World/BoardCamera") as CameraRig
-	_expect(main.get_node_or_null("HUD/BottomPanel/StatusLabel") is Label,
-		"A HUD restaurada deve conter o texto usado para as mensagens de status.")
-	_expect(main.get_node_or_null("World/Board/Markers/SafeSpotMarker") == null, "O círculo visual do safe spot deve ser removido.")
+	var dune_font := load("res://assets/fonts/dune_rise.otf") as FontFile
+	_expect(dune_font != null, "A identidade tipográfica do jogo deve incorporar a fonte Dune Rise.")
+	var orb := main.get_node("World/Seraph/Model/Seraph/Skeleton3D/OrbAttachment/AstraiaOrb") as Node3D
+	var orb_attachment := orb.get_parent() as Node3D
+	var approved_orb_transform := Transform3D(orb.transform.basis, Vector3(0.0, 0.02, 0.0))
+	var approved_orb_position := (orb_attachment.global_transform * approved_orb_transform).origin
+	_expect(absf(orb.global_position.x - approved_orb_position.x) < 0.01
+		and absf(orb.global_position.z - approved_orb_position.z) < 0.01
+		and is_equal_approx(orb.global_position.y - approved_orb_position.y, 2.0),
+		"O globo deve preservar a posição aprovada e subir apenas no eixo vertical do cenário.")
+	_expect(main.get_node_or_null("HUD/Announcement/EdictLabel") is Label,
+		"A HUD deve conter a apresentação central dos éditos.")
+	_expect(main.get_node_or_null("HUD/ResultPanel/ResultLabel") is Label,
+		"A HUD deve conter o painel temático de resultado.")
+	_expect(main.get_node_or_null("World/Board/Markers/SafeSpot") is MeshInstance3D,
+		"O safe spot deve permanecer visível diretamente no tabuleiro.")
 	var music := main.get_node("Music") as AudioStreamPlayer
 	_expect(music.stream is AudioStreamOggVorbis and music.stream.loop and music.autoplay,
 		"A trilha deve iniciar automaticamente e repetir em OGG.")
@@ -229,15 +251,25 @@ func _test_board_camera() -> void:
 	if rig != null:
 		rig.set_process(false)
 		_expect(not rig.gameplay_mode and is_equal_approx(rig._active_elevation, 18.0), "O jogo deve abrir com a vista de apresentação mais baixa.")
+		_expect(is_equal_approx(rig._active_zoom_ratio, 1.0), "A apresentação deve começar um pouco mais próxima do tabuleiro.")
 		_expect((main.get_node("PhaseManager") as PhaseManager).current_phase == 0, "A prévia não deve iniciar a fase automaticamente.")
 		rig.enter_gameplay(true)
 		rig.update_framing(0.0, true)
+		_expect(is_equal_approx(rig._active_elevation, 30.0) and is_equal_approx(rig._active_zoom_ratio, 1.08)
+			and is_equal_approx(rig._active_vertical_focus, 8.0) and is_equal_approx(rig.camera.fov, 60.0)
+			and is_zero_approx(rig.yaw_degrees),
+			"A fase deve terminar reta, com vista superior e composição deslocada para preservar o céu.")
+		for spacecraft_name in ["SpaceStation", "SatelliteA"]:
+			var spacecraft := main.get_node("World/CelestialSpace/SolarSystem/" + spacecraft_name) as Node3D
+			var screen := rig.camera.unproject_position(spacecraft.global_position) / root.get_visible_rect().size
+			_expect(not rig.camera.is_position_behind(spacecraft.global_position)
+				and screen.x >= 0.04 and screen.x <= 0.96 and screen.y >= 0.02 and screen.y <= 0.98,
+				"O enquadramento de fase deve preservar o cenário e a nave: %s (screen=%s, behind=%s)" % [spacecraft_name, screen, rig.camera.is_position_behind(spacecraft.global_position)])
 		var initial_position := rig.camera.global_position
 		player.position += Vector3(7.6, 0.0, 0.0)
 		player.rotation.y += PI / 2.0
 		rig.update_framing(0.1)
 		_expect(rig.camera.global_position.is_equal_approx(initial_position), "A câmera não deve seguir a posição ou rotação do jogador.")
-		var original_size := root.size
 		for viewport_size in [Vector2i(1920, 1080), Vector2i(1280, 1024), Vector2i(2560, 1080), Vector2i(800, 1200)]:
 			root.size = viewport_size
 			await process_frame
@@ -252,7 +284,7 @@ func _test_board_camera() -> void:
 				_expect(planet_distance + planet_radius < rig.camera.far, "A Terra não deve ser cortada pelo plano distante.")
 				for point in rig.framing_points:
 					var screen := rig.camera.unproject_position(point) / root.get_visible_rect().size
-					_expect(not rig.camera.is_position_behind(point) and screen.x >= 0.04 and screen.x <= 0.96 and screen.y >= 0.09 and screen.y <= 0.87,
+					_expect(not rig.camera.is_position_behind(point) and screen.x >= 0.04 and screen.x <= 0.96 and screen.y >= 0.09 and screen.y <= 0.98,
 						"Tabuleiro cortado: ângulo=%s, viewport=%s, ponto=%s" % [angle, viewport_size, screen])
 		root.size = original_size
 		rig.yaw_degrees = 0.0
@@ -324,7 +356,7 @@ func _test_celestial_environment() -> void:
 		if surface_material != null:
 			for map in [&"surface_map", &"relief_map", &"roughness_map", &"city_map"]:
 				var texture := surface_material.get_shader_parameter(map) as Texture2D
-				_expect(texture != null and texture.get_width() == 8192, "O mapa %s deve preservar os detalhes 8K do asset." % map)
+				_expect(texture != null and texture.get_width() == 4096, "O mapa %s deve preservar detalhes 4K, suficientes para a saída 1080p." % map)
 	_expect(space.get_node_or_null("Earth/EarthSurface") != null, "A Terra 3D deve existir no cenário.")
 	_expect(space.get_node_or_null("Earth/EarthAtmosphere") != null, "A Terra deve possuir atmosfera separada.")
 	var stars := space.get_node_or_null("StarField") as MultiMeshInstance3D
