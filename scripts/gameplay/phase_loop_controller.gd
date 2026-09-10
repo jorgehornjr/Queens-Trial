@@ -174,6 +174,8 @@ func _resolve_current_wave(run_id: int) -> void:
 		if run_id != _generation:
 			return
 		await get_tree().create_timer(0.32).timeout
+		if run_id != _generation:
+			return
 		for piece in pieces:
 			origins.append(piece.destination_cell)
 			attack_paths.append(_board.state.attack_cells(piece.piece_type, piece.destination_cell))
