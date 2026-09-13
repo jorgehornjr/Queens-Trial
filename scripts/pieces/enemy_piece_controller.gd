@@ -25,7 +25,6 @@ var _final_target := Vector3.ZERO
 var _roman_label: Label3D
 var _arrows: Array[MeshInstance3D] = []
 var _active := false
-var _pulse_time := 0.0
 var _visual: Node3D
 
 
@@ -61,19 +60,10 @@ func configure(board: Board3D, definition: Dictionary, value: int, index: int) -
 	return true
 
 
-func _process(delta: float) -> void:
-	if not _active:
-		return
-	_pulse_time += delta
-	if _roman_label != null:
-		var glow := 0.86 + sin(_pulse_time * 2.8) * 0.14
-		_roman_label.modulate = Color(1.0, 1.0, 1.0, glow)
-
-
 func set_wave_active(active: bool) -> void:
 	_active = active
 	if _roman_label != null:
-		_roman_label.modulate = Color(1.0, 1.0, 1.0, 1.0 if active else 0.34)
+		_roman_label.modulate = Color.WHITE
 	for arrow in _arrows:
 		arrow.visible = active
 
@@ -108,11 +98,14 @@ func _create_roman_label(text_value: String) -> void:
 	_roman_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_roman_label.no_depth_test = true
 	_roman_label.font = CELESTIAL_FONT
-	_roman_label.font_size = 124
+	# Mais resolução de glifo, mantendo exatamente o mesmo tamanho no mundo.
+	_roman_label.font_size = 248
 	_roman_label.outline_size = 0
+	_roman_label.outline_modulate = Color(0, 0, 0, 0)
 	_roman_label.modulate = Color.WHITE
 	_roman_label.fixed_size = false
-	_roman_label.pixel_size = 0.009
+	_roman_label.pixel_size = 0.0045
+	_roman_label.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 	add_child(_roman_label)
 
 

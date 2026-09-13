@@ -255,7 +255,7 @@ func _test_board_camera() -> void:
 		_expect((main.get_node("PhaseManager") as PhaseManager).current_phase == 0, "A prévia não deve iniciar a fase automaticamente.")
 		rig.enter_gameplay(true)
 		rig.update_framing(0.0, true)
-		_expect(is_equal_approx(rig._active_elevation, 30.0) and is_equal_approx(rig._active_zoom_ratio, 1.08)
+		_expect(is_equal_approx(rig._active_elevation, 30.0) and is_equal_approx(rig._active_zoom_ratio, 1.0)
 			and is_equal_approx(rig._active_vertical_focus, 8.0) and is_equal_approx(rig.camera.fov, 60.0)
 			and is_zero_approx(rig.yaw_degrees),
 			"A fase deve terminar reta, com vista superior e composição deslocada para preservar o céu.")

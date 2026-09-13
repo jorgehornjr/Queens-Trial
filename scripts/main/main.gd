@@ -5,6 +5,7 @@ extends Node
 @onready var player: GridPlayer = $World/Player
 @onready var hud: GameHUD = $HUD
 @onready var board_camera: BoardOrbitCamera = $World/BoardCamera
+@onready var celestial_space: CelestialSpace = $World/CelestialSpace
 
 
 func _ready() -> void:
@@ -22,5 +23,6 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_phase_started(phase_number: int, phase_data: Dictionary, phase_seed: int) -> void:
 	board_camera.enter_gameplay()
+	celestial_space.enter_gameplay_composition(board_camera.camera, board_camera.transition_seconds)
 	hud.set_phase(phase_number, phase_data, phase_seed)
 	player.reset_to_start()

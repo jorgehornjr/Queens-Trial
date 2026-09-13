@@ -19,6 +19,9 @@ extends Node3D
 @export_range(-2.0, 2.0, 0.01) var cloud_degrees_per_second := 0.27
 @export_range(-1.0, 1.0, 0.001) var star_field_degrees_per_second := 0.006
 
+@export_category("Gameplay Composition")
+@export_range(0.0, 0.20, 0.005) var gameplay_background_drop := 0.13
+
 @export_category("Star Field")
 @export var star_texture: Texture2D
 @export_range(64, 1200, 1) var star_count := 520
@@ -32,6 +35,8 @@ extends Node3D
 var _environment: Environment
 var _sky_material: ShaderMaterial
 var _effect_time := 0.0
+var _gameplay_composition_applied := false
+var _composition_tween: Tween
 
 
 func _ready() -> void:
@@ -55,6 +60,34 @@ func _process(delta: float) -> void:
 		earth_clouds.rotate_y(deg_to_rad(cloud_degrees_per_second) * delta)
 	if star_field.visible:
 		star_field.rotate_y(deg_to_rad(star_field_degrees_per_second) * delta)
+
+
+func enter_gameplay_composition(camera: Camera3D, duration: float) -> void:
+	if _gameplay_composition_applied or camera == null:
+		return
+	_gameplay_composition_applied = true
+	if _composition_tween != null:
+		_composition_tween.kill()
+	_composition_tween = create_tween()
+	_composition_tween.set_parallel(true)
+	_composition_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	var targets: Array[Node3D] = [
+		$DistantEarth,
+		$SolarSystem.get_node_or_null("Moon") as Node3D,
+		$SolarSystem.get_node_or_null("Mars") as Node3D,
+		$SolarSystem.get_node_or_null("SpaceStation") as Node3D,
+		$SolarSystem.get_node_or_null("SatelliteA") as Node3D,
+	]
+	for target in targets:
+		if target == null:
+			continue
+		var camera_depth := (target.global_position - camera.global_position).dot(-camera.global_basis.z)
+		if camera_depth <= 0.0:
+			continue
+		var visible_height := 2.0 * camera_depth * tan(deg_to_rad(camera.fov * 0.5))
+		var destination := target.global_position - camera.global_basis.y * visible_height * gameplay_background_drop
+		_composition_tween.tween_property(target, "global_position", destination, duration)
+	_composition_tween.chain().tween_callback(func(): _composition_tween = null)
 
 
 func _advance_sky(delta: float) -> void:

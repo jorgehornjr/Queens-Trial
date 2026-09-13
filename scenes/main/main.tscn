@@ -22,6 +22,7 @@ autoplay = true
 
 [node name="PhaseManager" type="Node" parent="." unique_id=313899773]
 script = ExtResource("2_phase")
+auto_start = false
 
 [node name="World" type="Node3D" parent="." unique_id=955873199]
 
@@ -67,6 +68,7 @@ omni_range = 27.0
 
 [node name="BoardCamera" type="Node3D" parent="World" unique_id=1202704203]
 script = ExtResource("6_camera")
+zoom_ratio = 1.0
 
 [node name="Camera3D" type="Camera3D" parent="World/BoardCamera" unique_id=1070207354]
 current = true

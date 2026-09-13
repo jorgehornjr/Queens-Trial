@@ -10,6 +10,7 @@ const ROUND_EDICT_FONT_SIZE := 62
 
 @onready var phase_label: Label = $PhasePanel/PhaseLabel
 @onready var tutorial_hint: Label = $TutorialHint
+@onready var start_prompt: Label = $StartPrompt
 @onready var announcement: Control = $Announcement
 @onready var announcement_label: Label = $Announcement/EdictLabel
 @onready var announcement_halo: ColorRect = $Announcement/Halo
@@ -28,6 +29,9 @@ var _round_edicts_home_position := Vector2.ZERO
 func _ready() -> void:
 	announcement.visible = false
 	result_panel.visible = false
+	start_prompt.visible = true
+	start_prompt.add_theme_font_override("font", JUPITER_FONT)
+	start_prompt.add_theme_font_size_override("font_size", 28)
 	announcement_label.add_theme_font_override("font", DUNE_FONT)
 	announcement_label.add_theme_font_size_override("font_size", ANNOUNCEMENT_FONT_SIZE)
 	round_edicts.add_theme_font_override("font", JUPITER_FONT)
@@ -41,6 +45,7 @@ func set_phase(phase_number: int, _phase_data: Dictionary, _phase_seed: int) -> 
 	phase_label.text = ""
 	# A apresentação fica concentrada nos éditos inferiores e nas telas de resultado.
 	tutorial_hint.visible = false
+	start_prompt.visible = false
 	result_panel.visible = false
 	_clear_dust()
 	round_edicts.visible = false
@@ -133,8 +138,8 @@ func _is_roman_text(text_value: String) -> bool:
 
 
 func show_failure(motivos: Array) -> void:
-	result_label.text = "TENTE NOVAMENTE\n%s" % " ".join(motivos)
-	result_label.add_theme_color_override("font_color", Color.WHITE)
+	result_label.text = "\n".join(PackedStringArray(motivos))
+	result_label.add_theme_color_override("font_color", Color(0.96, 0.91, 0.82, 1.0))
 	_show_result_panel()
 
 
@@ -154,13 +159,9 @@ func hide_tutorial_hint() -> void:
 func _show_result_panel() -> void:
 	result_panel.visible = true
 	result_panel.modulate = Color(1, 1, 1, 0)
-	result_panel.scale = Vector2(0.90, 0.90)
-	result_panel.pivot_offset = result_panel.size * 0.5
 	var tween := create_tween()
-	tween.set_parallel(true)
-	tween.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.tween_property(result_panel, "scale", Vector2.ONE, 0.32)
-	tween.tween_property(result_panel, "modulate", Color.WHITE, 0.22)
+	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_property(result_panel, "modulate", Color.WHITE, 0.24)
 
 
 func _clear_dust() -> void:
