@@ -8,8 +8,9 @@ As regras de gameplay estão consolidadas em [docs/Queens Trial - Documentação
 
 ## Como executar
 
-1. Instale o Godot 4.7.
-2. Importe a pasta que contém `project.godot`.
-3. Execute o projeto com `F6` ou pelo botão de reprodução.
-4. Pressione `enter` para iniciar a fase.
-5. Use `W`, `A`, `S` e `D` para mover o jogador uma casa por pressionamento.
+1. Clone esse repositório para seu desktop (Evite baixar como .zip).
+2. Instale o Godot 4.7.
+3. Importe a pasta que contém `project.godot`.
+4. Execute o projeto com `F6` ou pelo botão de reprodução.
+5. Pressione `enter` para iniciar a fase.
+6. Use `W`, `A`, `S` e `D` para mover o jogador uma casa por pressionamento.
