@@ -9,6 +9,7 @@ const AttackVisualizerModel = preload("res://scripts/gameplay/attack_visualizer.
 const Constants = preload("res://scripts/core/game_constants.gd")
 const CELESTIAL_FONT = preload("res://assets/fonts/jupiter_pro.otf")
 const PhaseCatalogModel = preload("res://scripts/data/phase_catalog.gd")
+const EdictTimerModel = preload("res://scripts/gameplay/edict_timer.gd")
 
 @export var phase_manager_path: NodePath
 @export var board_path: NodePath
@@ -29,6 +30,8 @@ var _numeral_tween: Tween
 var _pending_piece_movements := 0
 var _generation := 0
 var _intro_running := false
+var _edict_timer: EdictTimer
+var _is_timed_phase := false
 
 
 func _ready() -> void:
@@ -44,6 +47,12 @@ func _ready() -> void:
 	_edito_machine.movimento_registrado.connect(_on_movimento_registrado)
 	_edito_machine.falha.connect(_on_falha)
 	_edito_machine.sucesso.connect(_on_sucesso)
+
+	_edict_timer = EdictTimerModel.new()
+	_edict_timer.name = "EdictTimer"
+	add_child(_edict_timer)
+	_edict_timer.expired.connect(_on_edict_timer_expired)
+	_edict_timer.tick.connect(_on_edict_timer_tick)
 
 	_attack_visualizer = AttackVisualizerModel.new()
 	_attack_visualizer.name = "AttackVisualizer"
@@ -65,6 +74,8 @@ func _on_phase_started(phase_number: int, phase_data: Dictionary, _phase_seed: i
 	_board.clear_tutorial_path()
 	_set_player_numeral(0, false)
 	_current_phase_data = phase_data
+	_is_timed_phase = String(phase_data.get("resolution", "moves")) == "timer"
+	_edict_timer.stop()
 	if phase_number > 5:
 		return
 	call_deferred("_begin_phase", run_id)
@@ -90,7 +101,8 @@ func _begin_phase(run_id: int) -> void:
 	_spawn_phase_pieces()
 	var editos := _build_editos(_current_phase_data)
 	_intro_running = true
-	if not _edito_machine.configurar_fase(editos, _player.current_cell):
+	var modo := &"timer" if _is_timed_phase else &"moves"
+	if not _edito_machine.configurar_fase(editos, _player.current_cell, modo):
 		push_error("Não foi possível configurar os éditos da fase atual.")
 		_intro_running = false
 		return
@@ -107,6 +119,8 @@ func _begin_phase(run_id: int) -> void:
 	if not tutorial_path.is_empty():
 		_board.show_tutorial_path(tutorial_path)
 	_player.set_input_enabled(true)
+	if _is_timed_phase:
+		_edict_timer.start(float(_current_phase_data.get("seconds_per_edict", 15)))
 
 
 func _build_editos(phase_data: Dictionary) -> Array:
@@ -150,6 +164,7 @@ func _on_player_moved(cell: Vector2i, previous_cell: Vector2i) -> void:
 
 func _on_estado_mudou(estado: int) -> void:
 	if estado == EditoMachineModel.Estado.PRIMEIRA_PECA:
+		_edict_timer.pause()
 		_player.set_input_enabled(false)
 		_board.clear_tutorial_path()
 		_hud.hide_tutorial_hint()
@@ -217,6 +232,8 @@ func _open_next_edict(run_id: int) -> void:
 	await get_tree().create_timer(0.46).timeout
 	if run_id == _generation:
 		_player.set_input_enabled(true)
+		if _is_timed_phase:
+			_edict_timer.start(float(_current_phase_data.get("seconds_per_edict", 15)))
 
 
 func _on_movimento_registrado(steps: int, required: int) -> void:
@@ -224,6 +241,7 @@ func _on_movimento_registrado(steps: int, required: int) -> void:
 
 
 func _on_falha(reasons: Array) -> void:
+	_edict_timer.stop()
 	var run_id := _generation
 	_player.set_input_enabled(false)
 	_set_player_numeral(0, false)
@@ -239,6 +257,7 @@ func _restart_after_feedback(run_id: int) -> void:
 
 
 func _on_sucesso() -> void:
+	_edict_timer.stop()
 	var run_id := _generation
 	_player.set_input_enabled(false)
 	_set_player_numeral(0, false)
@@ -251,6 +270,17 @@ func _advance_after_feedback(run_id: int) -> void:
 	await get_tree().create_timer(0.15).timeout
 	if run_id == _generation and _phase_manager.current_phase < 5:
 		_phase_manager.advance_phase()
+
+
+func _on_edict_timer_expired() -> void:
+	if not _is_timed_phase:
+		return
+	_edito_machine.expirar_tempo()
+
+
+func _on_edict_timer_tick(remaining: float) -> void:
+	if _hud.has_method("set_edict_timer"):
+		_hud.set_edict_timer(remaining)
 
 
 func _create_player_numeral() -> void:

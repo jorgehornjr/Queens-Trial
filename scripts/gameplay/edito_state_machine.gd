@@ -34,15 +34,16 @@ var origem_atual: Vector2i
 var posicao_jogador: Vector2i
 var passos_dados: int = 0
 var passos_necessarios: int = 0
+var modo_resolucao: StringName = &"moves"
 
-func configurar_fase(lista_editos: Array, posicao_inicial: Vector2i) -> bool:
+func configurar_fase(lista_editos: Array, posicao_inicial: Vector2i, modo: StringName = &"moves") -> bool:
 	if not _validar_editos(lista_editos):
 		push_error("Configuração de éditos inválida: valores ou pares repetidos indevidamente.")
 		return false
 	editos = lista_editos
 	indice_edito_atual = 0
 	posicao_jogador = posicao_inicial
-	# Configurar uma fase reinicia o ciclo, inclusive após FINALIZADO.
+	modo_resolucao = modo
 	estado_atual = Estado.SELECAO_PAR
 	_transicionar(Estado.SELECAO_PAR)
 	_iniciar_edito_atual()
@@ -81,7 +82,10 @@ func registrar_movimento(direcao: Vector2i) -> bool:
 	passos_dados += 1
 	movimento_registrado.emit(passos_dados, passos_necessarios)
 
-	if passos_dados >= passos_necessarios:
+	# No modo "moves" (fases 1-5), atingir a contagem já resolve o édito.
+	# No modo "timer" (fases 6-10), o jogador pode ir e voltar livremente;
+	# só o EdictTimer, via expirar_tempo(), decide quando travar o estado.
+	if modo_resolucao == &"moves" and passos_dados >= passos_necessarios:
 		_transicionar(Estado.PRIMEIRA_PECA)
 	return true
 
@@ -150,3 +154,9 @@ func _transicionar(novo_estado: int) -> bool:
 func _numeral(valor: int) -> String:
 	const NUMERAIS = {2: "II", 3: "III", 4: "IV"}
 	return NUMERAIS.get(valor, str(valor))
+
+func expirar_tempo() -> bool:
+	if estado_atual != Estado.AGUARDANDO_MOVIMENTO:
+		push_warning("Expiração de tempo ignorada: fora do estado de movimentação (%s)." % Estado.keys()[estado_atual])
+		return false
+	return _transicionar(Estado.PRIMEIRA_PECA)

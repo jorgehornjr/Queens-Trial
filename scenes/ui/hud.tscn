@@ -1,8 +1,8 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3 uid="uid://flj1ppppij5h"]
 
-[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
-[ext_resource type="FontFile" path="res://assets/fonts/dune_rise.otf" id="2_dune"]
-[ext_resource type="FontFile" path="res://assets/fonts/jupiter_pro.otf" id="3_jupiter"]
+[ext_resource type="Script" uid="uid://c57wflqttbgee" path="res://scripts/ui/hud.gd" id="1_hud"]
+[ext_resource type="FontFile" uid="uid://cvywdipei2yil" path="res://assets/fonts/dune_rise.otf" id="2_dune"]
+[ext_resource type="FontFile" uid="uid://dimlq76mmxxgd" path="res://assets/fonts/jupiter_pro.otf" id="3_jupiter"]
 
 [sub_resource type="StyleBoxFlat" id="Style_phase"]
 content_margin_left = 22.0
@@ -29,12 +29,12 @@ content_margin_right = 12.0
 content_margin_bottom = 12.0
 bg_color = Color(0, 0, 0, 0)
 
-[node name="HUD" type="CanvasLayer"]
+[node name="HUD" type="CanvasLayer" unique_id=1738850811]
 script = ExtResource("1_hud")
 
-[node name="PhasePanel" type="PanelContainer" parent="."]
+[node name="PhasePanel" type="PanelContainer" parent="." unique_id=528574581]
 visible = false
-anchors_preset = 10
+anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -150.0
@@ -44,15 +44,15 @@ offset_bottom = 88.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("Style_phase")
 
-[node name="PhaseLabel" type="Label" parent="PhasePanel"]
+[node name="PhaseLabel" type="Label" parent="PhasePanel" unique_id=1385599177]
+layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("2_dune")
 theme_override_font_sizes/font_size = 25
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="TutorialHint" type="Label" parent="."]
+[node name="TutorialHint" type="Label" parent="." unique_id=125307899]
 visible = false
 anchors_preset = 12
 anchor_top = 1.0
@@ -69,15 +69,14 @@ theme_override_font_sizes/font_size = 22
 text = "Siga as casas iluminadas • WASD para mover"
 horizontal_alignment = 1
 
-[node name="StartPrompt" type="Label" parent="."]
-anchors_preset = 0
+[node name="StartPrompt" type="Label" parent="." unique_id=1482818226]
+anchors_preset = -1
 anchor_left = 0.035
 anchor_top = 0.45
 anchor_right = 0.335
 anchor_bottom = 0.57
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.96, 0.91, 0.82, 1)
 theme_override_constants/outline_size = 0
 theme_override_fonts/font = ExtResource("3_jupiter")
@@ -86,7 +85,7 @@ text = "Pressione Enter para iniciar"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Announcement" type="Control" parent="."]
+[node name="Announcement" type="Control" parent="." unique_id=267424525]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -95,8 +94,8 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Halo" type="ColorRect" parent="Announcement"]
-anchors_preset = 8
+[node name="Halo" type="ColorRect" parent="Announcement" unique_id=1391232424]
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -107,11 +106,11 @@ offset_right = 230.0
 offset_bottom = 2.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.93, 0.66, 0.20, 0.76)
 mouse_filter = 2
+color = Color(0.93, 0.66, 0.2, 0.76)
 
-[node name="EdictLabel" type="Label" parent="Announcement"]
-anchors_preset = 8
+[node name="EdictLabel" type="Label" parent="Announcement" unique_id=1331872741]
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -130,8 +129,9 @@ text = "IV"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ResultPanel" type="PanelContainer" parent="."]
+[node name="ResultPanel" type="PanelContainer" parent="." unique_id=925565669]
 visible = false
+anchors_preset = -1
 anchor_left = 0.035
 anchor_top = 0.38
 anchor_right = 0.335
@@ -140,19 +140,20 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("Style_result")
 
-[node name="ResultLabel" type="Label" parent="ResultPanel"]
+[node name="ResultLabel" type="Label" parent="ResultPanel" unique_id=875160330]
+layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_constants/line_spacing = 8
 theme_override_constants/outline_size = 0
 theme_override_fonts/font = ExtResource("3_jupiter")
 theme_override_font_sizes/font_size = 24
 text = "Resultado"
-horizontal_alignment = 0
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="RoundEdicts" type="Label" parent="."]
+[node name="RoundEdicts" type="Label" parent="." unique_id=1888609571]
 visible = false
+anchors_preset = -1
 anchor_left = 0.87
 anchor_top = 0.52
 anchor_right = 0.87
@@ -163,10 +164,9 @@ offset_right = 180.0
 offset_bottom = 46.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
-theme_override_fonts/font = ExtResource("2_dune")
-theme_override_font_sizes/font_size = 62
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_constants/outline_size = 0
+theme_override_fonts/font = ExtResource("2_dune")
+theme_override_font_sizes/font_size = 62
 horizontal_alignment = 1
 vertical_alignment = 1

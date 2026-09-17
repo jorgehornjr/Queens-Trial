@@ -2,155 +2,155 @@
   "schema_version": 1,
   "source": "docs/Queens Trial - Especificacao Consolidada de Gameplay.docx",
   "phases": [
-    {
-      "number": 1,
-      "resolution": "moves",
-      "edict_count": 1,
-      "edict_values": [4],
-      "safe_spot": [0, 0],
-      "tutorial_path": [[0, 3], [0, 2], [0, 1], [0, 0]],
-      "seconds_per_edict": 0,
-      "first_pair": [],
-      "second_pair": [],
-      "pair_order": "horizontal_first",
-      "focus": "Um edito e movimento basico",
-      "configuration": "fixed",
-      "piece_waves": [[], []]
-    },
-    {
-      "number": 2,
-      "resolution": "moves",
-      "edict_count": 2,
-      "seconds_per_edict": 0,
-      "first_pair": [],
-      "second_pair": [],
-      "pair_order": "horizontal_first",
-      "focus": "Dois editos e safe spot",
-      "edict_values": [2, 3],
-      "safe_spot": [3, 2],
-      "configuration": "fixed",
-      "piece_waves": [[], []]
-    },
-    {
-      "number": 3,
-      "resolution": "moves",
-      "edict_count": 2,
-      "seconds_per_edict": 0,
-      "first_pair": ["rook", "rook"],
-      "second_pair": [],
-      "pair_order": "horizontal_first",
-      "focus": "Introducao dos ataques",
-      "edict_values": [2, 4],
-      "safe_spot": [0, 2],
-      "configuration": "fixed",
-      "piece_waves": [
-        [
-          {"type": "rook", "side": "left", "edge_slot": 1, "edge_direction": -1, "move_value": 1},
-          {"type": "rook", "side": "right", "edge_slot": 3, "edge_direction": -1, "move_value": 2}
-        ],
-        []
-      ]
-    },
-    {
-      "number": 4,
-      "resolution": "moves",
-      "edict_count": 2,
-      "seconds_per_edict": 0,
-      "first_pair": ["rook", "rook"],
-      "second_pair": ["rook", "rook"],
-      "pair_order": "horizontal_first",
-      "focus": "Duas ondas",
-      "edict_values": [2, 4],
-      "safe_spot": [0, 2],
-      "configuration": "fixed",
-      "piece_waves": [
-        [
-          {"type": "rook", "side": "left", "edge_slot": 2, "edge_direction": -1, "move_value": 2},
-          {"type": "rook", "side": "right", "edge_slot": 0, "edge_direction": 1, "move_value": 1}
-        ],
-        [
-          {"type": "rook", "side": "top", "edge_slot": 0, "edge_direction": 1, "move_value": 4},
-          {"type": "rook", "side": "bottom", "edge_slot": 1, "edge_direction": 1, "move_value": 2}
-        ]
-      ]
-    },
-    {
-      "number": 5,
-      "resolution": "moves",
-      "edict_count": 2,
-      "seconds_per_edict": 0,
-      "first_pair": ["bishop", "bishop"],
-      "second_pair": ["rook", "rook"],
-      "pair_order": "horizontal_first",
-      "focus": "Introducao do Bispo",
-      "edict_values": [3, 4],
-      "safe_spot": [0, 1],
-      "configuration": "fixed",
-      "piece_waves": [
-        [
-          {"type": "bishop", "side": "left", "edge_slot": 4, "edge_direction": -1, "move_value": 3},
-          {"type": "bishop", "side": "right", "edge_slot": 3, "edge_direction": 1, "move_value": 1}
-        ],
-        [
-          {"type": "rook", "side": "top", "edge_slot": 0, "edge_direction": 1, "move_value": 4},
-          {"type": "rook", "side": "bottom", "edge_slot": 1, "edge_direction": 1, "move_value": 2}
-        ]
-      ]
-    },
-    {
-      "number": 6,
-      "resolution": "timer",
-      "edict_count": 2,
-      "seconds_per_edict": 15,
-      "first_pair": ["bishop", "bishop"],
-      "second_pair": ["rook", "rook"],
-      "pair_order": "horizontal_first",
-      "focus": "Introducao do cronometro",
-      "configuration": "fixed"
-    },
-    {
-      "number": 7,
-      "resolution": "timer",
-      "edict_count": 2,
-      "seconds_per_edict": 15,
-      "first_pair": ["rook", "rook"],
-      "second_pair": ["bishop", "bishop"],
-      "pair_order": "horizontal_first",
-      "focus": "Troca de leitura",
-      "configuration": "procedural"
-    },
-    {
-      "number": 8,
-      "resolution": "timer",
-      "edict_count": 2,
-      "seconds_per_edict": 15,
-      "first_pair": ["rook", "bishop"],
-      "second_pair": ["rook", "bishop"],
-      "pair_order": "announced_dynamic",
-      "focus": "Pares mistos",
-      "configuration": "fixed"
-    },
-    {
-      "number": 9,
-      "resolution": "timer",
-      "edict_count": 2,
-      "seconds_per_edict": 15,
-      "first_pair": ["rook", "bishop"],
-      "second_pair": ["rook", "bishop"],
-      "pair_order": "announced_dynamic",
-      "focus": "Pares mistos dificeis",
-      "configuration": "procedural"
-    },
-    {
-      "number": 10,
-      "resolution": "timer",
-      "edict_count": 2,
-      "seconds_per_edict": 15,
-      "first_pair": ["rook", "bishop"],
-      "second_pair": ["rook", "bishop"],
-      "pair_order": "announced_dynamic",
-      "focus": "Desafio final",
-      "configuration": "fixed"
-    }
+	{
+	  "number": 1,
+	  "resolution": "moves",
+	  "edict_count": 1,
+	  "edict_values": [4],
+	  "safe_spot": [0, 0],
+	  "tutorial_path": [[0, 3], [0, 2], [0, 1], [0, 0]],
+	  "seconds_per_edict": 0,
+	  "first_pair": [],
+	  "second_pair": [],
+	  "pair_order": "horizontal_first",
+	  "focus": "Um edito e movimento basico",
+	  "configuration": "fixed",
+	  "piece_waves": [[], []]
+	},
+	{
+	  "number": 2,
+	  "resolution": "moves",
+	  "edict_count": 2,
+	  "seconds_per_edict": 0,
+	  "first_pair": [],
+	  "second_pair": [],
+	  "pair_order": "horizontal_first",
+	  "focus": "Dois editos e safe spot",
+	  "edict_values": [2, 3],
+	  "safe_spot": [3, 2],
+	  "configuration": "fixed",
+	  "piece_waves": [[], []]
+	},
+	{
+	  "number": 3,
+	  "resolution": "moves",
+	  "edict_count": 2,
+	  "seconds_per_edict": 0,
+	  "first_pair": ["rook", "rook"],
+	  "second_pair": [],
+	  "pair_order": "horizontal_first",
+	  "focus": "Introducao dos ataques",
+	  "edict_values": [2, 4],
+	  "safe_spot": [0, 2],
+	  "configuration": "fixed",
+	  "piece_waves": [
+		[
+		  {"type": "rook", "side": "left", "edge_slot": 1, "edge_direction": -1, "move_value": 1},
+		  {"type": "rook", "side": "right", "edge_slot": 3, "edge_direction": -1, "move_value": 2}
+		],
+		[]
+	  ]
+	},
+	{
+	  "number": 4,
+	  "resolution": "moves",
+	  "edict_count": 2,
+	  "seconds_per_edict": 0,
+	  "first_pair": ["rook", "rook"],
+	  "second_pair": ["rook", "rook"],
+	  "pair_order": "horizontal_first",
+	  "focus": "Duas ondas",
+	  "edict_values": [2, 4],
+	  "safe_spot": [0, 2],
+	  "configuration": "fixed",
+	  "piece_waves": [
+		[
+		  {"type": "rook", "side": "left", "edge_slot": 2, "edge_direction": -1, "move_value": 2},
+		  {"type": "rook", "side": "right", "edge_slot": 0, "edge_direction": 1, "move_value": 1}
+		],
+		[
+		  {"type": "rook", "side": "top", "edge_slot": 0, "edge_direction": 1, "move_value": 4},
+		  {"type": "rook", "side": "bottom", "edge_slot": 1, "edge_direction": 1, "move_value": 2}
+		]
+	  ]
+	},
+	{
+	  "number": 5,
+	  "resolution": "moves",
+	  "edict_count": 2,
+	  "seconds_per_edict": 0,
+	  "first_pair": ["bishop", "bishop"],
+	  "second_pair": ["rook", "rook"],
+	  "pair_order": "horizontal_first",
+	  "focus": "Introducao do Bispo",
+	  "edict_values": [3, 4],
+	  "safe_spot": [0, 1],
+	  "configuration": "fixed",
+	  "piece_waves": [
+		[
+		  {"type": "bishop", "side": "left", "edge_slot": 4, "edge_direction": -1, "move_value": 3},
+		  {"type": "bishop", "side": "right", "edge_slot": 3, "edge_direction": 1, "move_value": 1}
+		],
+		[
+		  {"type": "rook", "side": "top", "edge_slot": 0, "edge_direction": 1, "move_value": 4},
+		  {"type": "rook", "side": "bottom", "edge_slot": 1, "edge_direction": 1, "move_value": 2}
+		]
+	  ]
+	},
+	{
+	  "number": 6,
+	  "resolution": "timer",
+	  "edict_count": 2,
+	  "seconds_per_edict": 15,
+	  "first_pair": ["bishop", "bishop"],
+	  "second_pair": ["rook", "rook"],
+	  "pair_order": "horizontal_first",
+	  "focus": "Introducao do cronometro",
+	  "configuration": "fixed"
+	},
+	{
+	  "number": 7,
+	  "resolution": "timer",
+	  "edict_count": 2,
+	  "seconds_per_edict": 15,
+	  "first_pair": ["rook", "rook"],
+	  "second_pair": ["bishop", "bishop"],
+	  "pair_order": "horizontal_first",
+	  "focus": "Troca de leitura",
+	  "configuration": "procedural"
+	},
+	{
+	  "number": 8,
+	  "resolution": "timer",
+	  "edict_count": 2,
+	  "seconds_per_edict": 15,
+	  "first_pair": ["rook", "bishop"],
+	  "second_pair": ["rook", "bishop"],
+	  "pair_order": "announced_dynamic",
+	  "focus": "Pares mistos",
+	  "configuration": "fixed"
+	},
+	{
+	  "number": 9,
+	  "resolution": "timer",
+	  "edict_count": 2,
+	  "seconds_per_edict": 15,
+	  "first_pair": ["rook", "bishop"],
+	  "second_pair": ["rook", "bishop"],
+	  "pair_order": "announced_dynamic",
+	  "focus": "Pares mistos dificeis",
+	  "configuration": "procedural"
+	},
+	{
+	  "number": 10,
+	  "resolution": "timer",
+	  "edict_count": 2,
+	  "seconds_per_edict": 15,
+	  "first_pair": ["rook", "bishop"],
+	  "second_pair": ["rook", "bishop"],
+	  "pair_order": "announced_dynamic",
+	  "focus": "Desafio final",
+	  "configuration": "fixed"
+	}
   ]
 }
