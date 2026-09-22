@@ -1,0 +1,376 @@
+[
+  {
+    "name": "mercury",
+    "source": "C:\\Users\\Steel\\Downloads\\Planets\\mercury.glb",
+    "output": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\environment\\solar_system\\mercury.glb",
+    "input_vertices": 16639,
+    "output_vertices": 16639,
+    "spin_axis": [
+      0.0,
+      1.0,
+      -0.0
+    ],
+    "has_rings": false,
+    "textures": [
+      {
+        "name": "Image_0",
+        "size": [
+          2048,
+          1024
+        ]
+      }
+    ]
+  },
+  {
+    "name": "venus",
+    "source": "C:\\Users\\Steel\\Downloads\\Planets\\venus.glb",
+    "output": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\environment\\solar_system\\venus.glb",
+    "input_vertices": 33278,
+    "output_vertices": 16639,
+    "spin_axis": [
+      0.0,
+      1.0,
+      -0.0
+    ],
+    "has_rings": false,
+    "textures": [
+      {
+        "name": "Image_0",
+        "size": [
+          2048,
+          1024
+        ]
+      },
+      {
+        "name": "Image_1",
+        "size": [
+          2048,
+          1024
+        ]
+      },
+      {
+        "name": "Image_2",
+        "size": [
+          2048,
+          1024
+        ]
+      },
+      {
+        "name": "Image_3",
+        "size": [
+          2048,
+          1024
+        ]
+      }
+    ]
+  },
+  {
+    "name": "moon",
+    "source": "C:\\Users\\Steel\\Downloads\\Planets\\source\\moon.fbx",
+    "output": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\environment\\solar_system\\moon.glb",
+    "input_vertices": 1442,
+    "output_vertices": 8642,
+    "spin_axis": [
+      0.0,
+      1.0,
+      -0.0
+    ],
+    "has_rings": false,
+    "textures": [
+      {
+        "name": "moon_color.png",
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "name": "moon_normal.png",
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "name": "moon_rough.png",
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ]
+  },
+  {
+    "name": "mars",
+    "source": "C:\\Users\\Steel\\Downloads\\Planets\\source\\mars.fbx",
+    "output": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\environment\\solar_system\\mars.glb",
+    "input_vertices": 1442,
+    "output_vertices": 8642,
+    "spin_axis": [
+      0.0,
+      1.0,
+      -0.0
+    ],
+    "has_rings": false,
+    "textures": [
+      {
+        "name": "mars_color.png",
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "name": "mars_rough.png",
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "name": "mars_normal.png",
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ]
+  },
+  {
+    "name": "neptune",
+    "source": "C:\\Users\\Steel\\Downloads\\Planets\\source\\neptune.fbx",
+    "output": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\environment\\solar_system\\neptune.glb",
+    "input_vertices": 223086,
+    "output_vertices": 23426,
+    "spin_axis": [
+      0.4743955433368683,
+      0.8803117871284485,
+      -4.6191374281079334e-08
+    ],
+    "has_rings": true,
+    "textures": [
+      {
+        "name": "Uv1_neptune1_diff.png",
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "name": "Uv1_neptune2_diff.png",
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "name": "Uv1_neptune2_diff.png.001",
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ]
+  },
+  {
+    "name": "uranus",
+    "source": "C:\\Users\\Steel\\Downloads\\Planets\\uranus.glb",
+    "output": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\environment\\solar_system\\uranus.glb",
+    "input_vertices": 1867583,
+    "output_vertices": 33550,
+    "spin_axis": [
+      0.9908188581466675,
+      0.13519611954689026,
+      -1.1293568746850724e-07
+    ],
+    "has_rings": true,
+    "textures": [
+      {
+        "name": "Image_0",
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "name": "Image_4",
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "name": "Image_1",
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun",
+    "source": "C:\\Users\\Steel\\Downloads\\Planets\\sun.glb",
+    "output": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\environment\\solar_system\\sun.glb",
+    "input_vertices": 4286,
+    "output_vertices": 2143,
+    "spin_axis": [
+      0.0,
+      1.0,
+      -0.0
+    ],
+    "has_rings": false,
+    "textures": [
+      {
+        "name": "Image_0",
+        "size": [
+          1024,
+          512
+        ]
+      }
+    ]
+  },
+  {
+    "name": "jupiter",
+    "source": "C:\\Users\\Steel\\Downloads\\Planets\\jupiter\\source\\saturn.fbx",
+    "output": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\environment\\solar_system\\jupiter.glb",
+    "input_vertices": 738898,
+    "output_vertices": 17882,
+    "spin_axis": [
+      0.322265625,
+      0.9466492533683777,
+      -4.391841912365635e-08
+    ],
+    "has_rings": true,
+    "textures": [
+      {
+        "name": "Uv1_jupiter1_diff.png",
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "name": "Uv1_jupiter2_diff.png",
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "name": "Uv1_jupiter2_diff.png.001",
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ]
+  },
+  {
+    "name": "black_hole",
+    "source": "C:\\Users\\Steel\\Downloads\\Planets\\black_hole.glb",
+    "output": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\environment\\solar_system\\black_hole.glb",
+    "input_vertices": 466186,
+    "output_vertices": 34777,
+    "spin_axis": [
+      0.0,
+      1.0,
+      -0.0
+    ],
+    "has_rings": false,
+    "textures": [
+      {
+        "name": "Image_8",
+        "size": [
+          512,
+          512
+        ]
+      },
+      {
+        "name": "Image_3",
+        "size": [
+          512,
+          512
+        ]
+      },
+      {
+        "name": "Image_6",
+        "size": [
+          512,
+          512
+        ]
+      },
+      {
+        "name": "Image_5",
+        "size": [
+          512,
+          512
+        ]
+      },
+      {
+        "name": "Image_7",
+        "size": [
+          512,
+          512
+        ]
+      },
+      {
+        "name": "Image_4",
+        "size": [
+          512,
+          512
+        ]
+      },
+      {
+        "name": "Image_9",
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ]
+  },
+  {
+    "name": "saturn",
+    "source": "C:\\Users\\Steel\\Downloads\\saturn.glb",
+    "output": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\environment\\solar_system\\saturn.glb",
+    "input_vertices": 3225368,
+    "output_vertices": 18414,
+    "spin_axis": [
+      -0.31804725527763367,
+      0.8931360244750977,
+      0.3180472254753113
+    ],
+    "has_rings": true,
+    "textures": [
+      {
+        "name": "Image_0",
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "name": "Image_2",
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "name": "Image_1",
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "name": "Image_3",
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ]
+  }
+]
