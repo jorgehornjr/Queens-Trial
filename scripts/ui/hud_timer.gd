@@ -38,6 +38,7 @@ var is_timed_phase: bool = false
 var _warning_level: int = 0
 var _pulse_tween: Tween
 var _panel_style: StyleBoxFlat
+var _bar_fill_style: StyleBoxFlat
 
 
 func _ready() -> void:
@@ -68,6 +69,16 @@ func _setup_styles() -> void:
 		_panel_style.content_margin_top = 8.0
 		_panel_style.content_margin_bottom = 8.0
 	add_theme_stylebox_override("panel", _panel_style)
+
+	# Garante fill style próprio para que a cor possa ser alterada em runtime.
+	_bar_fill_style = StyleBoxFlat.new()
+	_bar_fill_style.bg_color = COLOR_NORMAL_BAR
+	_bar_fill_style.corner_radius_top_left = 2
+	_bar_fill_style.corner_radius_top_right = 2
+	_bar_fill_style.corner_radius_bottom_right = 2
+	_bar_fill_style.corner_radius_bottom_left = 2
+	if progress_bar != null:
+		progress_bar.add_theme_stylebox_override("fill", _bar_fill_style)
 
 	if title_label != null:
 		title_label.add_theme_font_override("font", JUPITER_FONT)
@@ -168,10 +179,9 @@ func _apply_visual_state(level: int) -> void:
 		_panel_style.border_color = border_color
 	if time_label != null:
 		time_label.add_theme_color_override("font_color", text_color)
-	if progress_bar != null:
-		var fill_style := progress_bar.get_theme_stylebox("fill")
-		if fill_style is StyleBoxFlat:
-			fill_style.bg_color = bar_color
+	if progress_bar != null and _bar_fill_style != null:
+		_bar_fill_style.bg_color = bar_color
+		progress_bar.add_theme_stylebox_override("fill", _bar_fill_style)
 
 
 func _trigger_pulse(peak_scale: float, half_duration: float) -> void:
