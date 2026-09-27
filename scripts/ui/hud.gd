@@ -3,6 +3,8 @@ extends CanvasLayer
 
 const Constants = preload("res://scripts/core/game_constants.gd")
 const EdictDust = preload("res://scripts/ui/edict_dust.gd")
+const HUDTimerModel = preload("res://scripts/ui/hud_timer.gd")
+const HUDOrderDisplayModel = preload("res://scripts/ui/hud_order_display.gd")
 const DUNE_FONT: FontFile = preload("res://assets/fonts/dune_rise.otf")
 const JUPITER_FONT: FontFile = preload("res://assets/fonts/jupiter_pro.otf")
 const ANNOUNCEMENT_FONT_SIZE := 112
@@ -17,6 +19,8 @@ const ROUND_EDICT_FONT_SIZE := 62
 @onready var result_panel: PanelContainer = $ResultPanel
 @onready var result_label: Label = $ResultPanel/ResultLabel
 @onready var round_edicts: Label = $RoundEdicts
+@onready var timer_display: HUDTimerModel = $TimerDisplay
+@onready var order_display: HUDOrderDisplayModel = $OrderDisplay
 
 var _dust_effect: Node2D
 var _intro_generation := 0
@@ -24,6 +28,8 @@ var _dust_tween: Tween
 var _phase_number := 0
 var _opening_shown := false
 var _round_edicts_home_position := Vector2.ZERO
+var _current_phase_data: Dictionary = {}
+var _is_timed_phase := false
 
 
 func _ready() -> void:
@@ -39,9 +45,11 @@ func _ready() -> void:
 	_round_edicts_home_position = round_edicts.position
 
 
-func set_phase(phase_number: int, _phase_data: Dictionary, _phase_seed: int) -> void:
+func set_phase(phase_number: int, phase_data: Dictionary, _phase_seed: int) -> void:
 	_intro_generation += 1
 	_phase_number = phase_number
+	_current_phase_data = phase_data
+	_is_timed_phase = String(phase_data.get("resolution", "moves")) == "timer"
 	phase_label.text = ""
 	# A apresentação fica concentrada nos éditos inferiores e nas telas de resultado.
 	tutorial_hint.visible = false
@@ -51,6 +59,62 @@ func set_phase(phase_number: int, _phase_data: Dictionary, _phase_seed: int) -> 
 	round_edicts.visible = false
 	round_edicts.modulate = Color.WHITE
 	round_edicts.position = _round_edicts_home_position
+
+	if timer_display != null:
+		var duration := float(phase_data.get("seconds_per_edict", 15))
+		timer_display.configure_phase(_is_timed_phase, duration)
+
+	if order_display != null:
+		order_display.setup_phase(phase_data)
+		order_display.visible = false
+
+
+## Conecta os componentes de HUD aos sinais do loop de gameplay.
+func connect_gameplay_signals(edito_machine: Node, edict_timer: Node) -> void:
+	if timer_display != null and edict_timer != null:
+		timer_display.connect_to_timer(edict_timer)
+	if order_display != null and edito_machine != null:
+		order_display.connect_to_machine(edito_machine)
+
+
+## Configuração explícita de ordens e pares caso o controller queira forçar.
+func setup_phase_orders(phase_data: Dictionary) -> void:
+	_current_phase_data = phase_data
+	_is_timed_phase = String(phase_data.get("resolution", "moves")) == "timer"
+	if order_display != null:
+		order_display.setup_phase(phase_data)
+	if timer_display != null:
+		var duration := float(phase_data.get("seconds_per_edict", 15))
+		timer_display.configure_phase(_is_timed_phase, duration)
+
+
+## Define e atualiza o tempo restante exibido no cronômetro da HUD.
+func set_edict_timer(remaining: float) -> void:
+	if timer_display != null and _is_timed_phase:
+		timer_display.set_time(remaining)
+
+
+## Inicia o cronômetro para o édito corrente.
+func start_edict_timer(seconds: float) -> void:
+	if timer_display != null and _is_timed_phase:
+		timer_display.set_time(seconds, seconds)
+
+
+## Pausa o cronômetro visual durante a resolução das peças.
+func pause_edict_timer() -> void:
+	pass
+
+
+## Oculta o cronômetro ao concluir ou falhar.
+func stop_edict_timer() -> void:
+	if timer_display != null:
+		timer_display.hide_timer()
+
+
+## Atualiza o destaque da ordem ativa e do par em jogo.
+func set_active_order(index: int) -> void:
+	if order_display != null:
+		order_display.set_active_order(index)
 
 
 func play_phase_intro(values: Array) -> void:
@@ -69,6 +133,8 @@ func play_phase_intro(values: Array) -> void:
 	if run_id != _intro_generation:
 		return
 	round_edicts.visible = true
+	if order_display != null and not _current_phase_data.is_empty():
+		order_display.visible = true
 
 
 func _play_announcement(text_value: String, transfer_to_round_edicts := false) -> void:
@@ -138,18 +204,26 @@ func _is_roman_text(text_value: String) -> bool:
 
 
 func show_failure(motivos: Array) -> void:
+	if timer_display != null:
+		timer_display.hide_timer()
 	result_label.text = "\n".join(PackedStringArray(motivos))
 	result_label.add_theme_color_override("font_color", Color(0.96, 0.91, 0.82, 1.0))
 	_show_result_panel()
 
 
 func show_success() -> void:
+	if timer_display != null:
+		timer_display.hide_timer()
 	result_panel.visible = false
 	await _play_announcement("FASE CONCLUÍDA")
 
 
 func show_restart() -> void:
 	result_panel.visible = false
+	if timer_display != null:
+		timer_display.hide_timer()
+	if order_display != null and not _current_phase_data.is_empty():
+		order_display.set_active_order(0)
 
 
 func hide_tutorial_hint() -> void:

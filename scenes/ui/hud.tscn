@@ -1,8 +1,10 @@
-[gd_scene format=3 uid="uid://flj1ppppij5h"]
+[gd_scene load_steps=12 format=3 uid="uid://flj1ppppij5h"]
 
 [ext_resource type="Script" uid="uid://c57wflqttbgee" path="res://scripts/ui/hud.gd" id="1_hud"]
 [ext_resource type="FontFile" uid="uid://cvywdipei2yil" path="res://assets/fonts/dune_rise.otf" id="2_dune"]
 [ext_resource type="FontFile" uid="uid://dimlq76mmxxgd" path="res://assets/fonts/jupiter_pro.otf" id="3_jupiter"]
+[ext_resource type="Script" path="res://scripts/ui/hud_timer.gd" id="4_timer"]
+[ext_resource type="Script" path="res://scripts/ui/hud_order_display.gd" id="5_orders"]
 
 [sub_resource type="StyleBoxFlat" id="Style_phase"]
 content_margin_left = 22.0
@@ -28,6 +30,88 @@ content_margin_top = 12.0
 content_margin_right = 12.0
 content_margin_bottom = 12.0
 bg_color = Color(0, 0, 0, 0)
+
+[sub_resource type="StyleBoxFlat" id="Style_timer"]
+content_margin_left = 18.0
+content_margin_top = 8.0
+content_margin_right = 18.0
+content_margin_bottom = 8.0
+bg_color = Color(0.02, 0.035, 0.11, 0.88)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.61, 1, 0.72)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0.05, 0.18, 0.65, 0.4)
+shadow_size = 10
+
+[sub_resource type="StyleBoxFlat" id="Style_timer_bar_bg"]
+bg_color = Color(0.08, 0.12, 0.25, 0.6)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="Style_timer_bar_fill"]
+bg_color = Color(0.38, 0.65, 1, 0.95)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="Style_order_panel"]
+content_margin_left = 14.0
+content_margin_top = 12.0
+content_margin_right = 14.0
+content_margin_bottom = 12.0
+bg_color = Color(0.02, 0.035, 0.11, 0.82)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.61, 1, 0.5)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0.05, 0.18, 0.65, 0.35)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="Style_order_card"]
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+bg_color = Color(0.04, 0.06, 0.15, 0.7)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.61, 1, 0.4)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="Style_active_pair"]
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+bg_color = Color(0.12, 0.09, 0.03, 0.75)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.96, 0.76, 0.25, 0.85)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [node name="HUD" type="CanvasLayer" unique_id=1738850811]
 script = ExtResource("1_hud")
@@ -170,3 +254,208 @@ theme_override_fonts/font = ExtResource("2_dune")
 theme_override_font_sizes/font_size = 62
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="TimerDisplay" type="PanelContainer" parent="." unique_id=194857201]
+visible = false
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -125.0
+offset_top = 22.0
+offset_right = 125.0
+offset_bottom = 86.0
+grow_horizontal = 2
+pivot_offset = Vector2(125, 32)
+theme_override_styles/panel = SubResource("Style_timer")
+script = ExtResource("4_timer")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TimerDisplay"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="TitleLabel" type="Label" parent="TimerDisplay/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.82, 1, 0.9)
+theme_override_fonts/font = ExtResource("3_jupiter")
+theme_override_font_sizes/font_size = 13
+text = "TEMPO RESTANTE"
+horizontal_alignment = 1
+
+[node name="TimeLabel" type="Label" parent="TimerDisplay/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_dune")
+theme_override_font_sizes/font_size = 26
+text = "15s"
+horizontal_alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="TimerDisplay/VBoxContainer"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+theme_override_styles/background = SubResource("Style_timer_bar_bg")
+theme_override_styles/fill = SubResource("Style_timer_bar_fill")
+max_value = 15.0
+value = 15.0
+show_percentage = false
+
+[node name="OrderDisplay" type="PanelContainer" parent="." unique_id=149837105]
+visible = false
+anchors_preset = -1
+anchor_left = 0.87
+anchor_top = 0.28
+anchor_right = 0.87
+anchor_bottom = 0.28
+offset_left = -160.0
+offset_top = -105.0
+offset_right = 160.0
+offset_bottom = 105.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("Style_order_panel")
+script = ExtResource("5_orders")
+
+[node name="MarginContainer" type="MarginContainer" parent="OrderDisplay"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="OrderDisplay/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TitleLabel" type="Label" parent="OrderDisplay/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.82, 1, 0.95)
+theme_override_fonts/font = ExtResource("2_dune")
+theme_override_font_sizes/font_size = 14
+text = "SEQUÊNCIA DE ORDENS"
+horizontal_alignment = 1
+
+[node name="Order1Panel" type="PanelContainer" parent="OrderDisplay/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("Style_order_card")
+
+[node name="Margin" type="MarginContainer" parent="OrderDisplay/MarginContainer/VBoxContainer/Order1Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 2
+
+[node name="VBox" type="VBoxContainer" parent="OrderDisplay/MarginContainer/VBoxContainer/Order1Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="HBox" type="HBoxContainer" parent="OrderDisplay/MarginContainer/VBoxContainer/Order1Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="Badge" type="Label" parent="OrderDisplay/MarginContainer/VBoxContainer/Order1Panel/Margin/VBox/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_jupiter")
+theme_override_font_sizes/font_size = 16
+text = "▸ 1ª ORDEM"
+
+[node name="Value" type="Label" parent="OrderDisplay/MarginContainer/VBoxContainer/Order1Panel/Margin/VBox/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_jupiter")
+theme_override_font_sizes/font_size = 18
+text = "II"
+horizontal_alignment = 1
+
+[node name="Status" type="Label" parent="OrderDisplay/MarginContainer/VBoxContainer/Order1Panel/Margin/VBox/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_jupiter")
+theme_override_font_sizes/font_size = 13
+text = "ATIVA"
+horizontal_alignment = 2
+
+[node name="PairLabel" type="Label" parent="OrderDisplay/MarginContainer/VBoxContainer/Order1Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.88, 0.95, 0.9)
+theme_override_fonts/font = ExtResource("3_jupiter")
+theme_override_font_sizes/font_size = 14
+text = "Torre + Torre • Horizontal"
+
+[node name="Order2Panel" type="PanelContainer" parent="OrderDisplay/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("Style_order_card")
+
+[node name="Margin" type="MarginContainer" parent="OrderDisplay/MarginContainer/VBoxContainer/Order2Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 2
+
+[node name="VBox" type="VBoxContainer" parent="OrderDisplay/MarginContainer/VBoxContainer/Order2Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="HBox" type="HBoxContainer" parent="OrderDisplay/MarginContainer/VBoxContainer/Order2Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="Badge" type="Label" parent="OrderDisplay/MarginContainer/VBoxContainer/Order2Panel/Margin/VBox/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_jupiter")
+theme_override_font_sizes/font_size = 16
+text = "  2ª ORDEM"
+
+[node name="Value" type="Label" parent="OrderDisplay/MarginContainer/VBoxContainer/Order2Panel/Margin/VBox/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_jupiter")
+theme_override_font_sizes/font_size = 18
+text = "IV"
+horizontal_alignment = 1
+
+[node name="Status" type="Label" parent="OrderDisplay/MarginContainer/VBoxContainer/Order2Panel/Margin/VBox/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_jupiter")
+theme_override_font_sizes/font_size = 13
+text = "A SEGUIR"
+horizontal_alignment = 2
+
+[node name="PairLabel" type="Label" parent="OrderDisplay/MarginContainer/VBoxContainer/Order2Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.88, 0.95, 0.9)
+theme_override_fonts/font = ExtResource("3_jupiter")
+theme_override_font_sizes/font_size = 14
+text = "Torre + Torre • Vertical"
+
+[node name="ActivePairPanel" type="PanelContainer" parent="OrderDisplay/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("Style_active_pair")
+
+[node name="Margin" type="MarginContainer" parent="OrderDisplay/MarginContainer/VBoxContainer/ActivePairPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 2
+
+[node name="VBox" type="VBoxContainer" parent="OrderDisplay/MarginContainer/VBoxContainer/ActivePairPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="ActivePairTitle" type="Label" parent="OrderDisplay/MarginContainer/VBoxContainer/ActivePairPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.84, 0.35, 1)
+theme_override_fonts/font = ExtResource("2_dune")
+theme_override_font_sizes/font_size = 12
+text = "PAR ATIVO"
+horizontal_alignment = 1
+
+[node name="ActivePairLabel" type="Label" parent="OrderDisplay/MarginContainer/VBoxContainer/ActivePairPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.85, 1)
+theme_override_fonts/font = ExtResource("3_jupiter")
+theme_override_font_sizes/font_size = 15
+text = "Torre + Torre • Horizontal"
+horizontal_alignment = 1

@@ -60,6 +60,9 @@ func _ready() -> void:
 	_attack_visualizer.configure(_board)
 	_phase_manager.phase_started.connect(_on_phase_started)
 
+	if _hud != null and _hud.has_method("connect_gameplay_signals"):
+		_hud.connect_gameplay_signals(_edito_machine, _edict_timer)
+
 
 func _on_phase_started(phase_number: int, phase_data: Dictionary, _phase_seed: int) -> void:
 	_generation += 1
@@ -224,6 +227,8 @@ func _on_edito_iniciado(index: int, value: int) -> void:
 	for wave_index in range(_waves.size()):
 		for piece in _waves[wave_index]:
 			piece.set_wave_active(wave_index == index)
+	if _hud != null and _hud.has_method("set_active_order"):
+		_hud.set_active_order(index)
 	if index > 0 and not _intro_running:
 		call_deferred("_open_next_edict", _generation)
 
