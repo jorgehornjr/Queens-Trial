@@ -16,6 +16,7 @@ func _run_tests() -> void:
 	_test_campaign_catalog()
 	_test_fase1_dados_completos()
 	_test_fase2_dados_completos()
+	_test_fase6_transicao_para_tempo()
 	_test_external_piece_spawn_points()
 	_test_painter_board_materials()
 	_test_player_visual()
@@ -98,6 +99,29 @@ func _test_fase2_dados_completos() -> void:
 	# Caso de falha: mesma garantia de "sem fallback" aplicada à fase 2.
 	var catalogo_invalido := Catalog.load_campaign("res://data/phases/arquivo_que_nao_existe.json")
 	_expect(catalogo_invalido.is_empty(), "Um caminho de catálogo inválido deve retornar vazio, nunca um valor padrão disfarçado.")
+func _test_fase6_transicao_para_tempo() -> void:
+	var campaign := Catalog.load_campaign()
+	var fase5 := Catalog.find_phase(campaign, 5)
+
+	_expect(not fase5.is_empty(), "A fase 5 deve existir no catálogo.")
+	_expect(String(fase5.get("resolution", "")) == "moves", "A fase 5 deve ser a última fase por movimentos.")
+	_expect(int(fase5.get("seconds_per_edict", -1)) == 0, "A fase 5 não deve ter limite de tempo.")
+
+	var fase6 := Catalog.find_phase(campaign, 6)
+
+	_expect(not fase6.is_empty(), "A fase 6 deve existir no catálogo.")
+	_expect(int(fase6.get("number", -1)) == 6, "O número da fase 6 deve ser 6.")
+	_expect(String(fase6.get("resolution", "")) == "timer", "A fase 6 deve trocar para resolução por tempo.")
+	_expect(int(fase6.get("seconds_per_edict", -1)) == 15, "A fase 6 deve usar 15 segundos por édito.")
+	_expect(int(fase6.get("edict_count", -1)) == 2, "A fase 6 deve manter dois éditos.")
+	_expect((fase6.get("first_pair", null) as Array) == ["bishop", "bishop"], "A fase 6 deve manter o par de Bispos no primeiro grupo.")
+	_expect((fase6.get("second_pair", null) as Array) == ["rook", "rook"], "A fase 6 deve manter o par de Torres no segundo grupo.")
+	_expect(String(fase6.get("configuration", "")) == "fixed", "A fase 6 deve ser configuração fixa, não procedural.")
+
+	_expect(
+		String(fase5.get("resolution")) != String(fase6.get("resolution")),
+		"Deve haver uma mudança real de modo de resolução entre a fase 5 e a fase 6."
+	) 
 
 
 func _test_external_piece_spawn_points() -> void:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://cpybiv47b53n4"]
+[gd_scene format=3 uid="uid://cpybiv47b53n4"]
 
 [ext_resource type="Script" uid="uid://dqgdiyvpkgxck" path="res://scripts/board/board.gd" id="1_board"]
 [ext_resource type="PackedScene" path="res://scenes/board/PaintedBoard.tscn" id="2_board_visual"]
@@ -11,30 +11,29 @@ script = ExtResource("1_board")
 
 [node name="BoardVisual" parent="." unique_id=1349187211 instance=ExtResource("2_board_visual")]
 
-[node name="LevitationMist" parent="." instance=ExtResource("5_mist")]
+[node name="LevitationMist" parent="." unique_id=367414123 instance=ExtResource("5_mist")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6, 0)
 
-[node name="SpawnPoints" type="Node3D" parent="."]
+[node name="SpawnPoints" type="Node3D" parent="." unique_id=1443190739]
 
-[node name="NorthWest" type="Marker3D" parent="SpawnPoints" groups=["piece_spawn"]]
-position = Vector3(-21, 0.16, -21)
+[node name="NorthWest" type="Marker3D" parent="SpawnPoints" unique_id=1625621842 groups=["piece_spawn"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 0.16, -21)
 
-[node name="NorthEast" type="Marker3D" parent="SpawnPoints" groups=["piece_spawn"]]
-position = Vector3(21, 0.16, -21)
+[node name="NorthEast" type="Marker3D" parent="SpawnPoints" unique_id=954205253 groups=["piece_spawn"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 0.16, -21)
 
-[node name="SouthEast" type="Marker3D" parent="SpawnPoints" groups=["piece_spawn"]]
-position = Vector3(21, 0.16, 21)
+[node name="SouthEast" type="Marker3D" parent="SpawnPoints" unique_id=699909261 groups=["piece_spawn"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 0.16, 21)
 
-[node name="SouthWest" type="Marker3D" parent="SpawnPoints" groups=["piece_spawn"]]
-position = Vector3(-21, 0.16, 21)
+[node name="SouthWest" type="Marker3D" parent="SpawnPoints" unique_id=1398921727 groups=["piece_spawn"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 0.16, 21)
 
-[node name="PreviewPieces" type="Node3D" parent="."]
+[node name="PreviewPieces" type="Node3D" parent="." unique_id=199182730]
 
-[node name="Rook" parent="PreviewPieces" instance=ExtResource("3_rook")]
-position = Vector3(-21, 0.16, -21)
-rotation_degrees = Vector3(0, 45, 0)
+[node name="Rook" parent="PreviewPieces" unique_id=102307832 instance=ExtResource("3_rook")]
+transform = Transform3D(0.70710677, 0, 0.70710677, 0, 1, 0, -0.70710677, 0, 0.70710677, -21, 0.16, -21)
 
-[node name="Bishop" parent="PreviewPieces" instance=ExtResource("4_bishop")]
-position = Vector3(21, 0.16, -21)
-rotation_degrees = Vector3(0, -45, 0)
+[node name="Bishop" parent="PreviewPieces" unique_id=1850009163 instance=ExtResource("4_bishop")]
+transform = Transform3D(0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, 0.70710677, 21, 0.16, -21)
 
 [node name="Markers" type="Node3D" parent="." unique_id=1891264786]
