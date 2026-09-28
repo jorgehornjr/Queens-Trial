@@ -6,6 +6,8 @@ const PhaseManagerModel = preload("res://scripts/gameplay/fase_manager.gd")
 const CameraRig = preload("res://scripts/camera/board_orbit_camera.gd")
 const RookResolverModel = preload("res://scripts/pieces/rook_resolver.gd")
 const AttackEventModel = preload("res://scripts/gameplay/attack_event.gd")
+const EditoMachineModel = preload("res://scripts/gameplay/edito_state_machine.gd")
+const EdictTimerModel = preload("res://scripts/gameplay/edict_timer.gd")
 var failures := PackedStringArray()
 func _initialize() -> void:
 	call_deferred("_run_tests")
@@ -16,6 +18,8 @@ func _run_tests() -> void:
 	_test_campaign_catalog()
 	_test_fase1_dados_completos()
 	_test_fase2_dados_completos()
+	_test_fase6_transicao_para_tempo()
+	_test_fase6_timer_resolucao()
 	_test_external_piece_spawn_points()
 	_test_painter_board_materials()
 	_test_player_visual()
@@ -60,8 +64,6 @@ func _test_campaign_catalog() -> void:
 	_expect(Catalog.find_phase(campaign, 7).get("configuration") == "procedural", "A fase 7 deve ser procedural.")
 	_expect(Catalog.find_phase(campaign, 9).get("configuration") == "procedural", "A fase 9 deve ser procedural.")
 func _test_fase1_dados_completos() -> void:
-	# Caso feliz: a fase 1 carrega com todos os dados esperados,
-	# batendo com a especificação consolidada do jogo.
 	var campaign := Catalog.load_campaign()
 	var fase1 := Catalog.find_phase(campaign, 1)
 
@@ -75,13 +77,9 @@ func _test_fase1_dados_completos() -> void:
 	_expect(String(fase1.get("pair_order", "")) == "horizontal_first", "A ordem dos pares da fase 1 deve ser horizontal_first.")
 	_expect(String(fase1.get("configuration", "")) == "fixed", "A fase 1 deve ser configuração fixa, não procedural.")
 
-	# Caso de falha: um caminho de catálogo inexistente não deve
-	# retornar um valor padrão disfarçado (sem fallback).
 	var catalogo_invalido := Catalog.load_campaign("res://data/phases/arquivo_que_nao_existe.json")
 	_expect(catalogo_invalido.is_empty(), "Um caminho de catálogo inválido deve retornar vazio, nunca um valor padrão disfarçado.")
 func _test_fase2_dados_completos() -> void:
-	# Caso feliz: a fase 2 carrega com os dados previstos na especificação
-	# (dois éditos, ainda sem peças — introduz o safe spot).
 	var campaign := Catalog.load_campaign()
 	var fase2 := Catalog.find_phase(campaign, 2)
 
@@ -95,9 +93,78 @@ func _test_fase2_dados_completos() -> void:
 	_expect(String(fase2.get("pair_order", "")) == "horizontal_first", "A ordem dos pares da fase 2 deve ser horizontal_first.")
 	_expect(String(fase2.get("configuration", "")) == "fixed", "A fase 2 deve ser configuração fixa, não procedural.")
 
-	# Caso de falha: mesma garantia de "sem fallback" aplicada à fase 2.
 	var catalogo_invalido := Catalog.load_campaign("res://data/phases/arquivo_que_nao_existe.json")
 	_expect(catalogo_invalido.is_empty(), "Um caminho de catálogo inválido deve retornar vazio, nunca um valor padrão disfarçado.")
+func _test_fase6_transicao_para_tempo() -> void:
+	var campaign := Catalog.load_campaign()
+	var fase5 := Catalog.find_phase(campaign, 5)
+
+	_expect(not fase5.is_empty(), "A fase 5 deve existir no catálogo.")
+	_expect(String(fase5.get("resolution", "")) == "moves", "A fase 5 deve ser a última fase por movimentos.")
+	_expect(int(fase5.get("seconds_per_edict", -1)) == 0, "A fase 5 não deve ter limite de tempo.")
+
+	var fase6 := Catalog.find_phase(campaign, 6)
+
+	_expect(not fase6.is_empty(), "A fase 6 deve existir no catálogo.")
+	_expect(int(fase6.get("number", -1)) == 6, "O número da fase 6 deve ser 6.")
+	_expect(String(fase6.get("resolution", "")) == "timer", "A fase 6 deve trocar para resolução por tempo.")
+	_expect(int(fase6.get("seconds_per_edict", -1)) == 15, "A fase 6 deve usar 15 segundos por édito.")
+	_expect(int(fase6.get("edict_count", -1)) == 2, "A fase 6 deve manter dois éditos.")
+	_expect((fase6.get("first_pair", null) as Array) == ["bishop", "bishop"], "A fase 6 deve manter o par de Bispos no primeiro grupo.")
+	_expect((fase6.get("second_pair", null) as Array) == ["rook", "rook"], "A fase 6 deve manter o par de Torres no segundo grupo.")
+	_expect(String(fase6.get("configuration", "")) == "fixed", "A fase 6 deve ser configuração fixa, não procedural.")
+
+	_expect(
+		String(fase5.get("resolution")) != String(fase6.get("resolution")),
+		"Deve haver uma mudança real de modo de resolução entre a fase 5 e a fase 6."
+	)
+func _test_fase6_timer_resolucao() -> void:
+	var timer := EdictTimerModel.new()
+	var expirations := [0]
+	timer.expired.connect(func(): expirations[0] += 1)
+	timer.start(15.0)
+	timer._process(10.0)
+	_expect(is_equal_approx(timer.remaining, 5.0) and timer.running, "O cronometro deve contar regressivamente sem expirar antes da hora.")
+	timer.pause()
+	timer._process(10.0)
+	_expect(is_equal_approx(timer.remaining, 5.0), "Pausar o cronometro nao deve consumir tempo restante.")
+	timer.resume()
+	timer._process(5.0)
+	_expect(expirations[0] == 1 and not timer.running, "O cronometro deve expirar exatamente uma vez ao completar 15s totais.")
+	timer._process(5.0)
+	_expect(expirations[0] == 1, "O cronometro nao deve expirar novamente apos ja ter disparado.")
+
+	var machine := EditoMachineModel.new()
+	var sucesso_disparado := [false]
+	machine.sucesso.connect(func(): sucesso_disparado[0] = true)
+	var editos_sucesso := [{"valor": 2, "par": "first_pair"}]
+	_expect(machine.configurar_fase(editos_sucesso, Vector2i(2, 2), &"timer"), "A fase cronometrada deve configurar com um unico edito valido.")
+	machine.registrar_movimento(Vector2i.RIGHT)
+	machine.registrar_movimento(Vector2i.RIGHT)
+	_expect(machine.estado_atual == EditoMachineModel.Estado.AGUARDANDO_MOVIMENTO, "No modo tempo, completar os passos nao deve travar o edito antes da expiracao.")
+	_expect(machine.expirar_tempo(), "A expiracao deve fechar o edito quando o jogador ja cumpriu o movimento.")
+	machine.avancar_primeira_peca()
+	machine.avancar_segunda_peca()
+	machine.avancar_ataque()
+	machine.julgar([], machine.posicao_jogador)
+	_expect(sucesso_disparado[0] and machine.estado_atual == EditoMachineModel.Estado.FINALIZADO, "Cumprir o edito antes da expiracao deve gerar sucesso ao expirar.")
+
+	var machine_falha := EditoMachineModel.new()
+	var falha_disparada := [false]
+	machine_falha.falha.connect(func(_motivos): falha_disparada[0] = true)
+	var editos_falha := [{"valor": 3, "par": "first_pair"}]
+	_expect(machine_falha.configurar_fase(editos_falha, Vector2i(2, 2), &"timer"), "A segunda fase cronometrada tambem deve configurar corretamente.")
+	machine_falha.registrar_movimento(Vector2i.RIGHT)
+	_expect(machine_falha.expirar_tempo(), "A expiracao deve fechar o edito mesmo com o movimento incompleto.")
+	machine_falha.avancar_primeira_peca()
+	machine_falha.avancar_segunda_peca()
+	machine_falha.avancar_ataque()
+	machine_falha.julgar([], machine_falha.posicao_jogador)
+	_expect(falha_disparada[0] and machine_falha.estado_atual == EditoMachineModel.Estado.FINALIZADO, "Expirar sem cumprir o edito deve gerar falha.")
+
+	timer.free()
+	machine.free()
+	machine_falha.free()
 
 
 func _test_external_piece_spawn_points() -> void:
@@ -299,7 +366,6 @@ func _test_board_camera() -> void:
 		wheel.pressed = true
 		rig._unhandled_input(wheel)
 		_expect(rig.zoom_ratio < rig.max_zoom_ratio, "O scroll para cima deve aproximar.")
-		# Simulação do arrasto sem capturar o cursor do sistema.
 		rig._dragging = true
 		var motion := InputEventMouseMotion.new()
 		motion.relative = Vector2(0, 150)
