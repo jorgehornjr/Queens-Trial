@@ -1,0 +1,50 @@
+{
+  "source_mod": "Fandaniel+Elidibus Enshroud.pmp",
+  "author": "Dekken",
+  "option": "Hooded Fandaniel",
+  "materials": {
+    "mt_c0101e8100_top_d.mtrl": {
+      "colorset_sha256": "20575808a90946da9fd28eb97f30d4d57ecb8f3f49800cc9eb74ee86c48b000d",
+      "files": {
+        "basecolor": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\models\\characters\\fandaniel\\fandaniel_d_basecolor.png",
+        "normal": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\models\\characters\\fandaniel\\fandaniel_d_normal.png",
+        "roughness": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\models\\characters\\fandaniel\\fandaniel_d_roughness.png",
+        "emission": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\models\\characters\\fandaniel\\fandaniel_d_emission.png"
+      },
+      "source_textures": [
+        "chara/equipment/e8100/texture/v01_c0101e8100_top_d_id.tex",
+        "chara/equipment/e8100/texture/v01_c0101e8100_top_d_m.tex",
+        "chara/equipment/e8100/texture/v01_c0101e8100_top_d_n.tex"
+      ]
+    },
+    "mt_c0101e8100_top_e.mtrl": {
+      "colorset_sha256": "904be5d2ddd10a54c4a4ce72542cf5e7a6a906e80929bd3ece01833dc7223bfb",
+      "files": {
+        "basecolor": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\models\\characters\\fandaniel\\fandaniel_e_basecolor.png",
+        "normal": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\models\\characters\\fandaniel\\fandaniel_e_normal.png",
+        "roughness": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\models\\characters\\fandaniel\\fandaniel_e_roughness.png",
+        "emission": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\assets\\models\\characters\\fandaniel\\fandaniel_e_emission.png"
+      },
+      "source_textures": [
+        "chara/equipment/e8100/texture/v01_c0101e8100_top_e_id.tex",
+        "chara/equipment/e8100/texture/v01_c0101e8100_top_e_m.tex",
+        "chara/equipment/e8100/texture/v01_c0101e8100_top_e_n.tex"
+      ]
+    }
+  },
+  "design_change": {
+    "cloth_color": "original burgundy restored",
+    "palette_rows": "all original rows preserved"
+  },
+  "face_resources": [
+    "vfx/cut/general/texture/asi_s006a0f.atex",
+    "vfx/cut/general/texture/asi_s006b0f.atex",
+    "vfx/cut/general/texture/asi_s006c0f.atex",
+    "vfx/cut/general/texture/asi_s006d0f.atex",
+    "vfx/cut/general/texture/awl_swd03.atex",
+    "vfx/cut/general/texture/clud001e2f.atex",
+    "vfx/cut/general/texture/dist_uv_f.atex",
+    "vfx/cut/general/texture/glow_mk0f.atex",
+    "vfx/cut/general/texture/uv_fire_30f.atex"
+  ]
+}

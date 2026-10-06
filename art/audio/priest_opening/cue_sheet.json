@@ -1,0 +1,38 @@
+{
+  "title": "O Limiar da Rainha",
+  "duration_seconds": 35,
+  "original_score": true,
+  "tonality": "D minor",
+  "cues": [
+    {
+      "time": 2.6,
+      "scene": "portal opens",
+      "music": "suspended strings and harp"
+    },
+    {
+      "time": 4.6,
+      "scene": "priest enters",
+      "music": "quiet viola theme"
+    },
+    {
+      "time": 18.8,
+      "scene": "queen revealed",
+      "music": "crescendo and unresolved dominant"
+    },
+    {
+      "time": 22.1,
+      "scene": "queen face then zoom out",
+      "music": "full low brass, horns, choir and timpani"
+    },
+    {
+      "time": 24.9,
+      "scene": "zoom out from queen",
+      "music": "largest orchestral statement"
+    },
+    {
+      "time": 33.75,
+      "scene": "return to board",
+      "music": "cadence and fade to gameplay"
+    }
+  ]
+}

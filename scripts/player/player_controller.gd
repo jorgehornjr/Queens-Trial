@@ -2,13 +2,14 @@ class_name GridPlayer
 extends Node3D
 
 signal cell_changed(cell: Vector2i, previous_cell: Vector2i)
+signal movement_started
 signal move_rejected(target_cell: Vector2i)
 signal restart_requested
 
 @export var board_path: NodePath
 @export var starting_cell := Vector2i(0, 4)
 @export_range(0.05, 2.0, 0.01) var move_duration := 0.62
-@export_range(0.05, 1.0, 0.01) var turn_duration := 0.34
+@export_range(0.05, 1.0, 0.01) var turn_duration := 0.28
 @export_range(0.0, 2.0, 0.01) var surface_offset := 0.72
 
 var current_cell := Vector2i.ZERO
@@ -20,6 +21,8 @@ var _board: Node
 var _move_tween: Tween
 var _animation_player: AnimationPlayer
 var _animation_state := &""
+var platform_sliding := false
+var platform_local_position := Vector3.ZERO
 
 func _ready() -> void:
 	call_deferred("_initialize_on_board")
@@ -48,6 +51,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	if platform_sliding:
+		return
 	if _animation_state == &"death":
 		return
 	# Movement is deliberately grid-locked and driven by one tween per key press.
@@ -62,6 +67,8 @@ func reset_to_start() -> void:
 	if _move_tween != null:
 		_move_tween.kill()
 		_move_tween = null
+	platform_sliding = false
+	rotation = Vector3.ZERO
 	var previous_cell := current_cell
 	current_cell = starting_cell
 	facing_direction = Vector2i.UP
@@ -69,8 +76,68 @@ func reset_to_start() -> void:
 	input_enabled = false
 	position = _board.grid_to_world(current_cell) + Vector3(0.0, surface_offset, 0.0)
 	rotation.y = _yaw_for_direction(facing_direction)
+	var model := get_node_or_null("Model")
+	if model != null and model.has_method("reset_platform_motion"):
+		model.reset_platform_motion()
 	_set_animation_state(false)
 	cell_changed.emit(current_cell, previous_cell)
+
+
+func begin_platform_slide(direction: int) -> void:
+	# Freeze the actual visual position at the deadline, including a partial step.
+	if _move_tween != null:
+		_move_tween.kill()
+		_move_tween = null
+	platform_local_position = (_board as Node3D).to_local(global_position)
+	platform_local_position.y = surface_offset
+	platform_sliding = true
+	input_enabled = false
+	movement_locked = true
+	facing_direction = Vector2i.UP
+	_animation_state = &"slide"
+	var model := get_node_or_null("Model")
+	if model != null and model.has_method("begin_platform_slide"):
+		model.begin_platform_slide(direction)
+		sync_to_platform()
+		return
+	var clip := _find_animation(PackedStringArray(["right_strafe" if direction > 0 else "left_strafe"]))
+	if clip != &"":
+		_animation_player.play(clip, 0.14)
+	sync_to_platform()
+
+
+func sync_to_platform() -> void:
+	var platform := _board as Node3D
+	global_position = platform.to_global(platform_local_position)
+	global_basis = platform.global_basis.orthonormalized()
+
+
+func finish_platform_slide() -> void:
+	platform_local_position.x = clampf(platform_local_position.x, -_board.tile_size * 2.0, _board.tile_size * 2.0)
+	current_cell = _board.world_to_grid(platform_local_position)
+	position = _board.grid_to_world(current_cell) + Vector3.UP * surface_offset
+	rotation = Vector3.ZERO
+	platform_sliding = false
+	movement_locked = false
+	_set_animation_state(false)
+
+
+func update_platform_motion(speed: float, strength: float) -> void:
+	var model := get_node_or_null("Model")
+	if model != null and model.has_method("update_platform_motion"):
+		model.update_platform_motion(_board as Node3D, speed, strength)
+
+
+func begin_platform_fall(direction: int) -> void:
+	var model := get_node_or_null("Model")
+	if model != null and model.has_method("begin_platform_fall"):
+		model.begin_platform_fall(direction)
+
+
+func recover_platform_slide() -> void:
+	var model := get_node_or_null("Model")
+	if model != null and model.has_method("recover_platform_slide"):
+		model.recover_platform_slide()
 
 
 func _initialize_on_board() -> void:
@@ -104,20 +171,24 @@ func _try_move(direction: Vector2i) -> void:
 	facing_direction = direction
 	movement_locked = true
 	_set_animation_state(true)
+	movement_started.emit()
 
 	var tween := create_tween()
 	_move_tween = tween
 	tween.set_parallel(true)
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_IN_OUT)
+	var desired_yaw := _yaw_for_direction(facing_direction)
+	var shortest_turn := wrapf(desired_yaw - rotation.y, -PI, PI)
+	# Let the shoulders start turning before taking the next full stride.
+	# The small lead grows for a U-turn, while the cell still resolves on time.
+	var turn_lead := minf(0.12, absf(shortest_turn) / PI * 0.12)
 	tween.tween_property(
 		self,
 		"position",
 		_board.grid_to_world(current_cell) + Vector3(0.0, surface_offset, 0.0),
-		move_duration
-	)
-	var desired_yaw := _yaw_for_direction(facing_direction)
-	var shortest_turn := wrapf(desired_yaw - rotation.y, -PI, PI)
+		move_duration - turn_lead
+	).set_delay(turn_lead)
 	tween.tween_property(
 		self,
 		"rotation:y",
@@ -151,6 +222,9 @@ func play_death_animation() -> void:
 	input_enabled = false
 	movement_locked = true
 	_animation_state = &"death"
+	var model := get_node_or_null("Model")
+	if model != null and model.has_method("prepare_ground_death"):
+		model.prepare_ground_death()
 	if _animation_player == null:
 		await get_tree().create_timer(2.15).timeout
 		return
@@ -180,12 +254,16 @@ func _set_animation_state(moving: bool) -> void:
 	var animation := _animation_player.get_animation(animation_name)
 	if animation != null:
 		animation.loop_mode = Animation.LOOP_LINEAR
-	_animation_player.play(animation_name, 0.16)
+		_animation_player.speed_scale = animation.length / move_duration if moving else 1.0
+	_animation_player.play(animation_name, 0.22 if moving else 0.26)
 
 
 func _find_animation(hints: PackedStringArray) -> StringName:
 	if _animation_player == null:
 		return &""
+	# Prefer gameplay's exact clip names before cinematic comparison clips.
+	for hint in hints:
+		if _animation_player.has_animation(hint): return StringName(hint)
 	for animation_name in _animation_player.get_animation_list():
 		var lower_name := String(animation_name).to_lower()
 		for hint in hints:

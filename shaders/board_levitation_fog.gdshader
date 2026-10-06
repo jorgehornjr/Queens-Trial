@@ -5,6 +5,8 @@ uniform float radiance : hint_range(0.0, 20.0) = 1.4;
 uniform float motion_speed = 0.18;
 uniform vec3 violet : source_color = vec3(0.48, 0.10, 0.9);
 uniform vec3 ice_blue : source_color = vec3(0.10, 0.42, 1.0);
+uniform bool follow_tilt = false;
+uniform mat4 world_to_mist;
 
 float hash3(vec3 p) {
 	p = fract(p * 0.1031);
@@ -26,6 +28,9 @@ float fbm(vec3 p) {
 void fog() {
 	// Centro do volume seis unidades abaixo do tabuleiro.
 	vec3 p = WORLD_POSITION - OBJECT_POSITION - vec3(0, 6, 0);
+	if (follow_tilt) {
+		p = (world_to_mist * vec4(WORLD_POSITION, 1.0)).xyz - vec3(0, 6, 0);
+	}
 	float t = TIME * motion_speed;
 	vec3 flow = p * vec3(0.30, 0.40, 0.30) + vec3(t * 0.3, t * 0.4, -t * 0.24);
 	float curl = noise3(flow * 0.65 + 8.0);

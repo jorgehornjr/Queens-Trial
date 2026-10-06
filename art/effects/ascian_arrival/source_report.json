@@ -1,0 +1,24 @@
+{
+  "mod": "Ascian and Ancient Teleport.rar",
+  "author": "Dekken",
+  "arrival_only": "vfx/common/eff/pop_tlep1t1h.avfx",
+  "textures": [
+    "vfx/common/texture/smok_a0000.atex",
+    "vfx/common/texture/aura073am.atex",
+    "vfx/common/texture/dist_002f.atex",
+    "vfx/common/texture/awl_swd03.atex"
+  ],
+  "audio": "sound/vfx/monster7/SE_Vfx_Monster_c0101_wrp01.scd",
+  "audio_sha256": "867f0bbfefb677e44d0b8be1ca460528228452491b87aae64e510e89a949213c",
+  "geometry_counts": [
+    [
+      240,
+      1044
+    ],
+    [
+      198,
+      576
+    ]
+  ],
+  "renderer": "Godot port of AVFX; source geometry, UVs, color/scale curves and texture resources preserved."
+}

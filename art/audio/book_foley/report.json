@@ -1,0 +1,20 @@
+{
+  "method": "Original filtered paper-fiber noise, soft folds and cloth contact; no sampled recordings.",
+  "rate_hz": 48000,
+  "channels": 2,
+  "seed": 16102026,
+  "assets": [
+    {
+      "file": "assets/audio/sfx/book/page_turn.wav",
+      "seconds": 1.04,
+      "peak_dbfs": -20.45,
+      "rms_dbfs": -36.56
+    },
+    {
+      "file": "assets/audio/sfx/book/book_close.wav",
+      "seconds": 1.25,
+      "peak_dbfs": -27.95,
+      "rms_dbfs": -42.79
+    }
+  ]
+}

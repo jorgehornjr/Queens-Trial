@@ -1,0 +1,26 @@
+{
+  "event_walk_loop": {
+    "game_path": "chara/human/c0101/animation/a0001/bt_common/event/event_walk_loop.pap",
+    "sha256": "8df8e1d5638c347ebe79dd5dc723bdfcf1079f3cbd83cdc75a9ff4345bca8af3",
+    "animations": [
+      {
+        "name": "cbfm_walk_loop",
+        "havok_index": 0,
+        "fbx": ".godot\\qa\\ffxiv\\native_walk\\cbfm_walk_loop.fbx",
+        "export": "ones across 33 frames (1.06667s).\nConverting 33 frames...\nConverted 33 frames.\nConverted animation.\n"
+      }
+    ]
+  },
+  "event_swalk_loop": {
+    "game_path": "chara/human/c0101/animation/a0001/bt_common/event/event_swalk_loop.pap",
+    "sha256": "d54a1ba068c791b7183b7e197cd1a04f677f2cea740073c2d1dde329cb91ef05",
+    "animations": [
+      {
+        "name": "cbfm_swalk_loop",
+        "havok_index": 0,
+        "fbx": ".godot\\qa\\ffxiv\\native_walk\\cbfm_swalk_loop.fbx",
+        "export": " 106 bones across 61 frames (2s).\nConverting 61 frames...\nConverted 61 frames.\nConverted animation.\n"
+      }
+    ]
+  }
+}

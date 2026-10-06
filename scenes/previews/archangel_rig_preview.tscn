@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/player/archangel_rig_preview.gd" id="1_preview"]
+[ext_resource type="PackedScene" path="res://scenes/player/archangel_animated_model.tscn" id="2_model"]
+
+[node name="ArchangelRigPreview" type="Node3D"]
+script = ExtResource("1_preview")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]

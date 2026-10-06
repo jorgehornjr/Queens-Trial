@@ -1,0 +1,72 @@
+{
+  "source": "art\\characters\\fallen_priest\\fallen_priest_rig.blend",
+  "upload": "priest_body_for_mixamo.zip",
+  "fbx_alternative": "priest_body_for_mixamo.fbx",
+  "pose": "Symmetrical A-pose, arms opened 40 degrees from default pose",
+  "vertices": 45374,
+  "triangles": 89999,
+  "excluded_from_upload": [
+    "CapeMesh",
+    "TabardMesh"
+  ],
+  "embedded_textures": true,
+  "preview_material": "Single opaque material, base color only; game PBR materials preserved in source",
+  "armatures": 0,
+  "landmarks_blender_z_up": {
+    "chin": [
+      0,
+      -0.06,
+      1.81
+    ],
+    "groin": [
+      0,
+      -0.015,
+      1.1
+    ],
+    "wrist_L": [
+      0.6991631984710693,
+      -0.045000094920396805,
+      1.2444193363189697
+    ],
+    "elbow_L": [
+      0.5052268505096436,
+      -0.015000049956142902,
+      1.4210933446884155
+    ],
+    "knee_L": [
+      0.17000000178813934,
+      -0.02500000037252903,
+      0.6399998664855957
+    ],
+    "wrist_R": [
+      -0.6991631984710693,
+      -0.045000094920396805,
+      1.2444193363189697
+    ],
+    "elbow_R": [
+      -0.5052268505096436,
+      -0.015000049956142902,
+      1.4210933446884155
+    ],
+    "knee_R": [
+      -0.17000000178813934,
+      -0.02500000037252903,
+      0.6399998664855957
+    ]
+  },
+  "game_source_sha256": {
+    "art\\characters\\fallen_priest\\fallen_priest_rig.blend": "c57218bfb00cb492f03878fadef1580e5c680a6ae105045eb560bc240f0febdc",
+    "assets\\models\\characters\\fallen_priest\\fallen_priest_rig.glb": "d6859917353edbd67d3a944208d625e7cb15fb1b608c4a0102a8684596e55bb7",
+    "assets\\models\\characters\\fallen_priest\\cape_cage.json": "552840547d6b55945162355be43e046d96487aaef6bbb518831a1cac4e854871"
+  },
+  "reassembly": "Retarget downloaded Mixamo body clips to the original PriestRig; keep CapeMesh, TabardMesh, their bones and cape_cage.json from the game source.",
+  "mixamo_result": {
+    "confirmed_on": "2026-10-05",
+    "character_name": "priest_body_for_mixamo",
+    "rig_download": "priest_mixamo_rig_tpose.fbx",
+    "bones_in_download": 33,
+    "ui_skeleton_lod": "Standard Skeleton (65)",
+    "validation": "Single skinned mesh, UVs, base color and all main body joints present; all vertices weighted",
+    "animation_selection": "Left to the user"
+  }
+}

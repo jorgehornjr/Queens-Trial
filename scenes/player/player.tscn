@@ -1,12 +1,12 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1_player"]
-[ext_resource type="PackedScene" path="res://scenes/player/wizard_animated_model.tscn" id="2_wizard"]
+[ext_resource type="PackedScene" path="res://scenes/player/fandaniel_animated_model.tscn" id="2_priest"]
 
 [node name="Player" type="Node3D"]
 script = ExtResource("1_player")
-surface_offset = 0.16
+surface_offset = 0.02
 
-[node name="Model" parent="." instance=ExtResource("2_wizard")]
+[node name="Model" parent="." instance=ExtResource("2_priest")]
 rotation_degrees = Vector3(0, 180, 0)
-scale = Vector3(2.4, 2.4, 2.4)
+scale = Vector3(2.45, 2.45, 2.45)

@@ -1,0 +1,114 @@
+{
+  "date": "2026-10-06",
+  "tests": {
+    "opening_tests.log": true,
+    "character_tests.log": true,
+    "balance_tests.log": true,
+    "core_tests.log": true
+  },
+  "clothing": {
+    "d": {
+      "original_restored": true,
+      "sha256": "f8d354e958a9e84399bc504d5d8b0f45d9bf7f049515b26524dc62e1ad5eeceb"
+    },
+    "e": {
+      "original_restored": true,
+      "sha256": "012da2d47c0d93b75f4492f43dba4f4c4a717ca364b4302fefb194aaa9e95ed5"
+    }
+  },
+  "native_walk": {
+    "origin": "Original FFXIV cinematic slow walk",
+    "game_path": "chara/human/c0101/animation/a0001/bt_common/event/event_swalk_loop.pap",
+    "motion_name": "cbfm_swalk_loop",
+    "pap_sha256": "d54a1ba068c791b7183b7e197cd1a04f677f2cea740073c2d1dde329cb91ef05",
+    "duration": 2.0,
+    "frames": 61,
+    "native_bone_mapping": true,
+    "loop": true,
+    "forward_speed_native": 0.5993755906820297,
+    "samples": [
+      {
+        "frame": 0,
+        "left_hand": [
+          0.3366888761520386,
+          -0.20714689791202545,
+          0.9426913261413574
+        ],
+        "right_hand": [
+          -0.27874669432640076,
+          0.03617006167769432,
+          0.9244381189346313
+        ],
+        "left_foot": [
+          0.0297759547829628,
+          -0.017619885504245758,
+          0.09058792889118195
+        ]
+      },
+      {
+        "frame": 15,
+        "left_hand": [
+          0.2997656464576721,
+          -0.08254289627075195,
+          0.8875033855438232
+        ],
+        "right_hand": [
+          -0.2796700894832611,
+          0.12248580902814865,
+          0.8859450221061707
+        ],
+        "left_foot": [
+          0.03298927843570709,
+          0.2601347863674164,
+          0.10744360089302063
+        ]
+      },
+      {
+        "frame": 30,
+        "left_hand": [
+          0.2799590528011322,
+          -0.0384264811873436,
+          0.9245292544364929
+        ],
+        "right_hand": [
+          -0.28528276085853577,
+          -0.21957314014434814,
+          0.9565503001213074
+        ],
+        "left_foot": [
+          0.10727304965257645,
+          0.02381668984889984,
+          0.16010628640651703
+        ]
+      },
+      {
+        "frame": 60,
+        "left_hand": [
+          0.3366895616054535,
+          -0.20714716613292694,
+          0.9426910877227783
+        ],
+        "right_hand": [
+          -0.2787460386753082,
+          0.03616955876350403,
+          0.9244377613067627
+        ],
+        "left_foot": [
+          0.029776547104120255,
+          -0.017620548605918884,
+          0.09058757871389389
+        ]
+      }
+    ]
+  },
+  "skin": {
+    "checked_exported_vertices": 5341,
+    "maximum_position_or_uv_difference": 1.341104507446289e-07,
+    "maximum_weight_difference": 5.761782329027909e-08,
+    "original_skeleton_bones": 106,
+    "passed": true
+  },
+  "wind_increase_db": 3.0,
+  "preview": "docs/previews/fandaniel_ffxiv_walk_intro.mp4",
+  "music_sha256": "c8048a27e13486d4b8e15f50afe9609ed5ab213cc262b9efdbc75ac12faee872"
+}

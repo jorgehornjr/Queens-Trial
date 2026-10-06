@@ -1,0 +1,9 @@
+# Folha ilustrada do menu de pausa
+
+O ESC usa uma única folha de papel marfim com bordas rasgadas. A rainha no alto à direita e o viajante no canto inferior esquerdo se olham na diagonal. Os demais cantos trazem planetas, órbitas e nébulas, com nanquim, aquarela e bordas de pintura esmaecidas. O centro permanece livre para a logo e os controles.
+
+Arte ativa: `assets/ui/pause_menu/illustrated_sheet_soft.png`, RGBA com transparência real fora da folha. A versão mais larga preserva os quatro grupos da composição e suaviza os contornos excessivamente nítidos, aproximando os pigmentos da aquarela do livro. Gerada pela ferramenta integrada `image_gen.imagegen`; edição registrada em [softening_prompt.json](softening_prompt.json). A versão aprovada anterior permanece em `illustrated_sheet.png`, com seu prompt em [generation_prompt.json](generation_prompt.json).
+
+`scenes/ui/pause_overlay.tscn` posiciona os controles vivos sobre a arte. A folha tem proporção 16:9 e ocupa quase toda a janela, com margem estreita para mostrar o papel rasgado. A logo `assets/logo/QTlogo.png` conserva sua geometria e lettering; `shaders/pause_logo_ink.gdshader` aplica somente granulação e variação discreta de opacidade, sem animação. O título PAUSA fica abaixo da logo, sem sobreposição. Jupiter Pro aparece também em Continuar, Reiniciar fase, Selecionar fase, números e atalhos. Os botões usam StyleBoxEmpty em todos os estados e mostram apenas o texto, sem retângulos ou bordas.
+
+`scripts/ui/pause_overlay.gd` mantém Continuar, Reiniciar fase, selecionar fases 1–6 e Ir, além de ESC e R. A folha entra e sai suavemente, ajusta-se à janela e preserva a pausa da música, dos efeitos e da física. Verificação funcional em `tests/test_pause_phase_selector.gd`; capturas atuais em `docs/previews/starred_guidance/`, geradas por `tests/capture_starred_guidance.gd`.

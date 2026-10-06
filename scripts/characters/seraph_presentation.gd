@@ -2,6 +2,11 @@ extends Node3D
 ## Epic encounter figure staged just beyond the north edge of the board.
 
 const CHARACTER_LAYER := 64
+const BalanceModel = preload("res://scripts/characters/queen_balance.gd")
+var balance: QueenBalance
+var balance_mode := false
+var _ritual_tween: Tween
+var _ritual_generation := 0
 
 @export var player_path := NodePath("../Player")
 @export_range(0.0, 12.0, 0.1) var orb_world_height_offset := 2.0
@@ -32,6 +37,48 @@ func _ready() -> void:
 	_skeleton = $Model.find_child("Skeleton3D", true, false) as Skeleton3D
 	_configure_procedural_animation()
 	call_deferred("_raise_orb_vertically")
+
+
+func _prepare_balance() -> void:
+	if is_instance_valid(balance):
+		return
+	var orb := get_node("Model/Seraph/Skeleton3D/OrbAttachment/AstraiaOrb") as Node3D
+	balance = BalanceModel.new()
+	balance.name = "QueenBalance"
+	add_child(balance)
+	balance.configure(orb)
+
+
+func set_balance_mode(enabled: bool) -> void:
+	if not enabled and not is_instance_valid(balance):
+		return
+	if balance == null:
+		_prepare_balance()
+	if balance_mode == enabled:
+		return
+	balance_mode = enabled
+	_ritual_generation += 1
+	var run_id := _ritual_generation
+	if _ritual_tween != null:
+		_ritual_tween.kill()
+	var orb := get_node("Model/Seraph/Skeleton3D/OrbAttachment/AstraiaOrb") as Node3D
+	orb.show()
+	balance.show()
+	_ritual_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	if enabled:
+		_ritual_tween.tween_property(orb, "ritual_reveal", 0.0, 1.15)
+		_ritual_tween.tween_interval(0.15)
+		_ritual_tween.tween_property(balance, "reveal", 1.0, 1.15)
+	else:
+		balance.reset_weights()
+		_ritual_tween.tween_property(balance, "reveal", 0.0, 0.95)
+		_ritual_tween.tween_property(orb, "ritual_reveal", 1.0, 1.15)
+	# Killing a replaced tween must also discard its completion callback.
+	_ritual_tween.tween_callback(func():
+		if run_id == _ritual_generation:
+			orb.visible = not enabled
+			balance.visible = enabled
+	)
 
 
 func _raise_orb_vertically() -> void:

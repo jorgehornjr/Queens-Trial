@@ -1,0 +1,7 @@
+[configuration]
+entry_symbol = "priest_cape_init"
+compatibility_minimum = "4.4"
+reloadable = false
+
+[libraries]
+windows.x86_64 = "res://native/priest_cape/bin/priest_cape.windows.x86_64.dll"

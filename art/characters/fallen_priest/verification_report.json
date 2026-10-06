@@ -1,0 +1,126 @@
+{
+  "verified_at": "2026-10-03T02:50:04",
+  "godot": "4.7.2",
+  "blender": "5.2.2 LTS",
+  "opening_seconds": 35,
+  "clips": 10,
+  "tests": {
+    "core": {
+      "passed": true,
+      "log": ".godot/qa/oct3_core_test.log"
+    },
+    "opening": {
+      "passed": true,
+      "log": ".godot/qa/oct3_opening_test.log"
+    },
+    "phase_six_body_and_cape": {
+      "passed": true,
+      "log": ".godot/qa/oct3_phase6_test.log"
+    },
+    "grounded_death": {
+      "passed": true,
+      "log": ".godot/qa/oct3_death_test.log"
+    },
+    "balance_rules_and_presentation": {
+      "passed": true,
+      "log": ".godot/qa/oct3_balance_test.log"
+    },
+    "phases_one_to_five": {
+      "passed": true,
+      "log": ".godot/qa/oct3_playthrough_test.log"
+    },
+    "pause_phase_selection_and_skip": {
+      "passed": true,
+      "log": ".godot/qa/oct3_pause_test.log"
+    },
+    "failure_audio_and_restart": {
+      "passed": true,
+      "log": ".godot/qa/oct3_failure_test.log"
+    },
+    "native_and_script_physics_equivalence": {
+      "passed": true,
+      "log": ".godot/qa/oct3_cape_test.log"
+    },
+    "card_burn_audio_synchronization": {
+      "passed": true,
+      "log": ".godot/qa/card_burn_reference/integration_test.log",
+      "verified_at": "2026-10-03T03:07:11"
+    }
+  },
+  "visual_review": [
+    "portal_leading_foot_then_body",
+    "slow_confident_walk_and_head_turns",
+    "left_and_right_board_slide_and_fall",
+    "body_and_hands_near_floor_in_death",
+    "cape_follows_body_and_settles",
+    "detailed_portal_smoke_filaments_and_luminous_fragments",
+    "queen_music_climax_during_zoom_out"
+  ],
+  "cape_solver": "accepted XPBD parameters and cage preserved",
+  "known_limitations": [
+    "approximate body colliders; no cloth self collision"
+  ],
+  "performance": {
+    "renderer": "Forward+",
+    "resolution": [
+      1280,
+      720
+    ],
+    "sample_seconds": 11,
+    "warmup_seconds": 2,
+    "fps_capped_by_display": 75,
+    "before": {
+      "cape_enabled": true,
+      "cape_solver_ms": 10.293803874092,
+      "fps": 75.0909090909091,
+      "frame_ms_p50": 13.299,
+      "frame_ms_p95": 24.056,
+      "frames": 826,
+      "physics_ms": 11.4530811138016,
+      "process_ms": 18.3471319612591,
+      "triangles": 381869.0
+    },
+    "after": {
+      "cape_enabled": true,
+      "cape_solver_ms": 0.477638014527845,
+      "fps": 75.0909090909091,
+      "frame_ms_p50": 13.313,
+      "frame_ms_p95": 14.147,
+      "frames": 826,
+      "physics_ms": 0.629268765133174,
+      "process_ms": 13.7055108958836,
+      "triangles": 381493.0
+    },
+    "cape_cpu_reduction_percent": 95.36
+  },
+  "audio": {
+    "opening_duration": 35.0,
+    "encoded_peak": 0.7884347438812256,
+    "largest_musical_statement_seconds": 25.0,
+    "queen_climax_verified": true,
+    "burn_duration_seconds": 2.05,
+    "burn_original_synthesis": false,
+    "actual_rendered_opening_audio": {
+      "duration": 35.008,
+      "peak": 0.1978605091571808,
+      "largest_halfsecond_at": 25.0
+    },
+    "burn_source_url": "https://www.youtube.com/watch?v=o7MXJvhDEQY",
+    "burn_source_range_seconds": [
+      25.82,
+      27.87
+    ],
+    "burn_processing": "light spectral music attenuation and zero-phase sub-bass removal; residual soundtrack remains"
+  },
+  "native_solver": {
+    "platform": "Windows x64, standard single-precision Godot",
+    "gdextension_minimum": "4.4",
+    "reference_max_position_difference": 6.74250805e-06,
+    "points": 117,
+    "pinned": 18,
+    "steps_per_second": 120,
+    "iterations": 12,
+    "caller_arrays_preserved": true
+  },
+  "preview": ".godot/qa/priest_opening_preview.mp4"
+}

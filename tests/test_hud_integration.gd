@@ -1,6 +1,8 @@
 extends SceneTree
 
 const HudScene = preload("res://scenes/ui/hud.tscn")
+const CARD_BACK = preload("res://assets/cards/back.png")
+const CARD_FOUR = preload("res://assets/cards/4.jpg")
 
 var failures := PackedStringArray()
 
@@ -45,7 +47,9 @@ func _test_minimal_hud() -> void:
 	await process_frame
 	hud.set_phase(1, {}, 0)
 	_expect(not hud.get_node("PhasePanel").visible, "O título PROVA não deve aparecer no topo da HUD.")
-	_expect(not hud.tutorial_hint.visible, "As dicas de movimentação devem permanecer ocultas.")
+	_expect(hud.get_node_or_null("StartPrompt") == null, "A abertura não deve mostrar instrução de Enter.")
+	_expect(hud.get_node_or_null("TutorialHint") == null, "A HUD não deve mostrar frases de movimentação fora do livro.")
+	_expect(hud.get_node_or_null("RoundEdicts") == null, "A HUD não pode manter os numerais fora das cartas.")
 	_expect(hud.get_node_or_null("TopPanel/Content/GoalLabel") == null,
 		"A HUD não pode revelar linha e coluna do destino.")
 	_expect(hud.get_node_or_null("TopPanel/Content/PositionLabel") == null,
@@ -57,6 +61,7 @@ func _test_minimal_hud() -> void:
 func _test_phase_one_presentation() -> void:
 	var scene := load("res://scenes/main/main.tscn") as PackedScene
 	var main := scene.instantiate()
+	main.set("opening_cutscene_enabled", false)
 	root.add_child(main)
 	await process_frame
 	await process_frame
@@ -64,51 +69,113 @@ func _test_phase_one_presentation() -> void:
 	manager.start_phase(1)
 	await create_timer(0.15).timeout
 	var hud := main.get_node("HUD") as GameHUD
+	var presentation := hud.card_presentation
 	var board := main.get_node("World/Board") as Board3D
 	var player := main.get_node("World/Player") as GridPlayer
 	_expect(not board.get_node("LevitationMist") is FogVolume,
 		"O tabuleiro isolado não deve conter um FogVolume sem ambiente no editor.")
 	_expect(board.get_node_or_null("LevitationMist/VolumetricMist") is FogVolume,
 		"A neblina volumétrica deve ser preservada no jogo em execução.")
-	_expect(hud.announcement.visible and hud.announcement_label.text == "INÍCIO",
-		"A primeira fase deve começar com INÍCIO no mesmo anúncio dos éditos.")
-	_expect(hud.announcement_label.get_theme_font("font").resource_path.ends_with("dune_rise.otf"),
-		"Frases de apresentação devem manter a fonte Dune.")
-	var saw_first_edict := false
-	for attempt in range(200):
-		if hud.announcement.visible and hud.announcement_label.text == "IV":
-			saw_first_edict = true
-		if player.input_enabled:
-			break
-		await create_timer(0.05).timeout
-	_expect(saw_first_edict, "Após INÍCIO, a primeira fase deve apresentar IV antes de liberar o jogador.")
-	_expect(player.input_enabled, "O jogador deve ser liberado depois da apresentação do édito.")
-	var reminder := hud.get_node("RoundEdicts") as Label
+	var book := hud.tutorial_book
+	_expect(book.visible and book.cover.visible and not player.input_enabled,
+		"O livro deve chegar fechado e impedir movimentos antes das cartas.")
+	_expect(await _wait_until(func(): return book.state == TutorialBook.State.OPENING),
+		"O livro deve entrar na animação de abertura.")
+	_expect(book.closing_cover.visible and not book.cover.visible and not book.spread.visible,
+		"A abertura deve girar a capa pela lombada em vez de trocar sua opacidade.")
+	var opening_progress := float(book.closing_cover.get("progress"))
+	await create_timer(0.35).timeout
+	_expect(float(book.closing_cover.get("progress")) < opening_progress,
+		"Abrir deve percorrer o mesmo movimento do fechamento em sentido inverso.")
+	_expect(await _wait_until(func(): return book.state == TutorialBook.State.READING),
+		"O livro deve se abrir no primeiro capítulo.")
+	_expect("Torre" not in book.body_label.text and "Bispo" not in book.body_label.text,
+		"A primeira fase deve ensinar somente um édito e os movimentos.")
+	_expect(book.illustration.texture != null and book.title_label.get_theme_font("font") == TutorialBook.TITLE_FONT,
+		"O livro deve ter gravura própria e usar Engravers nos títulos.")
+	book.turn_page(-1)
+	await _wait_until(func(): return book.state == TutorialBook.State.READING and book.table_visible)
+	_expect(book.table_visible and not book.illustration.visible,
+		"A aba deve abrir a tabela sem fechar o tutorial.")
+	book.turn_page(1)
+	await _wait_until(func(): return book.state == TutorialBook.State.READING and not book.table_visible)
+	await create_timer(0.3).timeout
+	_expect(book.visible and presentation._cards.is_empty() and not player.input_enabled,
+		"O livro deve aguardar o clique antes de apresentar as cartas.")
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.position = Vector2(40, 40)
+	click.pressed = true
+	book._input(click)
+	await process_frame
+	_expect(book.state == TutorialBook.State.CLOSING,
+		"O clique fora do livro também deve solicitar o fechamento.")
+	_expect(await _wait_until(func(): return book.closing_cover.visible and float(book.closing_cover.get("progress")) > 0.55),
+		"A capa da frente deve girar pela lombada durante o fechamento.")
+	_expect(book.visible and not book.spread.visible and presentation._cards.is_empty(),
+		"A animação da capa deve manter as cartas bloqueadas.")
+	_expect(await _wait_until(func(): return book.cover.visible),
+		"O fechamento deve terminar mostrando a capa da frente.")
+	_expect(book.visible and book.cover.visible and not book.spread.visible,
+		"A capa deve reaparecer antes de o livro sumir.")
+	_expect(book.cover_art.texture == TutorialBook.COVER,
+		"A imagem final deve ser a capa aprovada, com o desenho da rainha.")
+	_expect(book.right_stack.modulate.a < 0.001,
+		"O bloco de folhas deve estar totalmente coberto antes de a camada ser ocultada.")
+	_expect(await _wait_until(func(): return presentation._cards.size() == 1 and not presentation._cards[0].disabled),
+		"A carta da fase I deve ficar disponível após o livro.")
+	if presentation._cards.size() == 1:
+		_expect(presentation._cards[0].texture_normal == CARD_BACK, "A carta deve entrar mostrando o verso.")
+		_expect(presentation.card_area.get_node_or_null("ClickHint") == null,
+			"A instrução de clique sob a carta deve ficar no livro.")
+		var card := presentation._cards[0] as TextureButton
+		var rest_position: Vector2 = card.get_meta("rest_position")
+		card.mouse_entered.emit()
+		await create_timer(0.25).timeout
+		_expect(card.scale.x > 1.08 and card.position.y < rest_position.y,
+			"Passar o mouse deve aproximar a carta sem virá-la.")
+		_expect(card.texture_normal == CARD_BACK, "Hover não deve virar a carta.")
+		card.mouse_exited.emit()
+		await create_timer(0.25).timeout
+		_expect(card.scale.is_equal_approx(Vector2.ONE), "A carta deve voltar ao tamanho normal ao sair do hover.")
+		presentation._cards[0].pressed.emit()
+		_expect(await _wait_until(func(): return presentation._cards[0].texture_normal == CARD_FOUR),
+			"O clique deve virar a carta IV para a frente correta.")
+		_expect(presentation._cards[0].material == null,
+			"A frente da carta deve manter o fundo claro e as cores originais.")
+		_expect(await _wait_until(func(): return presentation.card_area.get_node_or_null("CardBurnAura") != null),
+			"A queima deve criar a camada de chamas e fumaça junto à carta.")
+		_expect(presentation.card_area.get_node_or_null("CardEmbers") == null,
+			"A queima não deve reutilizar as partículas circulares antigas.")
+	_expect(await _wait_until(func(): return is_instance_valid(board._tutorial_guide) and board._tutorial_guide.playing),
+		"A queima da carta deve iniciar o caminho estrelado.")
+	_expect(not presentation.visible, "A carta deve desaparecer depois da queima.")
 	_expect(player.get_node_or_null("RemainingMoves") == null,
 		"O jogador não deve mais exibir o numeral de movimentos sobre a cabeça.")
-	_expect(reminder.text == "IV" and reminder.visible,
-		"O édito original deve permanecer visível durante a rodada.")
-	_expect(is_equal_approx(reminder.anchor_left, 0.87) and is_equal_approx(reminder.anchor_top, 0.52),
-		"O par fixo deve ocupar a lateral direita durante a rodada.")
-	_expect(reminder.get_theme_font("font").resource_path.ends_with("jupiter_pro.otf"),
-		"Os numerais romanos fixos devem utilizar Jupiter Pro Regular.")
-	_expect(board._tutorial_markers.size() == 4,
-		"As quatro casas do caminho tutorial devem acender em sequência.")
+	_expect(not player.input_enabled,
+		"O jogador deve esperar o caminho chegar ao refúgio.")
+	var origin := player.current_cell
+	player._try_move(Vector2i.LEFT)
+	_expect(player.current_cell == origin, "Andar durante a orientação deve ser ignorado.")
 	_expect(board.can_player_enter(Vector2i(2, 2)), "A casa central deve estar jogável.")
 	await create_timer(0.8).timeout
-	_expect(board._tutorial_markers[0].reveal > 0.99,
-		"A primeira casa deve permanecer acesa quando a segunda começa.")
-	_expect(board._tutorial_markers[2].reveal == 0.0,
-		"O tutorial deve revelar as casas lentamente, sem acender todas juntas.")
-	await create_timer(2.9).timeout
-	for marker in board._tutorial_markers:
-		_expect(marker.reveal > 0.99, "As casas já apresentadas devem continuar acesas.")
+	_expect(board._tutorial_guide.reveal > 0.0 and board._tutorial_guide.reveal < 0.6,
+		"As estrelas devem se revelar ao longo da curva, sem acender juntas.")
+	_expect(await _wait_until(func(): return player.input_enabled),
+		"O jogador deve ser liberado quando o caminho terminar.")
+	_expect(board._tutorial_guide.reveal > 0.99,
+		"O caminho completo deve continuar visível depois da orientação.")
 	player._try_move(Vector2i.UP)
 	await create_timer(0.9).timeout
-	_expect(reminder.text == "IV" and reminder.visible, "O édito fixo não pode diminuir ao andar.")
+	_expect(not presentation.visible, "O numeral não pode reaparecer depois de andar.")
 	manager.restart_phase()
 	await create_timer(0.15).timeout
-	_expect(hud.announcement_label.text == "IV", "INÍCIO não deve se repetir ao reiniciar a primeira fase.")
+	_expect(not book.visible, "O guia não deve se repetir ao reiniciar a fase.")
+	_expect(await _wait_until(func(): return presentation._cards.size() == 1 and not presentation._cards[0].disabled),
+		"O reinício deve apresentar novamente a carta fechada.")
+	if presentation._cards.size() == 1:
+		presentation._cards[0].pressed.emit()
+		await _wait_until(func(): return player.input_enabled)
 	main.queue_free()
 	await process_frame
 	await process_frame
@@ -117,3 +184,11 @@ func _test_phase_one_presentation() -> void:
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		failures.append(message)
+
+
+func _wait_until(predicate: Callable, limit := 2400) -> bool:
+	for _frame in range(limit):
+		if predicate.call():
+			return true
+		await process_frame
+	return false

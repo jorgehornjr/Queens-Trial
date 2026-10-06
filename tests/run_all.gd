@@ -56,7 +56,7 @@ func _test_campaign_catalog() -> void:
 	var catalog_errors := Catalog.validate_campaign(campaign)
 	_expect(catalog_errors.is_empty(), "O catálogo deve reproduzir a progressão consolidada.")
 	_expect(Catalog.find_phase(campaign, 1).get("edict_count") == 1, "A fase 1 deve usar um único édito.")
-	_expect(Catalog.find_phase(campaign, 6).get("seconds_per_edict") == 15, "A fase 6 deve introduzir 15 segundos por édito.")
+	_expect(Catalog.find_phase(campaign, 6).get("seconds_per_edict") == 5, "A fase 6 deve permitir cinco segundos para ler a balança.")
 	_expect(Catalog.find_phase(campaign, 7).get("configuration") == "procedural", "A fase 7 deve ser procedural.")
 	_expect(Catalog.find_phase(campaign, 9).get("configuration") == "procedural", "A fase 9 deve ser procedural.")
 func _test_fase1_dados_completos() -> void:
@@ -178,9 +178,9 @@ func _test_player_visual() -> void:
 	if player == null:
 		return
 	_expect(player.get_node_or_null("Placeholder") == null, "O marcador provisório deve ter sido removido.")
-	_expect(player.get_node_or_null("Model") is Node3D, "O jogador deve instanciar o Battlemage Wizard.")
-	_expect(not player.find_children("*", "MeshInstance3D", true, false).is_empty(), "O Wizard deve carregar sua malha 3D.")
-	_expect(is_equal_approx(player.move_duration, 0.62), "O Wizard deve concluir automaticamente cada passo na grade.")
+	_expect(player.get_node_or_null("Model") is Node3D and player.get_node("Model").has_method("begin_cinematic_arrival"), "O jogador deve instanciar o sacerdote como personagem principal.")
+	_expect(not player.find_children("*", "MeshInstance3D", true, false).is_empty(), "O sacerdote deve carregar sua malha 3D.")
+	_expect(is_equal_approx(player.move_duration, 0.62), "O jogador deve concluir automaticamente cada passo na grade.")
 	_expect(not ResourceLoader.exists("res://scenes/player/traveler_player.tscn"), "O viajante antigo deve estar fora do projeto ativo.")
 	player.free()
 
@@ -216,13 +216,14 @@ func _test_textured_piece_halos() -> void:
 
 func _test_board_camera() -> void:
 	var main := (load("res://scenes/main/main.tscn") as PackedScene).instantiate()
+	main.set("opening_cutscene_enabled", false)
 	root.add_child(main)
 	var original_size := root.size
 	root.size = Vector2i(1920, 1080)
 	await process_frame
 	var rig := main.get_node("World/BoardCamera") as CameraRig
-	var dune_font := load("res://assets/fonts/dune_rise.otf") as FontFile
-	_expect(dune_font != null, "A identidade tipográfica do jogo deve incorporar a fonte Dune Rise.")
+	var story_font := load("res://assets/fonts/CormorantSC-SemiBold.ttf") as FontFile
+	_expect(story_font != null, "A identidade tipográfica do jogo deve incorporar a fonte de livro antigo.")
 	var orb := main.get_node("World/Seraph/Model/Seraph/Skeleton3D/OrbAttachment/AstraiaOrb") as Node3D
 	var orb_attachment := orb.get_parent() as Node3D
 	var approved_orb_transform := Transform3D(orb.transform.basis, Vector3(0.0, 0.02, 0.0))
@@ -238,8 +239,8 @@ func _test_board_camera() -> void:
 	_expect(main.get_node_or_null("World/Board/Markers/SafeSpot") is MeshInstance3D,
 		"O safe spot deve permanecer visível diretamente no tabuleiro.")
 	var music := main.get_node("Music") as AudioStreamPlayer
-	_expect(music.stream is AudioStreamOggVorbis and music.stream.loop and music.autoplay,
-		"A trilha deve iniciar automaticamente e repetir em OGG.")
+	_expect(music.stream is AudioStreamOggVorbis and music.stream.loop and not music.autoplay,
+		"A trilha OGG deve repetir e ser iniciada pelo controlador após a abertura.")
 	_expect(music.playing and music.stream.get_length() > 60.0, "A faixa completa deve estar em reprodução.")
 	var moon := main.get_node("World/CelestialSpace/SolarSystem/Moon") as SolarBody
 	_expect(moon.position.is_equal_approx(Vector3(-110, -170, -1200)) and is_equal_approx(moon.body_radius, 300.0),
