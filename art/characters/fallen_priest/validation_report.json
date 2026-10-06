@@ -1,0 +1,13 @@
+{
+	"failures": [],
+	"passed": true,
+	"scenarios": [
+		"rig_and_weights",
+		"walk",
+		"pause",
+		"left_slide_and_fall",
+		"right_slide_and_fall",
+		"restart",
+		"three_round_recovery"
+	]
+}

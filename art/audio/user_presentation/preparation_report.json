@@ -1,0 +1,69 @@
+{
+  "sources": {
+    "wind": {
+      "file": "wind.mp3",
+      "sha256": "87b92c6a364271c084c5c9cd794be165d1407baa4e781f5a6dcaa07ae23698d1"
+    },
+    "candle": {
+      "file": "candle.mp3",
+      "sha256": "6992c6d3d0eab2c5ea23aa6c3afe1d5704c239e134ec34df1d9db5972931e02b"
+    }
+  },
+  "cues": {
+    "assets\\audio\\sfx\\balance\\weigh_left.wav": {
+      "source": "wind",
+      "start": 0.8,
+      "duration": 0.95,
+      "gain": 3.0,
+      "peak": 0.11397108435630798,
+      "rms": 0.03035549579779921,
+      "fade_in": 0.1,
+      "fade_out": 0.25,
+      "pan": -0.12
+    },
+    "assets\\audio\\sfx\\balance\\slide_left.wav": {
+      "source": "wind",
+      "start": 2.0,
+      "duration": 2.3,
+      "gain": 3.0,
+      "peak": 0.213810995221138,
+      "rms": 0.04902668011575766,
+      "fade_in": 0.14,
+      "fade_out": 0.3,
+      "pan": -0.15
+    },
+    "assets\\audio\\sfx\\balance\\weigh_right.wav": {
+      "source": "wind",
+      "start": 0.8,
+      "duration": 0.95,
+      "gain": 3.0,
+      "peak": 0.11397108435630798,
+      "rms": 0.03035549579779921,
+      "fade_in": 0.1,
+      "fade_out": 0.25,
+      "pan": 0.12
+    },
+    "assets\\audio\\sfx\\balance\\slide_right.wav": {
+      "source": "wind",
+      "start": 2.0,
+      "duration": 2.3,
+      "gain": 3.0,
+      "peak": 0.213810995221138,
+      "rms": 0.04902668011575766,
+      "fade_in": 0.14,
+      "fade_out": 0.3,
+      "pan": 0.15
+    },
+    "assets\\audio\\sfx\\cards\\paper_burn.wav": {
+      "source": "candle",
+      "start": 1.0,
+      "duration": 1.65,
+      "gain": 3.3274866082281265,
+      "peak": 0.7,
+      "rms": 0.024916446346646373,
+      "fade_in": 0.025,
+      "fade_out": 0.16,
+      "pan": 0.0
+    }
+  }
+}

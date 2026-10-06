@@ -1,0 +1,26 @@
+{
+  "vertices": 77619,
+  "triangles": 155374,
+  "bones": 139,
+  "parts": {
+    "Body": 106348,
+    "Cape": 17716,
+    "Head": 18008,
+    "Tabard": 13302
+  },
+  "clips": [
+    "breathing_idle",
+    "walk",
+    "intro_arrival",
+    "standing_death",
+    "left_slide",
+    "left_fall",
+    "left_recover",
+    "right_slide",
+    "right_fall",
+    "right_recover"
+  ],
+  "cape_particles": 117,
+  "max_weight_error": 1.7881393432617188e-07,
+  "max_influences": 4
+}

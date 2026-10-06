@@ -9,11 +9,9 @@ uniform float radiance = 2.2;
 uniform float motion_speed = 0.035;
 uniform float time_offset = 0.0;
 varying vec3 world_vertex;
-varying flat vec3 volume_center;
 
 void vertex() {
 	world_vertex = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	volume_center = MODEL_MATRIX[3].xyz;
 }
 
 vec2 intersect_box(vec3 origin, vec3 direction) {
@@ -26,14 +24,17 @@ vec2 intersect_box(vec3 origin, vec3 direction) {
 
 void fragment() {
 	// Integração frontal de um campo contínuo de densidade.
-	vec3 origin = CAMERA_POSITION_WORLD - volume_center;
-	vec3 direction = normalize(world_vertex - CAMERA_POSITION_WORLD);
+	// Intersect the actual volume orientation, including a gently rolling cloud.
+	mat4 world_to_volume = inverse(MODEL_MATRIX);
+	vec3 world_direction = normalize(world_vertex - CAMERA_POSITION_WORLD);
+	vec3 origin = (world_to_volume * vec4(CAMERA_POSITION_WORLD, 1.0)).xyz;
+	vec3 direction = normalize((world_to_volume * vec4(world_direction, 0.0)).xyz);
 	vec2 hit = intersect_box(origin, direction);
 	float start = max(hit.x, 0.0);
 	float end = hit.y;
 	float depth = textureLod(scene_depth, SCREEN_UV, 0.0).r;
 	vec4 opaque_world = INV_VIEW_MATRIX * INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, depth, 1.0);
-	float opaque_distance = dot(opaque_world.xyz / opaque_world.w - CAMERA_POSITION_WORLD, direction);
+	float opaque_distance = dot(opaque_world.xyz / opaque_world.w - CAMERA_POSITION_WORLD, world_direction);
 	end = min(end, opaque_distance);
 	if (end <= start) { discard; }
 	float step_length = (end - start) / 48.0;

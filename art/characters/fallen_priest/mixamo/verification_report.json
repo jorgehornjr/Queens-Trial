@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-05",
+  "tests": {
+    "core": {
+      "passed": true,
+      "log": ".godot/qa/mixamo_core_tests.log"
+    },
+    "mixamo_and_turns": {
+      "passed": true,
+      "log": ".godot/qa/mixamo_integration_tests.log"
+    },
+    "opening": {
+      "passed": true,
+      "log": ".godot/qa/mixamo_opening_tests.log"
+    },
+    "ground_death": {
+      "passed": true,
+      "log": ".godot/qa/mixamo_death_tests.log"
+    },
+    "phase_six_cape": {
+      "passed": true,
+      "log": ".godot/qa/mixamo_phase_six_tests.log"
+    },
+    "phases_one_to_five": {
+      "passed": true,
+      "log": ".godot/qa/mixamo_playthrough_tests.log"
+    }
+  },
+  "rig_data_preserved": true,
+  "rendered_checks": [
+    "six_clips_start_middle_end",
+    "head_attached_sigil_closeup",
+    "opening_5.25_10.5_17.5_seconds"
+  ],
+  "teleport_mod": "Deferred by user; mod depends on FFXIV game textures and audio."
+}

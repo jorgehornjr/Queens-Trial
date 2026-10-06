@@ -1,0 +1,161 @@
+{
+  "unweighted_vertices": 0,
+  "max_influences": 4,
+  "max_weight_error": 1.8775463104248047e-06,
+  "shared_seam_vertices": 1943,
+  "wing_master_motion": 0.1449529780103053,
+  "ik_target_errors": {
+    "Forearm_L": 1.3954744529230618e-05,
+    "Shin_L": 1.2574496537321675e-06
+  },
+  "pose_checks": {
+    "rig_pose_test:61": {
+      "seam_error": 0,
+      "edge_stretch": {
+        "BodyMesh": {
+          "p99_edge_ratio": 1.3032259941101074,
+          "max_edge_ratio": 45.46924591064453
+        },
+        "HaloMesh": {
+          "p99_edge_ratio": 1.0000033378601074,
+          "max_edge_ratio": 1.0000100135803223
+        },
+        "HeadMesh": {
+          "p99_edge_ratio": 1.0786877870559692,
+          "max_edge_ratio": 1.9578205347061157
+        },
+        "SwordMesh": {
+          "p99_edge_ratio": 1.0000196695327759,
+          "max_edge_ratio": 1.0000807046890259
+        },
+        "Tabard_BackMesh": {
+          "p99_edge_ratio": 2.1481575965881348,
+          "max_edge_ratio": 4.26217794418335
+        },
+        "Tabard_FrontMesh": {
+          "p99_edge_ratio": 1.071047306060791,
+          "max_edge_ratio": 1.3158231973648071
+        },
+        "Wing_LMesh": {
+          "p99_edge_ratio": 1.0298923254013062,
+          "max_edge_ratio": 1.721942663192749
+        },
+        "Wing_RMesh": {
+          "p99_edge_ratio": 1.021385908126831,
+          "max_edge_ratio": 2.331059455871582
+        }
+      }
+    },
+    "wing_flex_test:31": {
+      "seam_error": 0,
+      "edge_stretch": {
+        "BodyMesh": {
+          "p99_edge_ratio": 1.0109856128692627,
+          "max_edge_ratio": 9.43257999420166
+        },
+        "HaloMesh": {
+          "p99_edge_ratio": 1.000046968460083,
+          "max_edge_ratio": 1.0001322031021118
+        },
+        "HeadMesh": {
+          "p99_edge_ratio": 1.0078253746032715,
+          "max_edge_ratio": 1.362280011177063
+        },
+        "SwordMesh": {
+          "p99_edge_ratio": 1.0000206232070923,
+          "max_edge_ratio": 1.000072956085205
+        },
+        "Tabard_BackMesh": {
+          "p99_edge_ratio": 1.1117693185806274,
+          "max_edge_ratio": 1.4553563594818115
+        },
+        "Tabard_FrontMesh": {
+          "p99_edge_ratio": 1.0213477611541748,
+          "max_edge_ratio": 1.1450294256210327
+        },
+        "Wing_LMesh": {
+          "p99_edge_ratio": 1.3257285356521606,
+          "max_edge_ratio": 5.652453899383545
+        },
+        "Wing_RMesh": {
+          "p99_edge_ratio": 1.1738802194595337,
+          "max_edge_ratio": 5.356344699859619
+        }
+      }
+    },
+    "wing_flex_test:91": {
+      "seam_error": 0,
+      "edge_stretch": {
+        "BodyMesh": {
+          "p99_edge_ratio": 1.010675072669983,
+          "max_edge_ratio": 9.112942695617676
+        },
+        "HaloMesh": {
+          "p99_edge_ratio": 1.0000492334365845,
+          "max_edge_ratio": 1.0001647472381592
+        },
+        "HeadMesh": {
+          "p99_edge_ratio": 1.0063077211380005,
+          "max_edge_ratio": 1.2997204065322876
+        },
+        "SwordMesh": {
+          "p99_edge_ratio": 1.0000172853469849,
+          "max_edge_ratio": 1.0000640153884888
+        },
+        "Tabard_BackMesh": {
+          "p99_edge_ratio": 1.0297532081604004,
+          "max_edge_ratio": 1.2384858131408691
+        },
+        "Tabard_FrontMesh": {
+          "p99_edge_ratio": 1.0322531461715698,
+          "max_edge_ratio": 1.1294423341751099
+        },
+        "Wing_LMesh": {
+          "p99_edge_ratio": 1.371300458908081,
+          "max_edge_ratio": 6.743290901184082
+        },
+        "Wing_RMesh": {
+          "p99_edge_ratio": 1.3471999168395996,
+          "max_edge_ratio": 7.169963836669922
+        }
+      }
+    },
+    "intro_presence:121": {
+      "seam_error": 0,
+      "edge_stretch": {
+        "BodyMesh": {
+          "p99_edge_ratio": 1.0020695924758911,
+          "max_edge_ratio": 6.159572124481201
+        },
+        "HaloMesh": {
+          "p99_edge_ratio": 1.0,
+          "max_edge_ratio": 1.0
+        },
+        "HeadMesh": {
+          "p99_edge_ratio": 1.0002728700637817,
+          "max_edge_ratio": 1.1599363088607788
+        },
+        "SwordMesh": {
+          "p99_edge_ratio": 1.0000156164169312,
+          "max_edge_ratio": 1.000059962272644
+        },
+        "Tabard_BackMesh": {
+          "p99_edge_ratio": 1.0983558893203735,
+          "max_edge_ratio": 1.426498293876648
+        },
+        "Tabard_FrontMesh": {
+          "p99_edge_ratio": 1.0220513343811035,
+          "max_edge_ratio": 1.149971604347229
+        },
+        "Wing_LMesh": {
+          "p99_edge_ratio": 1.1657259464263916,
+          "max_edge_ratio": 3.3270063400268555
+        },
+        "Wing_RMesh": {
+          "p99_edge_ratio": 1.0862882137298584,
+          "max_edge_ratio": 2.846069812774658
+        }
+      }
+    }
+  }
+}

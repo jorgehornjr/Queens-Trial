@@ -1,0 +1,41 @@
+{
+  "title": "O Chamado da Rainha",
+  "duration": 43,
+  "cues": [
+    {
+      "time": 0,
+      "scene": "serene world establishing shot",
+      "music": "quiet sustained D-minor strings"
+    },
+    {
+      "time": 5.2,
+      "scene": "second empty-board shot",
+      "music": "add-nine harmony and natural orchestral join"
+    },
+    {
+      "time": 11.8,
+      "scene": "native slow walk",
+      "music": "approved viola and cello theme"
+    },
+    {
+      "time": 26.8,
+      "scene": "queen reveal",
+      "music": "approved crescendo"
+    },
+    {
+      "time": 30.1,
+      "scene": "queen close-up",
+      "music": "approved epic brass, choir and timpani"
+    },
+    {
+      "time": 32.9,
+      "scene": "queen zoom out",
+      "music": "approved largest statement"
+    },
+    {
+      "time": 41.4,
+      "scene": "return to board",
+      "music": "equal-power crossfade to gameplay"
+    }
+  ]
+}

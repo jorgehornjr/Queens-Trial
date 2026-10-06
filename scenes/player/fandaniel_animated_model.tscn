@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/models/characters/fandaniel/fandaniel_mixamo.glb" id="1_rig"]
+[ext_resource type="Script" path="res://scripts/player/fandaniel_animated_model.gd" id="2_model"]
+
+[node name="FandanielAnimatedModel" type="Node3D"]
+script = ExtResource("2_model")
+
+[node name="Rig" parent="." instance=ExtResource("1_rig")]

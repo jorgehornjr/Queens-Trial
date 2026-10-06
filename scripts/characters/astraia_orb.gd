@@ -7,10 +7,17 @@ const METALLIC = preload("res://assets/models/props/astraia/textures/Instru_Low_
 const NORMAL = preload("res://assets/models/props/astraia/textures/Instru_Low_01_Instruments_Normal.jpeg")
 const ROUGHNESS = preload("res://assets/models/props/astraia/textures/Instru_Low_01_Instruments_Roughness.jpeg")
 const OPACITY = preload("res://assets/models/props/astraia/textures/Instruments_Opacity.jpg")
+var ritual_reveal := 1.0:
+	set(value):
+		ritual_reveal = value
+		if _ritual_material != null:
+			_ritual_material.set_shader_parameter("ritual_reveal", value)
+var _ritual_material: ShaderMaterial
 
 
 func _ready() -> void:
 	var material := ShaderMaterial.new()
+	_ritual_material = material
 	material.shader = INSTRUMENT_SHADER
 	material.set_shader_parameter("base_color", BASE_COLOR)
 	material.set_shader_parameter("metallic_map", METALLIC)

@@ -1,0 +1,58 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/main/opening_cutscene.gd" id="1_opening"]
+[ext_resource type="Script" path="res://scripts/main/ascian_arrival.gd" id="2_teleport"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/ascian_arrival.wav" id="3_teleport_sound"]
+
+[node name="OpeningCutscene" type="Node3D"]
+script = ExtResource("1_opening")
+
+[node name="CinematicCamera" type="Camera3D" parent="."]
+current = false
+near = 0.12
+far = 120000.0
+
+[node name="PlayerKeyLight" type="OmniLight3D" parent="."]
+visible = false
+light_color = Color(1, 0.78, 0.54, 1)
+light_energy = 1.5
+omni_range = 9.0
+shadow_enabled = false
+
+[node name="TeleportArrival" type="Node3D" parent="."]
+script = ExtResource("2_teleport")
+
+[node name="TeleportSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_teleport_sound")
+volume_db = -7.0
+
+[node name="Overlay" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="Fade" type="ColorRect" parent="Overlay"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="TopBar" type="ColorRect" parent="Overlay"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 72.0
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="BottomBar" type="ColorRect" parent="Overlay"]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -72.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0, 0, 0, 1)

@@ -1,0 +1,26 @@
+{
+  "vertices_source": 981894,
+  "triangles_source": 1963878,
+  "vertices_working": 157065,
+  "triangles_working": 314220,
+  "deform_bones": 81,
+  "control_bones": 10,
+  "max_influences": 4,
+  "max_weight_error": 1.7881393432617188e-07,
+  "parts": {
+    "BodyMesh": 141125,
+    "HaloMesh": 4164,
+    "HeadMesh": 9213,
+    "SwordMesh": 26673,
+    "Tabard_BackMesh": 2685,
+    "Tabard_FrontMesh": 3098,
+    "Wing_LMesh": 64340,
+    "Wing_RMesh": 62922
+  },
+  "actions": [
+    "breathing_idle",
+    "intro_presence",
+    "wing_flex_test",
+    "rig_pose_test"
+  ]
+}

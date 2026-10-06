@@ -29,6 +29,16 @@ var _active_zoom_ratio := 1.0
 var _active_vertical_focus := 0.0
 var _mode_transition: Tween
 var gameplay_mode := false
+var cinematic_mode := false
+var horizontal_orbit_enabled := true
+
+
+func set_horizontal_orbit_enabled(enabled: bool) -> void:
+	horizontal_orbit_enabled = enabled
+	if not enabled:
+		_end_orbit()
+		yaw_degrees = 0.0
+		_yaw = 0.0
 
 
 func _ready() -> void:
@@ -50,7 +60,12 @@ func _ready() -> void:
 
 func enter_gameplay(instant := false) -> void:
 	if gameplay_mode:
+		if cinematic_mode:
+			cinematic_mode = false
+			if instant:
+				update_framing(0.0, true)
 		return
+	cinematic_mode = false
 	gameplay_mode = true
 	# Gameplay always starts square to the board, even if presentation was orbited.
 	yaw_degrees = 0.0
@@ -74,8 +89,14 @@ func enter_gameplay(instant := false) -> void:
 	_mode_transition.chain().tween_callback(func(): _mode_transition = null)
 
 
+func begin_cinematic() -> void:
+	_end_orbit()
+	cinematic_mode = true
+
+
 func _process(delta: float) -> void:
-	update_framing(delta)
+	if not cinematic_mode:
+		update_framing(delta)
 
 
 func update_framing(delta: float, snap := false) -> void:
@@ -124,8 +145,12 @@ func _collect_framing_points(node: Node) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if cinematic_mode:
+		return
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			if not horizontal_orbit_enabled:
+				return
 			_mouse_before_drag = get_viewport().get_mouse_position()
 			_previous_mouse_mode = Input.mouse_mode
 			_dragging = true

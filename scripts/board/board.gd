@@ -5,7 +5,10 @@ signal board_built
 
 const Constants = preload("res://scripts/core/game_constants.gd")
 const BoardStateModel = preload("res://scripts/board/board_state.gd")
-const SquareAura = preload("res://scripts/gameplay/square_aura.gd")
+const FloorStarShader = preload("res://shaders/sanctuary_symbol.gdshader")
+const SANCTUARY_SYMBOL = preload("res://assets/textures/guidance/sanctuary_reference.png")
+const GLOW_PERIOD := 2.8
+const StarredGuideModel = preload("res://scripts/gameplay/starred_guide.gd")
 
 @export_category("Geometry")
 @export_range(1.0, 12.0, 0.1) var tile_size := 7.6
@@ -25,8 +28,9 @@ var _frame_outer := Vector2(24.0, 24.0)
 var state
 var _safe_spot_marker: Node3D
 var _safe_spot_light: OmniLight3D
-var _tutorial_markers: Array[Node3D] = []
-var _tutorial_tweens: Array[Tween] = []
+var _safe_spot_ink: ShaderMaterial
+var _tutorial_guide: StarredGuide
+var _tutorial_generation := 0
 var _presentation_time := 0.0
 
 
@@ -45,15 +49,20 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_presentation_time += delta
+	var glow := 0.5 + 0.5 * cos(_presentation_time * TAU / GLOW_PERIOD)
+	if _safe_spot_ink != null:
+		_safe_spot_ink.set_shader_parameter("energy", lerpf(0.55, 3.3, glow))
+		_safe_spot_ink.set_shader_parameter("glow_strength", lerpf(0.20, 1.0, glow))
 	if is_instance_valid(_safe_spot_light):
-		_safe_spot_light.light_energy = 1.15 + sin(_presentation_time * 2.25) * 0.32
+		_safe_spot_light.light_energy = lerpf(0.05, 0.95, glow)
 
 
 func build_visuals() -> void:
+	clear_tutorial_path()
 	_clear_children(markers_root)
 	_safe_spot_marker = null
 	_safe_spot_light = null
-	_tutorial_markers.clear()
+	_safe_spot_ink = null
 	board_built.emit()
 
 
@@ -65,70 +74,77 @@ func set_safe_spot_cell(cell: Vector2i) -> bool:
 	return true
 
 
+func set_safe_spot_visible(enabled: bool) -> void:
+	if is_instance_valid(_safe_spot_marker):
+		_safe_spot_marker.visible = enabled
+	if is_instance_valid(_safe_spot_light):
+		_safe_spot_light.visible = enabled
+
+
 func show_safe_spot(cell: Vector2i) -> void:
 	if is_instance_valid(_safe_spot_marker):
 		_safe_spot_marker.queue_free()
-	# Keep the semantic marker as a MeshInstance3D for scene/test discoverability;
-	# the actual layered VFX lives in its children.
 	var marker := MeshInstance3D.new()
 	marker.name = "SafeSpot"
 	marker.position = grid_to_world(cell) + Vector3(0.0, 0.16, 0.0)
+	var floor := PlaneMesh.new()
+	floor.size = Vector2(1.0, float(SANCTUARY_SYMBOL.get_height()) / SANCTUARY_SYMBOL.get_width()) * tile_size * 0.98
+	marker.mesh = floor
+	marker.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var ink := ShaderMaterial.new()
+	ink.shader = FloorStarShader
+	ink.set_shader_parameter("glyph", SANCTUARY_SYMBOL)
+	_safe_spot_ink = ink
+	ink.set_shader_parameter("reveal", 0.0)
+	marker.material_override = ink
 	markers_root.add_child(marker)
-	var seal := SquareAura.new()
-	seal.name = "SanctuaryAura"
-	seal.reveal = 0.0
-	seal.configure(tile_size * 1.04, Color(0.12, 1.0, 0.40, 0.92), 2.25, 0.0, true)
-	marker.add_child(seal)
-	var appear := create_tween()
-	appear.set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
-	appear.tween_property(seal, "reveal", 1.0, 0.85)
-
+	var appear := marker.create_tween()
+	appear.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	appear.tween_method(func(value: float): ink.set_shader_parameter("reveal", value), 0.0, 1.0, 0.65)
 	_safe_spot_light = OmniLight3D.new()
-	_safe_spot_light.name = "CelestialGlow"
-	_safe_spot_light.position.y = 0.55
-	_safe_spot_light.light_color = Color(0.10, 1.0, 0.32)
-	_safe_spot_light.omni_range = tile_size * 0.82
+	_safe_spot_light.name = "StarFloorLight"
+	_safe_spot_light.position.y = 0.26
+	_safe_spot_light.light_color = Color(1.0, 0.76, 0.35)
+	_safe_spot_light.light_energy = 0.72
+	_safe_spot_light.light_volumetric_fog_energy = 0.0
+	_safe_spot_light.omni_range = tile_size * 0.65
 	_safe_spot_light.shadow_enabled = false
 	marker.add_child(_safe_spot_light)
 	_safe_spot_marker = marker
 
 
-func show_tutorial_path(cells: Array) -> void:
+func show_tutorial_path(cells: Array, origin_cell := Vector2i(-1, -1)) -> bool:
 	clear_tutorial_path()
-	var delay := 0.0
+	var run_id := _tutorial_generation
+	var waypoints := PackedVector3Array()
+	if state != null and state.is_inside(origin_cell):
+		waypoints.append(grid_to_world(origin_cell))
 	for value in cells:
-		if not value is Array or value.size() != 2:
-			continue
+		if not value is Array or value.size() != 2: continue
 		var cell := Vector2i(int(value[0]), int(value[1]))
-		if state == null or not state.is_inside(cell):
-			continue
-		var marker := SquareAura.new()
-		marker.name = "Tutorial_%d_%d" % [cell.x, cell.y]
-		marker.position = grid_to_world(cell) + Vector3(0.0, 0.17, 0.0)
-		marker.reveal = 0.0
-		markers_root.add_child(marker)
-		var path_index := _tutorial_markers.size()
-		var color := Color(0.10, 0.48, 1.0, 0.90)
-		if cell == safe_spot:
-			color = Color(0.12, 1.0, 0.40, 0.75)
-		marker.configure(tile_size * 1.04, color, 1.55, float(path_index) * 0.72, cell != safe_spot)
-		_tutorial_markers.append(marker)
-		var tween := create_tween()
-		_tutorial_tweens.append(tween)
-		tween.tween_interval(delay)
-		tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		tween.tween_property(marker, "reveal", 1.0, 0.68)
-		delay += 0.95
+		if state == null or not state.is_inside(cell): continue
+		var point := grid_to_world(cell)
+		if waypoints.is_empty() or not point.is_equal_approx(waypoints[-1]):
+			waypoints.append(point)
+	if waypoints.size() < 2: return true
+	var guide := StarredGuideModel.new() as StarredGuide
+	guide.name = "StarredTutorialPath"
+	guide.position.y = 0.18
+	markers_root.add_child(guide)
+	guide.configure(waypoints, tile_size)
+	_tutorial_guide = guide
+	guide.play()
+	var completed: bool = await guide.finished
+	return completed and run_id == _tutorial_generation
 
 
 func clear_tutorial_path() -> void:
-	for tween in _tutorial_tweens:
-		tween.kill()
-	_tutorial_tweens.clear()
-	for marker in _tutorial_markers:
-		if is_instance_valid(marker):
-			marker.queue_free()
-	_tutorial_markers.clear()
+	_tutorial_generation += 1
+	if is_instance_valid(_tutorial_guide):
+		_tutorial_guide.cancel()
+		_tutorial_guide.hide()
+		_tutorial_guide.queue_free()
+	_tutorial_guide = null
 
 
 func grid_to_world(cell: Vector2i) -> Vector3:

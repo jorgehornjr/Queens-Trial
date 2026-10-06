@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-05",
+  "test_suites": {
+    "fandaniel": {
+      "passed": true,
+      "log": "fandaniel_tests.log"
+    },
+    "opening": {
+      "passed": true,
+      "log": "opening_tests.log"
+    },
+    "playthrough": {
+      "passed": true,
+      "log": "playthrough_tests.log"
+    },
+    "balance": {
+      "passed": true,
+      "log": "balance_tests.log"
+    },
+    "core": {
+      "passed": true,
+      "log": "core_tests.log"
+    }
+  },
+  "model_skin": {
+    "checked_exported_vertices": 5341,
+    "maximum_position_or_uv_difference": 1.341104507446289e-07,
+    "maximum_weight_difference": 5.761782329027909e-08,
+    "original_skeleton_bones": 106,
+    "passed": true
+  },
+  "preview": "docs/previews/fandaniel_ascian_arrival.mp4",
+  "original_audio": {
+    "preserved_decoded_samples": true,
+    "sample_rate": 44100,
+    "channels": 1,
+    "duration": 5.958820861678005,
+    "sha256": "867f0bbfefb677e44d0b8be1ca460528228452491b87aae64e510e89a949213c"
+  },
+  "preserved_priest_regressions": {
+    "preserved_priest_tests.log": true,
+    "preserved_priest_death_tests.log": true,
+    "preserved_priest_phase_six_tests.log": true
+  }
+}

@@ -39,10 +39,24 @@ static func validate_campaign(campaign: Dictionary) -> PackedStringArray:
 			errors.append("Fase %d ausente." % phase_number)
 			continue
 
-		var should_be_timed := phase_number >= 6
+		var should_be_timed := phase_number >= 7
 		var is_timed := String(phase.get("resolution", "")) == "timer"
 		if should_be_timed != is_timed:
 			errors.append("Modo de resolução incorreto na fase %d." % phase_number)
+		if phase_number == 6:
+			if String(phase.get("resolution", "")) != "balance" or float(phase.get("seconds_per_edict", 0)) != 5.0:
+				errors.append("A fase 6 deve usar a balança com cinco segundos de decisão.")
+			var rounds: Array = phase.get("balance_rounds", [])
+			if rounds.is_empty():
+				errors.append("A balança precisa de pelo menos uma rodada.")
+			for pair in rounds:
+				if not pair is Array or pair.size() != 2:
+					errors.append("Cada rodada da balança precisa de duas cartas.")
+					continue
+				if pair[0] == pair[1] or float(pair[0]) != int(pair[0]) or float(pair[1]) != int(pair[1]) or int(pair[0]) not in range(1, 5) or int(pair[1]) not in range(1, 5):
+					errors.append("As cartas da balança devem ter pesos diferentes entre 1 e 4.")
+			if float(phase.get("tilt_degrees", 0.0)) <= 0.0 or float(phase.get("tilt_degrees", 0.0)) > 30.0 or not is_equal_approx(float(phase.get("slide_tiles", 0.0)), 3.0):
+				errors.append("A balança exige inclinação parcial e deslizamento de três casas.")
 
 		var should_be_procedural := phase_number == 7 or phase_number == 9
 		var is_procedural := String(phase.get("configuration", "")) == "procedural"

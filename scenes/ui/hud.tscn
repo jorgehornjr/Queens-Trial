@@ -1,8 +1,9 @@
 [gd_scene format=3 uid="uid://flj1ppppij5h"]
 
 [ext_resource type="Script" uid="uid://c57wflqttbgee" path="res://scripts/ui/hud.gd" id="1_hud"]
-[ext_resource type="FontFile" uid="uid://cvywdipei2yil" path="res://assets/fonts/dune_rise.otf" id="2_dune"]
+[ext_resource type="FontFile" path="res://assets/fonts/CormorantSC-SemiBold.ttf" id="2_story"]
 [ext_resource type="FontFile" uid="uid://dimlq76mmxxgd" path="res://assets/fonts/jupiter_pro.otf" id="3_jupiter"]
+[ext_resource type="PackedScene" path="res://scenes/ui/card_presentation.tscn" id="4_cards"]
 
 [sub_resource type="StyleBoxFlat" id="Style_phase"]
 content_margin_left = 22.0
@@ -47,43 +48,12 @@ theme_override_styles/panel = SubResource("Style_phase")
 [node name="PhaseLabel" type="Label" parent="PhasePanel" unique_id=1385599177]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_fonts/font = ExtResource("2_dune")
+theme_override_fonts/font = ExtResource("2_story")
 theme_override_font_sizes/font_size = 25
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="TutorialHint" type="Label" parent="." unique_id=125307899]
-visible = false
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 220.0
-offset_top = -42.0
-offset_right = -220.0
-offset_bottom = -12.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 22
-text = "Siga as casas iluminadas • WASD para mover"
-horizontal_alignment = 1
-
-[node name="StartPrompt" type="Label" parent="." unique_id=1482818226]
-anchors_preset = -1
-anchor_left = 0.035
-anchor_top = 0.45
-anchor_right = 0.335
-anchor_bottom = 0.57
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.96, 0.91, 0.82, 1)
-theme_override_constants/outline_size = 0
-theme_override_fonts/font = ExtResource("3_jupiter")
-theme_override_font_sizes/font_size = 28
-text = "Pressione Enter para iniciar"
-horizontal_alignment = 1
-vertical_alignment = 1
+[node name="CardPresentation" parent="." instance=ExtResource("4_cards")]
 
 [node name="Announcement" type="Control" parent="." unique_id=267424525]
 layout_mode = 3
@@ -123,7 +93,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_constants/outline_size = 0
-theme_override_fonts/font = ExtResource("2_dune")
+theme_override_fonts/font = ExtResource("2_story")
 theme_override_font_sizes/font_size = 112
 text = "IV"
 horizontal_alignment = 1
@@ -150,23 +120,3 @@ theme_override_font_sizes/font_size = 24
 text = "Resultado"
 vertical_alignment = 1
 autowrap_mode = 2
-
-[node name="RoundEdicts" type="Label" parent="." unique_id=1888609571]
-visible = false
-anchors_preset = -1
-anchor_left = 0.87
-anchor_top = 0.52
-anchor_right = 0.87
-anchor_bottom = 0.52
-offset_left = -180.0
-offset_top = -46.0
-offset_right = 180.0
-offset_bottom = 46.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_constants/outline_size = 0
-theme_override_fonts/font = ExtResource("2_dune")
-theme_override_font_sizes/font_size = 62
-horizontal_alignment = 1
-vertical_alignment = 1

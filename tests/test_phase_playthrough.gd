@@ -2,15 +2,16 @@ extends SceneTree
 
 const EditoMachine = preload("res://scripts/gameplay/edito_state_machine.gd")
 const Constants = preload("res://scripts/core/game_constants.gd")
+const CARD_BACK = preload("res://assets/cards/back.png")
 
 var failures := PackedStringArray()
 
 const ROUTES := {
-	1: [[Vector2i.UP, Vector2i.UP, Vector2i.UP, Vector2i.UP]],
-	2: [[Vector2i.UP, Vector2i.UP], [Vector2i.RIGHT, Vector2i.RIGHT, Vector2i.RIGHT]],
-	3: [[Vector2i.RIGHT, Vector2i.RIGHT], [Vector2i.LEFT, Vector2i.LEFT, Vector2i.UP, Vector2i.UP]],
-	4: [[Vector2i.RIGHT, Vector2i.RIGHT], [Vector2i.LEFT, Vector2i.LEFT, Vector2i.UP, Vector2i.UP]],
-	5: [[Vector2i.RIGHT, Vector2i.RIGHT, Vector2i.UP], [Vector2i.LEFT, Vector2i.LEFT, Vector2i.UP, Vector2i.UP]],
+	1: [[Vector2i.LEFT, Vector2i.LEFT, Vector2i.UP, Vector2i.UP]],
+	2: [[Vector2i.LEFT, Vector2i.LEFT], [Vector2i.RIGHT, Vector2i.RIGHT, Vector2i.RIGHT]],
+	3: [[Vector2i.DOWN, Vector2i.DOWN], [Vector2i.LEFT, Vector2i.LEFT, Vector2i.UP, Vector2i.UP]],
+	4: [[Vector2i.DOWN, Vector2i.DOWN], [Vector2i.LEFT, Vector2i.LEFT, Vector2i.UP, Vector2i.UP]],
+	5: [[Vector2i.LEFT, Vector2i.DOWN, Vector2i.DOWN], [Vector2i.LEFT, Vector2i.UP, Vector2i.UP, Vector2i.UP]],
 }
 
 
@@ -21,25 +22,40 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var main := (load("res://scenes/main/main.tscn") as PackedScene).instantiate()
+	main.set("opening_cutscene_enabled", false)
 	root.add_child(main)
 	await process_frame
 	await process_frame
 	var manager := main.get_node("PhaseManager") as PhaseManager
 	var controller := main.get_node("PhaseLoopController") as PhaseLoopController
 	var player := main.get_node("World/Player") as GridPlayer
-	var reminder := main.get_node("HUD/RoundEdicts") as Label
 	var hud := main.get_node("HUD") as GameHUD
+	var presentation := hud.card_presentation
 	manager.start_phase(1)
 
 	for phase_number in range(1, 6):
+		if not await _wait_until(func(): return hud.tutorial_book.state == TutorialBook.State.READING):
+			failures.append("O capítulo da fase %d não abriu." % phase_number)
+			break
+		hud.tutorial_book.request_close()
+		var expected_card_count: int = 1 if phase_number == 1 else 2
+		if not await _wait_until(func():
+			return manager.current_phase == phase_number and presentation._cards.size() == expected_card_count and not presentation._cards[0].disabled
+		):
+			failures.append("As cartas da fase %d não ficaram prontas para clique." % phase_number)
+			break
+		if expected_card_count == 2 and presentation._cards[0].position.x >= presentation._cards[1].position.x:
+			failures.append("As duas cartas devem aparecer lado a lado.")
+		for card in presentation._cards:
+			if card.texture_normal != CARD_BACK:
+				failures.append("Cada carta deve começar pelo verso.")
+			card.pressed.emit()
 		if not await _wait_until(func(): return manager.current_phase == phase_number and player.input_enabled):
 			failures.append("A fase %d não liberou o jogador." % phase_number)
 			break
+		if presentation.visible or hud.get_node_or_null("RoundEdicts") != null:
+			failures.append("Os valores não devem permanecer na HUD após a queima.")
 		var phase_routes: Array = ROUTES[phase_number]
-		var expected_parts := PackedStringArray()
-		for value in controller._current_phase_data.get("edict_values", []):
-			expected_parts.append(Constants.to_roman(int(value)))
-		var expected_reminder := "  +  ".join(expected_parts)
 		var sides := {}
 		var expected_piece_count := 0
 		for definitions in controller._current_phase_data.get("piece_waves", []):
@@ -66,8 +82,6 @@ func _run() -> void:
 				if not await _wait_until(func(): return not player.movement_locked):
 					failures.append("Movimento travou na fase %d." % phase_number)
 					break
-				if not reminder.visible or reminder.text != expected_reminder:
-					failures.append("Os éditos originais devem permanecer durante ambas as ondas.")
 			if edict_index < phase_routes.size() - 1:
 				if not await _wait_until(func():
 					return controller._edito_machine.indice_edito_atual == edict_index + 1 and player.input_enabled
@@ -83,8 +97,13 @@ func _run() -> void:
 		else:
 			if not await _wait_until(func(): return not hud.announcement.visible):
 				failures.append("A última fase deve terminar a animação de conclusão.")
+			if not await _wait_until(func(): return manager.current_phase == 6):
+				failures.append("A conclusão da fase cinco deve abrir a fase da balança.")
 
-	await create_timer(2.0).timeout
+	if manager.current_phase == 6:
+		await _wait_until(func(): return hud.tutorial_book.state == TutorialBook.State.READING)
+		hud.tutorial_book.request_close()
+		await _wait_until(func(): return main.get_node("BalanceTrialController").stage == BalanceTrialController.Stage.DECISION)
 	main.queue_free()
 	await process_frame
 	await process_frame

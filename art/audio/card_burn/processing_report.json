@@ -1,0 +1,34 @@
+{
+  "source_url": "https://www.youtube.com/watch?v=o7MXJvhDEQY",
+  "source_title": "American Horror Story: 13 | Title Sequence - Season 13 | FX",
+  "source_start_seconds": 25.82,
+  "source_end_seconds": 27.87,
+  "book_visible_approximately": [
+    25.8,
+    27.1
+  ],
+  "duration": 2.05,
+  "sample_rate": 48000,
+  "channels": 2,
+  "original_synthesis": false,
+  "source_phase_preserved": true,
+  "installed_variant": "treated_light",
+  "variants": {
+    "treated_light": {
+      "path": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\.godot\\qa\\card_burn_reference\\treated_light.wav",
+      "rms": 0.1507398561307872,
+      "waveform_correlation_to_reference": 0.9544411638769085,
+      "minimum_spectral_gain_db": -6.375175252488256
+    },
+    "treated_stronger": {
+      "path": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\.godot\\qa\\card_burn_reference\\treated_stronger.wav",
+      "rms": 0.14426287545990063,
+      "waveform_correlation_to_reference": 0.952629953125178,
+      "minimum_spectral_gain_db": -12.39577516576788
+    }
+  },
+  "reference_excerpt": "C:\\Users\\Steel\\Documents\\GitHub\\Queens-Trial\\.godot\\qa\\card_burn_reference\\reference_excerpt.wav",
+  "sha256": "03b37848292658bab8c2c10204aa16634779e979853a61e42cebde070ee8170b",
+  "limitation": "Background music and sound effect overlap; this is reduced music, not a clean isolated production stem.",
+  "video_audio_alignment_seconds": 21.999
+}
