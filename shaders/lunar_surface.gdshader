@@ -9,6 +9,8 @@ uniform vec3 sun_direction = vec3(-1.0, 0.0, 0.0);
 uniform float exposure : hint_range(0.5, 4.0) = 1.8;
 uniform float relief_strength : hint_range(0.0, 1.0) = 0.55;
 uniform float highlight_strength : hint_range(0.0, 12.0) = 5.0;
+uniform vec4 light_tint : source_color = vec4(1.0);
+uniform float rim_strength = 0.0;
 
 void fragment() {
 	vec3 color = texture(surface_map, UV).rgb * surface_tint.rgb;
@@ -33,6 +35,8 @@ void fragment() {
 	float crater_rays = smoothstep(0.02, 0.15, luminance - broad_luminance);
 	float face_gate = smoothstep(0.05, 0.35, dot(geometric_normal, normalize(VIEW)));
 	float highlights = highlands * (0.05 + crater_rays * crater_rays) * light_gate * face_gate;
-	ALBEDO = color * (vec3(0.014, 0.018, 0.028) + vec3(daylight * exposure));
-	ALBEDO += vec3(highlights * highlight_strength);
+	ALBEDO = color * (vec3(0.014, 0.018, 0.028) + light_tint.rgb * daylight * exposure);
+	ALBEDO += light_tint.rgb * highlights * highlight_strength;
+	float rim = pow(1.0 - max(dot(geometric_normal, normalize(VIEW)), 0.0), 6.0);
+	EMISSION = vec3(1.0, 0.68, 0.31) * rim * light_gate * rim_strength;
 }

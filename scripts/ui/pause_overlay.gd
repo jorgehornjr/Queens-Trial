@@ -4,6 +4,7 @@ extends CanvasLayer
 ## Folha ilustrada e controles continuam ativos enquanto a prova está pausada.
 
 const SHEET_SIZE := Vector2(1778, 1000)
+const MAIN_MENU_PATH := "res://scenes/ui/main_menu.tscn"
 
 @export var music_path := NodePath("../Music")
 @export var phase_manager_path := NodePath("../PhaseManager")
@@ -13,7 +14,7 @@ const SHEET_SIZE := Vector2(1778, 1000)
 @onready var sheet: Control = $Screen/Sheet
 @onready var content: Control = $Screen/Sheet/Content
 @onready var continue_button: Button = $Screen/Sheet/Content/ContinueButton
-@onready var restart_button: Button = $Screen/Sheet/Content/RestartButton
+@onready var main_menu_button: Button = $Screen/Sheet/Content/MainMenuButton
 @onready var phase_selector: OptionButton = $Screen/Sheet/Content/PhaseSelector
 @onready var phase_button: Button = $Screen/Sheet/Content/PhaseButton
 
@@ -35,9 +36,12 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_fit_sheet)
 	_fit_sheet()
 	continue_button.pressed.connect(_resume)
-	restart_button.pressed.connect(_restart_phase)
-	for phase_number in range(1, 7):
+	main_menu_button.pressed.connect(_return_to_main_menu)
+	for phase_number in range(1, PhaseManager.LAST_PLAYABLE_PHASE + 1):
 		phase_selector.add_item("Fase %d" % phase_number, phase_number)
+	for number in range(PhaseManager.Savage.FIRST, PhaseManager.Savage.LAST + 1):
+		phase_selector.add_item("Chaotic %s" % GameConstants.to_roman(number - 100), number)
+		phase_selector.set_item_disabled(phase_selector.item_count - 1, not PhaseManager.can_start_phase(number))
 	phase_button.pressed.connect(_jump_to_phase)
 	_style_phase_popup()
 
@@ -45,9 +49,6 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause_game"):
 		_toggle_pause()
-		get_viewport().set_input_as_handled()
-	elif screen.visible and event.is_action_pressed("restart_phase"):
-		_restart_phase()
 		get_viewport().set_input_as_handled()
 
 
@@ -68,10 +69,14 @@ func _set_paused(paused: bool) -> void:
 			_music.stream_paused = true
 		if _audio != null:
 			_audio.set_effects_paused(true)
-		restart_button.disabled = _phase_manager == null or _phase_manager.current_phase == 0
 		phase_button.disabled = _phase_manager == null
 		if _phase_manager != null:
-			phase_selector.select(clampi(_phase_manager.current_phase - 1, 0, phase_selector.item_count - 1))
+			for index in range(phase_selector.item_count):
+				var number := phase_selector.get_item_id(index)
+				if PhaseManager.Savage.contains(number):
+					phase_selector.set_item_disabled(index, not PhaseManager.can_start_phase(number))
+				if phase_selector.get_item_id(index) == _phase_manager.current_phase:
+					phase_selector.select(index)
 		_open_sheet()
 	else:
 		_close_sheet()
@@ -126,11 +131,13 @@ func _resume() -> void:
 	_set_paused(false)
 
 
-func _restart_phase() -> void:
-	if _closing or _phase_manager == null or _phase_manager.current_phase == 0:
+func _return_to_main_menu() -> void:
+	if _closing:
 		return
 	await _close_sheet()
-	_phase_manager.restart_phase()
+	var error := get_tree().change_scene_to_file(MAIN_MENU_PATH)
+	if error != OK:
+		push_error("Não foi possível voltar ao menu principal.")
 
 
 func _jump_to_phase() -> void:

@@ -1,84 +1,66 @@
 # Queen's Trial
 
-Queen's Trial é um jogo de estratégia educacional desenvolvido em Godot. A apresentação acontece em uma arena 3D, enquanto regras, posições e validações usam uma grade lógica 2D de 5 x 5 casas.
+Jogo de estratégia em Godot 4.7, com arena 3D e grade lógica de 5 × 5 casas.
 
-## Prévia do arcanjo
+## Executar
 
-O arcanjo permanece como versão de avaliação, com corpo e asas articulados, acessórios separados e texturas 4K. Abra `scenes/previews/archangel_rig_preview.tscn` e execute com `F6` para girar o modelo, mostrar os ossos e experimentar as animações. O botão **Testar abertura e fase 1** abre uma sessão com o arcanjo; também é possível executar diretamente `scenes/previews/archangel_phase_one_preview.tscn`.
+Abra `project.godot` no Godot 4.7 e pressione **F5**. O menu principal leva à abertura com Hooded Fandaniel, personagem atual. O jogo usa os recursos convertidos incluídos no projeto e não depende da instalação de Final Fantasy XIV.
 
-A fonte editável está em `art/characters/archangel/archangel_rig.blend`. Organização, controles, preparação e verificações estão em [art/characters/archangel/README.md](art/characters/archangel/README.md).
+**WASD** move uma casa por pressionamento; **R** reinicia a prova; **Esc** pausa e permite selecionar as oito fases ou um desafio Chaotic. Nas fases 1–6, o livro no canto superior direito ou **N** abre a consulta e pausa a prova. Para testar diretamente, use `godot --path . -- --phase=6`.
 
-## Fandaniel — personagem principal atual
+## Vanilla — fases 1–5
 
-**F5** abre a cena principal com a versão **Hooded Fandaniel** e sua roupa bordô original restaurada. O forro bege, os marrons, a malha, as UVs, os pesos e o esqueleto permanecem preservados. Na abertura, ele aparece pela fumaça e avança com `cbfm_swalk_loop`, a caminhada lenta de cena extraída do próprio FFXIV. A câmera acompanha os passos até a revelação da rainha, e o personagem termina na casa inicial da gameplay. Idle, Walking, Strafes e morte da gameplay mantêm os clipes existentes; as apresentações anteriores ficam arquivadas.
+A casa inicial, o refúgio e os éditos variam ao entrar em uma fase. Os valores vão de **I a IV**, sem repetir o valor dentro do mesmo par. O sorteio prioriza combinações ainda não vistas, evita a mesma sequência em fases consecutivas e prefere inverter uma combinação antes de repetir sua ordem.
 
-A chegada substitui o portal anterior e usa os modelos, texturas e curvas do **AscianTeleport**, adaptados ao Godot. O efeito começa no centro do corpo e o personagem aparece pela fumaça. O som é o recurso original `SE_Vfx_Monster_c0101_wrp01.scd`, convertido para WAV, sem síntese. O jogo funciona com os recursos convertidos incluídos no projeto, sem depender da instalação do FFXIV em tempo de execução.
+Não há cronômetro. A contagem de movimentos resolve cada édito; a distância final deve corresponder à carta. O último édito precisa terminar no refúgio, fora do ataque da onda atual. As fases mantêm sua progressão: movimento, dois éditos, torres, dois pares e bispos. O gerador valida rotas e ocupação e oferece pelo menos duas casas intermediárias possíveis nas fases de dois éditos, mantendo uma dificuldade menor que o Chaotic.
 
-A abertura dura 43 segundos e começa com dois planos suaves do cenário e do tabuleiro vazio, sem mostrar a rainha. O interior do capuz contém uma forma de rosto fechada e escura, acompanhando o osso da cabeça. A revelação preserva o mesmo shader e a escrita de profundidade durante toda a chegada. Depois de alguns passos, um modificador eleva discretamente a cabeça e o capuz antes do corte para a rainha, sobre a caminhada nativa.
+As estrelas da fase 1 acompanham a rota sorteada. A abertura termina na mesma casa usada pela primeira fase, sem reposicionar o personagem no fim da câmera. Reiniciar preserva o desafio e sua semente, para permitir outra tentativa do mesmo problema.
 
-Use `scenes/previews/fallen_priest_phase_six_preview.tscn` com **F6** para testar o personagem atual na balança. Fonte editável e detalhes: [art/characters/fandaniel/README.md](art/characters/fandaniel/README.md). Origem e adaptação do efeito: [art/effects/ascian_arrival/README.md](art/effects/ascian_arrival/README.md).
+## Balança — fase 6
 
-A trilha atual **O Chamado da Rainha** acrescenta oito segundos de cordas serenas ao arranjo aprovado, com destaque épico da rainha perto de 33 s e orquestra sustentada durante o movimento final da câmera. Os últimos 1,6 s se sobrepõem à música da gameplay com ganhos suaves. O Wind fornecido substitui o vento da balança, com recortes de 0,95 s e 2,3 s; o volume foi aumentado em 3 dB após a avaliação do usuário. O Candle acompanha os 1,65 s da queima. Fontes e preparação em `art/audio/opening_v2/` e `art/audio/user_presentation/`.
+São três rodadas com dois pesos diferentes, sorteados de **VIII a XX**. Há cinco segundos para mover-se livremente antes da inclinação de 21° e do deslizamento de três casas. As duas colunas do lado leve permitem sobreviver. Na última rodada, os pratos se soltam, o braço fica nivelado e o **?** substitui a indicação visual; as cartas continuam determinando o lado pesado.
 
-## Sacerdote — versão anterior preservada
+A balança é carregada e instanciada durante a preparação da cena. Seu shader é apresentado totalmente dissolvido antes da gameplay, evitando o carregamento e a construção do modelo na troca da fase 5 para a 6. A dissolução do globo e a materialização continuam com seus tempos originais.
 
-O **Corrupted Fallen Priest Dark Fantasy** e suas fontes permanecem disponíveis para comparação. A fonte editável, os seis clipes anteriores com skin, o símbolo original e a capa física estão preservados em `art/characters/fallen_priest/` e na cena `scenes/player/fallen_priest_animated_model.tscn`.
+A transformação inteira aparece antes do livro de tutorial. Depois que a balança se materializa, há uma breve pausa visual antes da leitura; as cartas e os cinco segundos da primeira rodada só começam ao fechar o livro.
 
-O personagem usa os seis downloads do Mixamo: **Idle** contínuo, **Walking** com transições e viradas suaves, **Look Around**, **Standing React Death Forward**, **Left Strafe** e **Right Strafe**. Os Strafes repetem durante a inclinação; a recuperação mescla para Idle. A queda pela borda conserva os clipes específicos anteriores. Corpo, capuz, tecido frontal e capa física permanecem completos. Um símbolo original vermelho, com contorno luminoso e aura, acompanha a cabeça dentro do capuz.
+Para testar o personagem atual nessa prova, execute `scenes/previews/fandaniel_phase_six_preview.tscn` com **F6**.
 
-O portal provisório tem camadas de fumaça em espiral, filamentos e fragmentos luminosos na borda, usando uma textura procedural pequena. A trilha original **O Limiar da Rainha** acompanha os 35 segundos da abertura: começa com cordas, sem os brilhos de harpa iniciais, e traz metais e coro no destaque da rainha, com auge próximo de 25 s durante o zoom out. As cartas usam um recorte tratado de 2,05 s da referência de American Horror Story indicada pelo usuário, sincronizado ao fogo e à pausa. A música de fundo do recorte é reduzida, sem síntese de novos estalos. Fontes e preparação em `art/audio/`, `tools/compose_priest_opening.py` e `tools/prepare_card_burn_reference.py`.
+## Cartas — fases 7 e 8
 
-A capa usa o módulo compilado em `native/priest_cape/` no Windows x64, preservando a malha e os parâmetros físicos. A DLL já está incluída; não é necessário instalar ferramentas para jogar. O código GDScript permanece disponível para comparação. No teste da abertura em 1280 × 720, o cálculo passou de aproximadamente 10,3 ms para 0,48 ms; o tempo dos quadros no percentil 95 passou de 24,1 ms para cerca de 14 ms. Os resultados dependem do computador e da resolução.
+As vinte artes de **I a XX** são usadas nas provas. A fase 7 tem ordenação crescente e decrescente, seis espaços e uma carta fixa. A fase 8 apresenta associação aos alvos 14, 18 e 19 e, depois, o decreto falso. A passagem pela nébula e a apresentação das cartas continuam em seus controladores próprios.
 
-Abra `scenes/previews/fallen_priest_phase_six_preview.tscn` e execute com **F6** para testar o **Corrupted Fallen Priest Dark Fantasy** diretamente na prova da balança. O personagem usa Mixamo no rig completo; a capa usa uma simulação física em tempo real. Use **1** para repetir a queda à esquerda, **2** para a direita, **3** para jogar as três rodadas e **4** para aproximar a câmera do personagem. WASD, R e Esc continuam disponíveis. Fonte Blender, detalhes e verificações: [art/characters/fallen_priest/README.md](art/characters/fallen_priest/README.md).
+## Chaotic
 
-## Documentação
+Cinco desafios separados do Vanilla, acessíveis pelo seletor de pausa ou por `--phase=101` até `105`. Mantêm o cronômetro, os pares de ataques, a atmosfera vermelha, o fogo no vestido da rainha e a música **With Hearts Aligned**. Regras e soluções de QA em [docs/design/savage.md](docs/design/savage.md).
 
-As regras de gameplay estão consolidadas em [docs/Queens Trial - Documentação Final.pdf](docs/Queens%20Trial%20-%20Documentação%20Final.pdf).
+## Correção após erro
 
-## Como executar
+Um painel marfim no centro da tela explica o erro com letras grandes, valores envolvidos e uma orientação para a próxima tentativa. O fundo escurece e a correção permanece até o jogador escolher **Tentar novamente** ou pressionar **Enter**. Nas provas de cartas, **Continuar** devolve a resposta montada para que ela possa ser ajustada. A pausa continua disponível durante a leitura.
 
-1. Clone esse repositório para seu desktop (Evite baixar como .zip).
-2. Instale o Godot 4.7.
-3. Importe a pasta que contém `project.godot`.
-4. Execute o projeto com `F5` ou pelo botão de reprodução.
-5. Aguarde a câmera de abertura e leia o livro. Clique nas páginas para folhear; clique fora do livro para fechá-lo e receber as cartas.
-6. Use `W`, `A`, `S` e `D` para mover o jogador uma casa por pressionamento.
+O painel atende Vanilla, balança, cartas e Chaotic. Detalhes e verificações em [docs/design/failure_feedback.md](docs/design/failure_feedback.md).
 
-## Livro dos tutoriais
+## Recursos e manutenção
 
-Cada fase apresenta somente sua novidade: **I**, um édito e movimento; **II**, dois éditos e o refúgio iluminado; **III**, alcance das torres; **IV**, ordem dos pares e flechas; **V**, diagonais dos bispos; **VI**, observação dos pesos da balança. O último capítulo faz perguntas para incentivar o raciocínio, sem indicar a posição vencedora.
+O protagonista ativo é **Hooded Fandaniel**, com sua roupa bordô, caminhada cinematográfica do FFXIV, sombra sob o capuz e animações da gameplay. Modelos de mago, arcanjo e sacerdote anteriores, suas animações, capa nativa, efeitos substituídos, fontes editáveis e prévias foram retirados do projeto ativo.
 
-O livro aprovado chega fechado, com tecido bordô, desenho dourado da rainha e da colisão de planetas e duas cantoneiras no lado direito. A capa mantém a textura original, sem brilho animado, aura ou partículas. As páginas usam papel marfim, ornamentos astronômicos e gravuras coloridas a nanquim e aquarela, com texto à esquerda e arte à direita. Os títulos usam **OPTI Engravers Old English** e o corpo usa **Alegreya**; as capitulares azuis são reaproveitadas das imagens aprovadas. O texto permanece editável no Godot. Em cada página, a tinta se revela aos poucos e a arte aparece em pinceladas largas, curvas e predominantemente verticais ao longo de cinco segundos, com bordas suaves. Ao fechar, a capa gira pela lombada, termina mostrando a frente e só então libera as cartas. O próximo capítulo reabre na página anterior e folheia automaticamente, acompanhado de um som discreto de papel. Reiniciar não repete capítulos lidos; uma leitura interrompida continua disponível.
+O backup recuperável está em `Deleted/project_cleanup_2026-10-17/`, ignorado pelo Git e pelo Godot. O manifesto registra os caminhos originais, tamanhos e SHA-256. `before_changes/` preserva o código e a configuração anteriores a esta manutenção. Nada desta limpeza foi apagado permanentemente. As notas de autoria em `art/` e os créditos dos recursos atuais continuam disponíveis; para reexportar fontes, restaure primeiro os insumos correspondentes do backup.
 
-A consulta de **Números romanos** é a primeira abertura do livro: **I–X à esquerda e XI–XX à direita**, em dez linhas alinhadas com a fonte **Jupiter Pro**, somente com título e tabela. Os tutoriais vêm depois. O capítulo das torres explica que o número acima de cada peça indica a mesma quantidade de casas nos dois trechos, pela linha e pela coluna. A gravura da balança tem braços de mesmo comprimento e suspensão no ponto central, segurada pela mão da rainha.
+Detalhes da limpeza e recuperação: [docs/maintenance/cleanup_2026-10-17.md](docs/maintenance/cleanup_2026-10-17.md). Créditos em [CREDITS.md](CREDITS.md).
 
-Durante a gameplay, o **ícone do livro no canto superior direito** ou **N** abre o tutorial da fase atual e pausa a prova. Clique na página esquerda para voltar e na direita para avançar; as setas do teclado também folheiam. Só é possível avançar até a última fase alcançada. Para consultar os números, volte pelas páginas até o começo. Clique fora do livro para fechar; **N** ou **Esc** também encerram a consulta. Na primeira leitura da fase seis, o relógio aguarda o fechamento. Os controladores de movimentos, éditos, ataques e balança não foram modificados; a correção futura da regra do safe spot continua pendente.
+## Verificação
 
-Para avaliar somente o livro, execute `scenes/previews/tutorial_book_preview.tscn` com **F6**: todos os capítulos ficam disponíveis para folhear, e **1–6** escolhem a fase. As artes ficam em `assets/ui/tutorial_book/`; prompts e notas em [art/tutorial_book/README.md](art/tutorial_book/README.md). Capturas reais em `docs/previews/tutorial_book/`. Verificações: `tests/test_tutorial_book.gd`, `tests/test_hud_integration.gd`, `tests/test_phase_playthrough.gd`, `tests/test_balance_trial.gd` e `tests/test_pause_phase_selector.gd`.
+```powershell
+python tools/run_checks.py --jobs 3
+```
 
-## Menu de pausa
+A suíte cobre geração e soluções Vanilla, campanha com movimentos e ataques reais, abertura, Fandaniel, livro, HUD, correção de erros, áudio, pausa, balança, cartas, menu e Chaotic. Os logs ficam em `tmp/checks/`.
 
-**Esc** abre uma folha de papel marfim com bordas rasgadas, ocupando quase toda a tela com uma margem estreita. A arte tem contornos suaves e pigmentos de aquarela; a rainha ocupa o alto à direita e olha para o viajante no canto inferior esquerdo, com planetas e nébulas nos outros cantos. A logo original mantém todos os contornos e letras, com uma textura estática de tinta, separada do título **PAUSA**. Continuar, reiniciar, selecionar uma das seis fases e os atalhos usam **Jupiter Pro**, mostrando apenas os textos, sem retângulos ou bordas nos botões. O menu se ajusta à janela e preserva a pausa da música, dos efeitos e da prova.
+Para auditar dependências, incluindo texturas extraídas dos GLBs:
 
-Arte e prompt em [art/pause_menu/README.md](art/pause_menu/README.md). Capturas em `docs/previews/ui_polish/`; `tests/capture_ui_polish.gd` captura a página pintando, a consulta, o fechamento e o menu em 720p, com `-- --qa-1080` para 1080p ou `--qa-menu` para somente o ESC. O som original de papel e tecido está em `assets/audio/sfx/book/`, com preparação em `tools/create_book_foley.py`.
+```powershell
+godot --headless --path . --script tools/audit_resources.gd
+python tools/audit_project.py
+```
 
-## Estrela do refúgio e orientação da fase 1
-
-O safe spot usa o símbolo de lua crescente e duas estrelas fornecido pelo autor, preservando seu desenho em `assets/textures/guidance/sanctuary_reference.png`. O shader remove somente o fundo azul durante a renderização. A emissão dourada e a luz próxima aumentam e diminuem suavemente em ciclos de 2,8 s, mantendo o desenho rente ao piso. A luz não contribui para a névoa volumétrica. A fase 6 mantém o refúgio oculto.
-
-Na fase 1, depois de a carta desaparecer, estrelas de cinco pontas acendem progressivamente ao longo de ondas regulares entre o viajante e o refúgio. Todas têm o mesmo tamanho, orientação e espaçamento; as ondas repetem a mesma amplitude e período sobre a rota das quatro casas. O jogador espera os 4,6 s da revelação e um breve assentamento antes de receber o controle; teclas pressionadas durante a orientação não gastam passos. ESC congela o desenho e retoma do mesmo ponto. Reiniciar ou mudar de fase cancela a animação anterior, que não pode liberar os controles da nova fase. O traço completo permanece até a resolução do édito.
-
-Implementação em `scripts/gameplay/starred_guide.gd`, `shaders/sanctuary_symbol.gdshader`, `shaders/floor_star.gdshader` e `shaders/starred_trail.gdshader`. A estrela do caminho está em `assets/textures/guidance/path_star.svg`. Verificações em `tests/test_starred_guidance.gd`, `tests/test_hud_integration.gd`, `tests/test_phase_playthrough.gd` e `tests/test_balance_trial.gd`; capturas do menu, da rota e das duas intensidades do refúgio em `docs/previews/starred_guidance/`.
-
-## Fase 6 — Julgamento da Balança
-
-A conclusão da fase 5 abre a prova da balança. O globo de Astraía se dissolve e uma balança 3D se materializa acima das mãos da rainha. As cartas laterais permanecem visíveis e os pratos acompanham seus pesos: o maior número baixa aquele lado. Há cinco segundos para mover-se livremente pela grade, sem limite de passos e sem safe spot ou ataques das peças.
-
-Após o prazo, o tabuleiro inclina 21° para o lado pesado. A gravidade projetada sobre a plataforma acelera o deslizamento de três casas, com poses próprias de apoio e perda de equilíbrio do sacerdote. Começar nas duas colunas do lado leve permite sobreviver; centro e lado pesado levam à queda pela borda e reinício automático. São três rodadas, usando somente as cartas 1–4. A câmera permanece frontal nessa prova para manter esquerda/direita coerentes com as cartas. `Esc` pausa também o relógio e a física; `R` reinicia toda a prova.
-
-A fase 6 é o término jogável desta versão. Ao selecionar outra fase, a balança se dissolve e o globo retorna. As definições das fases 7–10 permanecem reservadas para implementação posterior. Para testar diretamente, abra `Esc`, escolha uma das fases 1–6 e pressione `Ir`; isso também funciona durante a abertura e inicia a fase escolhida do começo. Também é possível usar `godot --path . -- --phase=6`. Rodadas, tempo, ângulo e deslocamento ficam em `data/phases/campaign.json`.
-
-A interface dessa prova mostra somente as duas cartas, centralizadas nos espaços laterais; os cinco segundos são contados internamente, sem título, contador ou textos de resultado. A balança permanece abaixo do queixo, preservando sua escala. A névoa azul original permanece em todas as fases; na fase seis, seus volumes usam coordenadas coerentes com a inclinação e acompanham parte da rotação com atraso suave, como uma nuvem suspensa. No deslizamento, um fluxo dourado rente ao piso e lampejos de pó estelar correm para o lado pesado, com vento estéreo nessa direção; uma camada de partículas douradas também atravessa a tela com pequenos rastros e brilhos, compartilhando direção e dissipação com o piso. Há também uma rajada suave ao pesar as cartas. Sair da fase seis restaura o comportamento anterior da névoa.
-
-Verificações: `godot --headless --path . --script tests/test_balance_trial.gd`, `tests/test_pause_phase_selector.gd` e `tests/test_phase_playthrough.gd`. Capturas no renderizador Forward+ podem ser geradas com `godot --path . --script tests/capture_balance_preview.gd`; os PNGs incluem o seletor de fases e ficam em `.godot/qa/`.
+O relatório sugere candidatos para revisão; não move arquivos automaticamente. Para medir a passagem da balança com renderização, execute `tests/profile_balance_transition.gd`. Pré-visualizações geradas ficam fora do Git.

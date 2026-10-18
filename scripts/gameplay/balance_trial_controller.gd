@@ -8,7 +8,7 @@ signal trial_completed
 const TrialHUD = preload("res://scripts/ui/balance_hud.gd")
 const Stardust = preload("res://scripts/gameplay/balance_stardust.gd")
 const ScreenDust = preload("res://scripts/ui/balance_screen_dust.gd")
-enum Stage { INACTIVE, TRANSITION, DECISION, TILTING, RECOVERING, SETTLING, FALLING, FAILED, COMPLETE }
+enum Stage { INACTIVE, TRANSITION, MALFUNCTION, DECISION, TILTING, RECOVERING, SETTLING, FALLING, FAILED, COMPLETE }
 
 var stage := Stage.INACTIVE
 var round_index := 0
@@ -21,7 +21,10 @@ var slide_speed := 0.0
 var _generation := 0
 var _elapsed := 0.0
 var _fall_velocity := Vector3.ZERO
-var _rounds: Array = []
+var _round_count := 3
+var _weight_min := 8
+var _weight_max := 20
+var _weight_rng := RandomNumberGenerator.new()
 var _decision_seconds := 5.0
 var _max_angle := deg_to_rad(21.0)
 var _slide_tiles := 3.0
@@ -39,6 +42,7 @@ var _slide_sound: StringName
 
 
 func _ready() -> void:
+	_weight_rng.randomize()
 	_manager = get_node("../PhaseManager")
 	_board = get_node("../World/Board")
 	_player = get_node("../World/Player")
@@ -68,10 +72,13 @@ func _on_phase_started(number: int, data: Dictionary, _seed: int) -> void:
 	if number != 6:
 		_queen.set_balance_mode(false)
 		return
-	_rounds = data.get("balance_rounds", [[4, 1], [1, 3], [2, 4]])
+	_round_count = int(data.get("balance_round_count", 3))
+	_weight_min = int(data.get("balance_weight_min", 8))
+	_weight_max = int(data.get("balance_weight_max", 20))
 	if is_instance_valid(_queen.balance):
 		_queen.balance.reset_weights()
 	_decision_seconds = float(data.get("seconds_per_edict", 5.0))
+	remaining = _decision_seconds
 	_max_angle = deg_to_rad(float(data.get("tilt_degrees", 21.0)))
 	_slide_tiles = float(data.get("slide_tiles", 3.0))
 	round_index = 0
@@ -93,24 +100,54 @@ func _begin(run_id: int) -> void:
 		await get_tree().process_frame
 		if run_id != _generation:
 			return
+	# Let the transformation finish unobstructed before the tutorial arrives.
+	if _hud.tutorial_book.needs_chapter(6):
+		await get_tree().create_timer(0.55).timeout
+		if run_id != _generation: return
+		var read_ok := await _hud.play_balance_intro()
+		if not read_ok or run_id != _generation: return
 	_open_round()
 
 
 func _open_round() -> void:
-	var pair: Array = _rounds[round_index]
-	left_weight = int(pair[0])
-	right_weight = int(pair[1])
+	# Draw when this round opens, including a new attempt after a fall or R.
+	var pair := _draw_weights()
+	left_weight = pair.x
+	right_weight = pair.y
 	heavy_direction = 1 if right_weight > left_weight else -1
 	remaining = _decision_seconds
 	_elapsed = 0.0
 	slide_distance = 0.0
 	slide_speed = 0.0
-	_queen.balance.set_weights(left_weight, right_weight)
-	_audio.play_effect(&"balance_weigh_right" if heavy_direction > 0 else &"balance_weigh_left")
+	var concealed := round_index == _round_count - 1
+	_queen.balance.set_weights(left_weight, right_weight, concealed)
+	if concealed:
+		stage = Stage.MALFUNCTION
+		trial_hud.hide()
+		_player.set_input_enabled(false)
+		_wait_for_malfunction(_generation)
+		return
+	_open_decision()
+
+func _wait_for_malfunction(run_id: int) -> void:
+	var completed: bool = await _queen.balance.malfunction_finished
+	if completed and run_id == _generation and stage == Stage.MALFUNCTION:
+		_open_decision()
+
+func _open_decision() -> void:
+	var concealed := round_index == _round_count - 1
+	if not concealed:
+		_audio.play_effect(&"balance_weigh_right" if heavy_direction > 0 else &"balance_weigh_left")
 	trial_hud.show_round(left_weight, right_weight)
 	stage = Stage.DECISION
 	_player.set_input_enabled(true)
 	round_started.emit(left_weight, right_weight)
+
+func _draw_weights() -> Vector2i:
+	var left := _weight_rng.randi_range(_weight_min, _weight_max)
+	var right := _weight_rng.randi_range(_weight_min, _weight_max - 1)
+	if right >= left: right += 1
+	return Vector2i(left, right)
 
 
 func _physics_process(delta: float) -> void:
@@ -159,12 +196,12 @@ func _physics_process(delta: float) -> void:
 			_elapsed += delta
 			if _elapsed >= 0.55:
 				round_index += 1
-				if round_index < _rounds.size():
+				if round_index < _round_count:
 					_audio.play_effect(&"round_success")
 					_open_round()
 				else:
 					_finish_success(_generation)
-		Stage.FALLING, Stage.FAILED:
+		Stage.FALLING:
 			_elapsed += delta
 			stardust.strength = 1.0-smoothstep(0.0,0.75,_elapsed)
 			_fall_velocity.y -= 32.0 * delta
@@ -174,7 +211,6 @@ func _physics_process(delta: float) -> void:
 			_board.rotation.z = move_toward(_board.rotation.z, 0.0, delta * _max_angle)
 			if stage == Stage.FALLING and _elapsed >= 1.5:
 				stage = Stage.FAILED
-				_restart_after_fall(_generation)
 	if stage in [Stage.DECISION, Stage.TILTING, Stage.RECOVERING, Stage.SETTLING, Stage.FALLING, Stage.FAILED]:
 		_player.update_platform_motion(slide_speed, stardust.strength)
 
@@ -188,11 +224,14 @@ func _start_fall() -> void:
 	stardust.fade()
 	_audio.fade_effect(_slide_sound)
 	_audio.play_effect(&"fail")
+	_wait_for_retry(_generation)
 
 
-func _restart_after_fall(run_id: int) -> void:
-	await get_tree().create_timer(maxf(0.45, _audio.effect_duration(&"fail") - 1.5)).timeout
-	if run_id == _generation:
+func _wait_for_retry(run_id: int) -> void:
+	var side := "esquerdo" if heavy_direction < 0 else "direito"
+	var weights := "À esquerda: %s (%d). À direita: %s (%d)." % [GameConstants.to_roman(left_weight), left_weight, GameConstants.to_roman(right_weight), right_weight]
+	var accepted := await _hud.show_failure([weights, "O lado %s ficou mais pesado e puxou o tabuleiro. O personagem acabou caindo pela borda." % side])
+	if accepted and run_id == _generation:
 		_manager.restart_phase()
 
 
@@ -204,5 +243,5 @@ func _finish_success(run_id: int) -> void:
 	trial_completed.emit()
 	await get_tree().create_timer(0.35).timeout
 	if run_id == _generation:
-		# Later phases retain their existing definitions; six is the playable end.
 		_queen.balance.reset_weights()
+		_manager.advance_phase()

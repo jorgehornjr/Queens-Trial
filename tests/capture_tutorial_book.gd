@@ -60,6 +60,7 @@ func _run() -> void:
 
 func _capture(name: String) -> void:
 	await RenderingServer.frame_post_draw
+	DirAccess.make_dir_recursive_absolute("res://docs/previews/tutorial_book")
 	var suffix := "_720" if "--qa-720" in OS.get_cmdline_user_args() else ""
 	var path := "res://docs/previews/tutorial_book/%s%s.png" % [name, suffix]
 	root.get_texture().get_image().save_png(path)

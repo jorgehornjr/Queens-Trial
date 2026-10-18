@@ -28,15 +28,16 @@ func _run() -> void:
 	for clip: String in report.clips:
 		_expect(animation.has_animation(clip), "Animação sem skin ausente: " + clip)
 		_expect(absf(animation.get_animation(clip).length - float(report.clips[clip].duration)) < 0.04, "A duração do novo download deve ser preservada: " + clip)
-	_expect(model.get_node("FandanielFace").attachment.bone_name == "j_kao", "O símbolo original deve acompanhar o rosto animado.")
+	_expect(model.get_node("FandanielFace").attachment.bone_name == "j_kao", "A sombra do capuz deve acompanhar a cabeça animada.")
 	var face: Node = model.get_node("FandanielFace")
 	_expect(face.attachment.get_node("ShadowedFace").mesh.get_surface_count() > 0, "O interior do capuz deve conter um rosto fechado que bloqueia o cenário.")
+	_expect(face.attachment.get_child_count() == 1 and model.find_child("FandanielOriginalFace", true, false) == null and model.find_child("GlyphLight", true, false) == null, "O capuz deve manter apenas a sombra, sem emblema vermelho ou luz facial.")
 	# Fade across the former pipeline-switch boundary and retain depth writing.
 	for reveal in [0.0, 0.5, 0.998, 0.999, 1.0]:
 		model.set_arrival_reveal(reveal)
 		for material: ShaderMaterial in model._appearance:
 			_expect(material.shader == model.ARRIVAL_SKIN and is_equal_approx(float(material.get_shader_parameter("reveal")), reveal), "A chegada deve preservar o shader dos materiais, inclusive ao terminar.")
-		_expect(is_equal_approx(face._shadow_material.albedo_color.a, reveal) and is_equal_approx(float(face._glyph_material.get_shader_parameter("reveal")), reveal), "O rosto escuro e o símbolo devem aparecer junto com o corpo.")
+		_expect(is_equal_approx(face._shadow_material.albedo_color.a, reveal), "A sombra do capuz deve aparecer junto com o corpo.")
 	animation.play("intro_arrival", 0.0)
 	animation.seek(0.8, true)
 	animation.advance(0.0)

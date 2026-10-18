@@ -8,6 +8,7 @@ const ROOK_SCENE = preload("res://scenes/pieces/rook.tscn")
 const BISHOP_SCENE = preload("res://scenes/pieces/bishop.tscn")
 const DIRECTION_SHADER = preload("res://shaders/direction_neon.gdshader")
 const CELESTIAL_FONT = preload("res://assets/fonts/jupiter_pro.otf")
+const Numeral = preload("res://scripts/ui/piece_numeral.gd")
 const ARROW_STRIP_SIZE := Vector2(2.4, 6.7)
 const ARROW_NEAR_GAP := 5.5
 const QUEEN_GOLD := Color(0.82, 0.58, 0.21, 1.0)
@@ -22,7 +23,7 @@ var entry_lane := 0
 var _board: Board3D
 var _edge_target := Vector3.ZERO
 var _final_target := Vector3.ZERO
-var _roman_label: Label3D
+var _roman_label: PieceNumeral
 var _arrows: Array[MeshInstance3D] = []
 var _active := false
 var _visual: Node3D
@@ -91,21 +92,11 @@ func play_resolution() -> void:
 
 
 func _create_roman_label(text_value: String) -> void:
-	_roman_label = Label3D.new()
+	_roman_label = Numeral.new() as PieceNumeral
 	_roman_label.name = "RomanNumeral"
 	_roman_label.text = text_value
 	_roman_label.position = Vector3(0.0, 7.2, 0.0)
-	_roman_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	_roman_label.no_depth_test = true
-	_roman_label.font = CELESTIAL_FONT
-	# Mais resolução de glifo, mantendo exatamente o mesmo tamanho no mundo.
-	_roman_label.font_size = 248
-	_roman_label.outline_size = 0
-	_roman_label.outline_modulate = Color(0, 0, 0, 0)
 	_roman_label.modulate = Color.WHITE
-	_roman_label.fixed_size = false
-	_roman_label.pixel_size = 0.0045
-	_roman_label.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 	add_child(_roman_label)
 
 

@@ -14,6 +14,8 @@
 [ext_resource type="Script" path="res://scripts/audio/game_audio.gd" id="11_audio"]
 [ext_resource type="PackedScene" path="res://scenes/main/opening_cutscene.tscn" id="12_opening"]
 [ext_resource type="Script" path="res://scripts/gameplay/balance_trial_controller.gd" id="13_balance"]
+[ext_resource type="Script" path="res://scripts/gameplay/card_trial_controller.gd" id="14_cards"]
+[ext_resource type="Script" path="res://scripts/gameplay/savage_controller.gd" id="15_savage"]
 
 [node name="Main" type="Node" unique_id=1396135177]
 script = ExtResource("1_main")
@@ -99,3 +101,9 @@ audio_path = NodePath("../GameAudio")
 script = ExtResource("13_balance")
 
 [node name="PauseOverlay" parent="." unique_id=998397426 instance=ExtResource("10_pause")]
+
+[node name="CardTrialController" type="Node" parent="."]
+script = ExtResource("14_cards")
+
+[node name="SavageController" type="Node" parent="."]
+script = ExtResource("15_savage")

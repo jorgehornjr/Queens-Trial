@@ -34,16 +34,14 @@ var origem_atual: Vector2i
 var posicao_jogador: Vector2i
 var passos_dados: int = 0
 var passos_necessarios: int = 0
-var modo_resolucao: StringName = &"moves"
 
-func configurar_fase(lista_editos: Array, posicao_inicial: Vector2i, modo: StringName = &"moves") -> bool:
+func configurar_fase(lista_editos: Array, posicao_inicial: Vector2i) -> bool:
 	if not _validar_editos(lista_editos):
 		push_error("Configuração de éditos inválida: valores ou pares repetidos indevidamente.")
 		return false
 	editos = lista_editos
 	indice_edito_atual = 0
 	posicao_jogador = posicao_inicial
-	modo_resolucao = modo
 	estado_atual = Estado.SELECAO_PAR
 	_transicionar(Estado.SELECAO_PAR)
 	_iniciar_edito_atual()
@@ -58,7 +56,7 @@ func _validar_editos(lista: Array) -> bool:
 		if lista[0]["par"] == lista[1]["par"]:
 			return false # segundo édito não pode reutilizar o mesmo par de peças
 	for edito in lista:
-		if not edito["valor"] in [2, 3, 4]:
+		if not edito["valor"] in [1, 2, 3, 4]:
 			return false
 	return true
 
@@ -82,10 +80,7 @@ func registrar_movimento(direcao: Vector2i) -> bool:
 	passos_dados += 1
 	movimento_registrado.emit(passos_dados, passos_necessarios)
 
-	# No modo "moves" (fases 1-5), atingir a contagem já resolve o édito.
-	# No modo "timer" (fases 6-10), o jogador pode ir e voltar livremente;
-	# só o EdictTimer, via expirar_tempo(), decide quando travar o estado.
-	if modo_resolucao == &"moves" and passos_dados >= passos_necessarios:
+	if passos_dados >= passos_necessarios:
 		_transicionar(Estado.PRIMEIRA_PECA)
 	return true
 
@@ -110,9 +105,10 @@ func julgar(zona_ataque: Array, safe_spot: Vector2i) -> void:
 	var distancia = abs(posicao_jogador.x - origem_atual.x) + abs(posicao_jogador.y - origem_atual.y)
 
 	if distancia != passos_necessarios:
-		motivos.append("Édito %s não cumprido: distância final %d." % [_numeral(passos_necessarios), distancia])
+		var position_feedback := "Você voltou ao ponto de partida." if distancia == 0 else "Você terminou a %d %s do ponto de partida." % [distancia, "casa" if distancia == 1 else "casas"]
+		motivos.append("A carta %s pedia uma distância de %d %s.\n%s" % [_numeral(passos_necessarios), passos_necessarios, "casa" if passos_necessarios == 1 else "casas", position_feedback])
 	if posicao_jogador in zona_ataque:
-		motivos.append("A casa também foi atingida por uma peça.")
+		motivos.append("Uma peça atacou a casa onde você parou.")
 
 	var eh_ultimo_edito = indice_edito_atual >= editos.size() - 1
 
@@ -123,7 +119,7 @@ func julgar(zona_ataque: Array, safe_spot: Vector2i) -> void:
 
 	if eh_ultimo_edito:
 		if posicao_jogador != safe_spot:
-			falha.emit(["Posição final não é o safe spot."])
+			falha.emit(["Você cumpriu os éditos, mas terminou fora da casa iluminada."])
 			_transicionar(Estado.FINALIZADO)
 			return
 		sucesso.emit()
@@ -152,11 +148,5 @@ func _transicionar(novo_estado: int) -> bool:
 	return true
 
 func _numeral(valor: int) -> String:
-	const NUMERAIS = {2: "II", 3: "III", 4: "IV"}
+	const NUMERAIS = {1: "I", 2: "II", 3: "III", 4: "IV"}
 	return NUMERAIS.get(valor, str(valor))
-
-func expirar_tempo() -> bool:
-	if estado_atual != Estado.AGUARDANDO_MOVIMENTO:
-		push_warning("Expiração de tempo ignorada: fora do estado de movimentação (%s)." % Estado.keys()[estado_atual])
-		return false
-	return _transicionar(Estado.PRIMEIRA_PECA)

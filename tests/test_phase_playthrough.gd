@@ -6,15 +6,6 @@ const CARD_BACK = preload("res://assets/cards/back.png")
 
 var failures := PackedStringArray()
 
-const ROUTES := {
-	1: [[Vector2i.LEFT, Vector2i.LEFT, Vector2i.UP, Vector2i.UP]],
-	2: [[Vector2i.LEFT, Vector2i.LEFT], [Vector2i.RIGHT, Vector2i.RIGHT, Vector2i.RIGHT]],
-	3: [[Vector2i.DOWN, Vector2i.DOWN], [Vector2i.LEFT, Vector2i.LEFT, Vector2i.UP, Vector2i.UP]],
-	4: [[Vector2i.DOWN, Vector2i.DOWN], [Vector2i.LEFT, Vector2i.LEFT, Vector2i.UP, Vector2i.UP]],
-	5: [[Vector2i.LEFT, Vector2i.DOWN, Vector2i.DOWN], [Vector2i.LEFT, Vector2i.UP, Vector2i.UP, Vector2i.UP]],
-}
-
-
 func _initialize() -> void:
 	Engine.time_scale = 10.0
 	call_deferred("_run")
@@ -23,6 +14,7 @@ func _initialize() -> void:
 func _run() -> void:
 	var main := (load("res://scenes/main/main.tscn") as PackedScene).instantiate()
 	main.set("opening_cutscene_enabled", false)
+	main.get_node("PhaseManager").save_progress = false
 	root.add_child(main)
 	await process_frame
 	await process_frame
@@ -55,7 +47,7 @@ func _run() -> void:
 			break
 		if presentation.visible or hud.get_node_or_null("RoundEdicts") != null:
 			failures.append("Os valores não devem permanecer na HUD após a queima.")
-		var phase_routes: Array = ROUTES[phase_number]
+		var phase_routes: Array = PhaseManager.Vanilla.solution(manager.current_phase_data)
 		var sides := {}
 		var expected_piece_count := 0
 		for definitions in controller._current_phase_data.get("piece_waves", []):
@@ -77,8 +69,8 @@ func _run() -> void:
 				if piece.get_node("RomanNumeral").text != str(Constants.to_roman(piece.move_value)):
 					failures.append("Numeral da peça não corresponde ao deslocamento.")
 		for edict_index in range(phase_routes.size()):
-			for direction in phase_routes[edict_index]:
-				player._try_move(direction)
+			for destination: Vector2i in phase_routes[edict_index]:
+				player._try_move(destination - player.current_cell)
 				if not await _wait_until(func(): return not player.movement_locked):
 					failures.append("Movimento travou na fase %d." % phase_number)
 					break

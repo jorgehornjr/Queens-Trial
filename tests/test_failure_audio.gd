@@ -38,9 +38,17 @@ func _run() -> void:
 	if not await _wait_until(func(): return player.input_enabled):
 		failures.append("A fase 1 não liberou o jogador.")
 	else:
-		# Four legal steps return to the start, so the edict must fail.
-		for direction in [Vector2i.UP, Vector2i.UP, Vector2i.DOWN, Vector2i.DOWN]:
-			player._try_move(direction)
+		# Use the drawn movement count, deliberately ending away from the refuge.
+		var wrong_route: Array = []
+		var data := manager.current_phase_data
+		for y in range(5):
+			for x in range(5):
+				var target := Vector2i(x, y)
+				if target == main.board.safe_spot: continue
+				var route := PhaseManager.Vanilla.shortest_path(player.current_cell, target)
+				if route.size() == int(data.edict_values[0]): wrong_route = route
+		for destination: Vector2i in wrong_route:
+			player._try_move(destination - player.current_cell)
 			if not await _wait_until(func(): return not player.movement_locked):
 				failures.append("O movimento do jogador travou.")
 				break
@@ -60,6 +68,10 @@ func _run() -> void:
 	if not is_equal_approx(music.volume_db, original_music_db):
 		failures.append("O volume da música não foi restaurado.")
 	var generation_after_failure := controller._generation
+	var correction := (main.get_node("HUD") as GameHUD).failure_feedback
+	await _wait_until(func(): return not correction.action.disabled)
+	_expect_generation_stays(controller, generation_after_failure)
+	correction.acknowledge()
 	if not await _wait_until(func(): return controller._generation > generation_after_failure and presentation._cards.size() == 1 and not presentation._cards[0].disabled):
 		failures.append("A fase não reiniciou após o áudio de falha.")
 	else:
@@ -90,3 +102,8 @@ func _wait_until(predicate: Callable) -> bool:
 			return true
 		await process_frame
 	return false
+
+
+func _expect_generation_stays(controller: PhaseLoopController, previous: int) -> void:
+	if controller._generation != previous:
+		failures.append("A correção deve aguardar a confirmação do aluno antes de reiniciar.")

@@ -20,8 +20,10 @@ func _run() -> void:
     var queen := main.get_node("World/Seraph") as Node3D
     var rig := main.get_node("World/BoardCamera") as BoardOrbitCamera
     var presentation := (main.get_node("HUD") as GameHUD).card_presentation
+    var board := main.get_node("World/Board") as Board3D
+    _expect(not board._safe_spot_marker.visible and not board._safe_spot_light.visible, "A abertura não deve mostrar o safe spot nem sua iluminação.")
     _expect(cutscene._running and manager.current_phase == 0 and not player.input_enabled, "A abertura deve bloquear a grade até terminar.")
-    _expect(not player.visible and not queen.visible and player.current_cell == Vector2i(2, 2), "A cena deve começar com o tabuleiro vazio.")
+    _expect(not player.visible and not queen.visible and player.current_cell == player.starting_cell, "A cena deve começar com o tabuleiro vazio na casa sorteada.")
     _expect(model.animation_player.has_animation("intro_arrival") and model.animation_player.has_animation("standing_death"), "O personagem deve ter caminhada nativa de chegada e morte do Mixamo.")
     _expect(main.get_node("GameAudio")._voices.is_empty() and not cutscene.teleport_sound.playing, "O primeiro quadro deve começar sem efeitos sonoros adicionais.")
     _expect(is_equal_approx(cutscene._length / cutscene.duration_scale, OpeningCutscene.TOTAL_LENGTH), "A abertura deve incluir os dois planos serenos.")
@@ -48,13 +50,14 @@ func _run() -> void:
     _expect(first_arm.angle_to(second_arm) > 0.04, "A caminhada deve movimentar os braços em vez de mantê-los presos ao tronco.")
     var first_z := player.global_position.z
     await _story(cutscene, OpeningCutscene.ENTRY_START + 6.2)
+    _expect(not board._safe_spot_marker.visible and not board._safe_spot_light.visible, "O safe spot deve permanecer oculto também durante a caminhada.")
     _expect(player.global_position.z < first_z - 3.0 and not queen.visible, "O personagem deve avançar enquanto a câmera acompanha a caminhada.")
     _expect(cutscene._spawn_anchor.z < 19.0 and player.global_position.z >= cutscene._arrival_anchor.z, "A caminhada cinematográfica deve permanecer sobre o tabuleiro.")
-    _expect(player.current_cell == Vector2i(2, 2), "A caminhada cinematográfica não deve mudar a casa lógica.")
+    _expect(player.current_cell == player.starting_cell, "A caminhada cinematográfica não deve mudar a casa lógica.")
     await _story(cutscene, OpeningCutscene.ENTRY_START + 9.0)
     _expect(model.cinematic_gaze.lift > 0.99 and not queen.visible, "Depois de alguns passos, o rosto deve levantar antes do corte para a rainha.")
     await _story(cutscene, OpeningCutscene.WALK_END + 0.2)
-    _expect(player.global_position.distance_to(cutscene._arrival_anchor) < 0.01 and model.animation_player.current_animation == "breathing_idle", "A entrada deve terminar na casa central, em repouso.")
+    _expect(player.global_position.distance_to(cutscene._arrival_anchor) < 0.01 and model.animation_player.current_animation == "breathing_idle", "A entrada deve terminar na casa sorteada, em repouso.")
     await _story(cutscene, OpeningCutscene.QUEEN_REVEAL + 0.4)
     _expect(queen.visible and cutscene.cinematic_camera.global_position.x < -25.0, "A rainha deve aparecer no plano de revelação do mundo.")
     await _story(cutscene, OpeningCutscene.QUEEN_CLOSE + 0.4)
@@ -65,6 +68,8 @@ func _run() -> void:
     _expect(music.volume_db > -35.0 and main._incoming_music.volume_db > -35.0, "A passagem de música deve usar ganhos suaves, sem queda brusca.")
     await _until(func(): return manager.current_phase == 1 and (main.get_node("HUD") as GameHUD).tutorial_book.visible)
     _expect(not cutscene._running and not cutscene.teleport.visible and not model.cinematic, "A abertura deve encerrar o portal e devolver o personagem à gameplay.")
+    _expect(board._safe_spot_marker.visible and board._safe_spot_light.visible, "O safe spot deve reaparecer ao iniciar a primeira fase.")
+    _expect(player.global_position.distance_to(cutscene._arrival_anchor) < 0.01, "A fase um deve começar na casa da chegada sem teletransportar o personagem.")
     _expect(root.get_camera_3d() == rig.camera and rig.gameplay_mode and not rig.cinematic_mode, "A câmera do tabuleiro deve assumir o controle no fim.")
     _expect(music.stream == load("res://assets/audio/music/5.21 Ascension.ogg") and music.playing, "A música do jogo deve começar depois da abertura.")
     _expect(is_equal_approx(music.volume_db, -12.0) and main._incoming_music == null, "A passagem deve terminar com uma única trilha no volume normal.")

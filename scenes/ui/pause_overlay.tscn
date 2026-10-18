@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/ui/pause_overlay.gd" id="1_pause"]
 [ext_resource type="FontFile" path="res://assets/fonts/jupiter_pro.otf" id="2_jupiter"]
 [ext_resource type="FontFile" path="res://assets/fonts/jupiter_pro.otf" id="3_body"]
-[ext_resource type="Texture2D" path="res://assets/ui/pause_menu/illustrated_sheet_soft.png" id="4_sheet"]
+[ext_resource type="Texture2D" path="res://assets/ui/pause_menu/illustrated_sheet_watercolor.png" id="4_sheet"]
 [ext_resource type="Texture2D" path="res://assets/logo/QTlogo.png" id="5_logo"]
 [ext_resource type="Script" path="res://scripts/ui/pause_ink_details.gd" id="6_details"]
 [ext_resource type="Shader" path="res://shaders/pause_logo_ink.gdshader" id="7_logo_ink"]
@@ -134,18 +134,19 @@ theme_override_styles/normal = SubResource("Style_button")
 theme_override_styles/hover = SubResource("Style_button_hover")
 theme_override_styles/pressed = SubResource("Style_button_hover")
 theme_override_styles/focus = SubResource("Style_button_hover")
-focus_neighbor_bottom = NodePath("../RestartButton")
+focus_neighbor_top = NodePath("../MainMenuButton")
+focus_neighbor_bottom = NodePath("../PhaseSelector")
 
-[node name="RestartButton" type="Button" parent="Screen/Sheet/Content"]
+[node name="MainMenuButton" type="Button" parent="Screen/Sheet/Content"]
 layout_mode = 0
 offset_left = 560.0
-offset_top = 519.0
+offset_top = 635.0
 offset_right = 1040.0
-offset_bottom = 585.0
+offset_bottom = 701.0
 theme_override_colors/font_color = Color(0.24, 0.12, 0.08, 1)
 theme_override_fonts/font = ExtResource("3_body")
 theme_override_font_sizes/font_size = 35
-text = "Reiniciar fase"
+text = "Menu principal"
 mouse_default_cursor_shape = 2
 theme_override_colors/font_hover_color = Color(0.24, 0.12, 0.08, 1)
 theme_override_colors/font_focus_color = Color(0.24, 0.12, 0.08, 1)
@@ -155,29 +156,15 @@ theme_override_styles/normal = SubResource("Style_button")
 theme_override_styles/hover = SubResource("Style_button_hover")
 theme_override_styles/pressed = SubResource("Style_button_hover")
 theme_override_styles/focus = SubResource("Style_button_hover")
-focus_neighbor_top = NodePath("../ContinueButton")
-focus_neighbor_bottom = NodePath("../PhaseSelector")
-
-[node name="PhaseSelectorLabel" type="Label" parent="Screen/Sheet/Content"]
-layout_mode = 0
-offset_left = 560.0
-offset_top = 609.0
-offset_right = 1040.0
-offset_bottom = 649.0
-theme_override_colors/font_color = Color(0.24, 0.12, 0.08, 1)
-theme_override_fonts/font = ExtResource("3_body")
-theme_override_font_sizes/font_size = 28
-text = "Selecionar fase"
-horizontal_alignment = 1
-vertical_alignment = 1
-mouse_filter = 2
+focus_neighbor_top = NodePath("../PhaseSelector")
+focus_neighbor_bottom = NodePath("../ContinueButton")
 
 [node name="PhaseSelector" type="OptionButton" parent="Screen/Sheet/Content"]
 layout_mode = 0
 offset_left = 560.0
-offset_top = 660.0
+offset_top = 535.0
 offset_right = 880.0
-offset_bottom = 726.0
+offset_bottom = 601.0
 theme_override_colors/font_color = Color(0.24, 0.12, 0.08, 1)
 theme_override_fonts/font = ExtResource("3_body")
 theme_override_font_sizes/font_size = 35
@@ -191,7 +178,8 @@ theme_override_styles/normal = SubResource("Style_button")
 theme_override_styles/hover = SubResource("Style_button_hover")
 theme_override_styles/pressed = SubResource("Style_button_hover")
 theme_override_styles/focus = SubResource("Style_button_hover")
-focus_neighbor_top = NodePath("../RestartButton")
+focus_neighbor_top = NodePath("../ContinueButton")
+focus_neighbor_bottom = NodePath("../MainMenuButton")
 focus_neighbor_right = NodePath("../PhaseButton")
 alignment = 1
 theme_override_colors/arrow = Color(0.29, 0.12, 0.09, 1)
@@ -199,9 +187,9 @@ theme_override_colors/arrow = Color(0.29, 0.12, 0.09, 1)
 [node name="PhaseButton" type="Button" parent="Screen/Sheet/Content"]
 layout_mode = 0
 offset_left = 900.0
-offset_top = 660.0
+offset_top = 535.0
 offset_right = 1040.0
-offset_bottom = 726.0
+offset_bottom = 601.0
 theme_override_colors/font_color = Color(0.24, 0.12, 0.08, 1)
 theme_override_fonts/font = ExtResource("3_body")
 theme_override_font_sizes/font_size = 35
@@ -216,19 +204,5 @@ theme_override_styles/hover = SubResource("Style_button_hover")
 theme_override_styles/pressed = SubResource("Style_button_hover")
 theme_override_styles/focus = SubResource("Style_button_hover")
 focus_neighbor_left = NodePath("../PhaseSelector")
-focus_neighbor_top = NodePath("../RestartButton")
-focus_neighbor_bottom = NodePath("../ContinueButton")
-
-[node name="ControlsLabel" type="Label" parent="Screen/Sheet/Content"]
-layout_mode = 0
-offset_left = 540.0
-offset_top = 798.0
-offset_right = 1060.0
-offset_bottom = 838.0
-theme_override_colors/font_color = Color(0.24, 0.12, 0.08, 1)
-theme_override_fonts/font = ExtResource("3_body")
-theme_override_font_sizes/font_size = 23
-text = "ESC · continuar       R · reiniciar"
-horizontal_alignment = 1
-vertical_alignment = 1
-mouse_filter = 2
+focus_neighbor_top = NodePath("../ContinueButton")
+focus_neighbor_bottom = NodePath("../MainMenuButton")

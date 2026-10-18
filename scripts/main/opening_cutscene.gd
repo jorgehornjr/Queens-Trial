@@ -29,6 +29,7 @@ const TOTAL_LENGTH := QUEEN_CLOSE + 12.9
 @onready var bottom_bar: ColorRect = $Overlay/BottomBar
 
 var _rig: BoardOrbitCamera
+var _board: Board3D
 var _player: GridPlayer
 var _seraph: Node3D
 var _character_model: Node3D
@@ -70,6 +71,8 @@ func play() -> void:
 		return
 
 	_character_model = _player.get_node_or_null("Model") as Node3D
+	_board = board
+	_board.set_safe_spot_visible(false)
 	var animations := _character_model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if animations != null and animations.has_animation("intro_arrival"):
 		_reaction_end = ENTRY_START + animations.get_animation("intro_arrival").length
@@ -304,4 +307,5 @@ func _complete() -> void:
 	top_bar.visible = false
 	bottom_bar.visible = false
 	fade.modulate.a = 0.0
+	_board.set_safe_spot_visible(true)
 	finished.emit()

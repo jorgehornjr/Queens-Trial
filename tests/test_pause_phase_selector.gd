@@ -11,14 +11,16 @@ func _initialize() -> void:
 func _run() -> void:
 	var main := (load("res://scenes/main/main.tscn") as PackedScene).instantiate()
 	root.add_child(main)
+	current_scene = main
 	await process_frame
 	await process_frame
 	var menu := main.get_node("PauseOverlay") as PauseOverlay
 	var manager := main.get_node("PhaseManager") as PhaseManager
 	var trial := main.get_node("BalanceTrialController") as BalanceTrialController
 	var cutscene := main.get_node("OpeningCutscene") as OpeningCutscene
+	_expect(menu.content.get_node_or_null("RestartButton") == null and menu.content.get_node_or_null("PhaseSelectorLabel") == null and menu.content.get_node_or_null("ControlsLabel") == null and menu.main_menu_button.text == "Menu principal", "A pausa deve conter Continuar, seletor com Ir e Menu principal, sem os textos removidos.")
 	_expect(cutscene._running and manager.current_phase == 0, "O teste deve começar durante a abertura.")
-	_expect(menu.phase_selector.item_count == 6, "O seletor deve oferecer todas as seis fases jogáveis.")
+	_expect(menu.phase_selector.item_count == 13 and menu.phase_selector.get_item_id(8) == 101 and menu.phase_selector.get_item_id(12) == 105 and menu.phase_selector.get_item_text(8) == "Chaotic I" and menu.phase_selector.get_item_text(12) == "Chaotic V", "O seletor deve oferecer oito fases e cinco desafios Chaotic para teste.")
 	await _jump(menu, 6)
 	_expect(manager.current_phase == 6 and not paused and not menu.screen.visible, "Ir deve fechar o ESC e iniciar a fase escolhida.")
 	_expect(not cutscene._running and not cutscene.teleport.visible and not cutscene.teleport_sound.playing, "Pular a abertura deve encerrar câmera, teleporte e áudio da intro.")
@@ -48,9 +50,15 @@ func _run() -> void:
 	await _until(func(): return trial.stage == BalanceTrialController.Stage.DECISION)
 	await _jump(menu, 6)
 	_expect(trial.round_index == 0 and not main.get_node("World/Player").platform_sliding, "Selecionar a fase atual deve iniciar um teste novo.")
-	# Wait beyond the cancelled cinematic's old finish time: it must not load phase one.
+	# Interrupt into the card table, then return, and let old callbacks expire.
+	await _jump(menu, 7)
+	await _until(func(): return main.get_node("CardTrialController").table.visible)
+	_expect(main.get_node("CardTrialController").table.visible and not main.get_node("World/Player").visible, "O seletor deve abrir a fase sete sem personagem.")
+	await _jump(menu, 8)
+	_expect(main.get_node("CardTrialController").state.kind == CardTrialState.Kind.MATCH, "A fase oito deve começar pela associação.")
+	await _jump(menu, 6)
 	await create_timer(OpeningCutscene.TOTAL_LENGTH + 1.0).timeout
-	_expect(manager.current_phase == 6 and not cutscene.top_bar.visible and not cutscene.bottom_bar.visible, "Callbacks antigos da abertura não devem sobrescrever a fase selecionada.")
+	_expect(manager.current_phase in [6, 7] and not cutscene.top_bar.visible and not cutscene.bottom_bar.visible, "Callbacks antigos da abertura não devem sobrescrever a fase selecionada.")
 	main.get_node("Music").stop()
 	main.get_node("GameAudio").stop_effects()
 	await create_timer(0.12, true, false, true).timeout
@@ -61,7 +69,7 @@ func _run() -> void:
 	for failure in failures:
 		printerr("FALHA: " + failure)
 	if failures.is_empty():
-		print("OK: ESC, seis fases, salto da abertura, pausa da poeira, troca durante inclinação e reinício da fase atual.")
+		print("OK: ESC, oito fases, mesa de cartas, salto da abertura, pausa e reinício.")
 	quit(0 if failures.is_empty() else 1)
 
 

@@ -39,26 +39,27 @@ static func validate_campaign(campaign: Dictionary) -> PackedStringArray:
 			errors.append("Fase %d ausente." % phase_number)
 			continue
 
-		var should_be_timed := phase_number >= 7
+		var should_be_timed := phase_number >= 9
 		var is_timed := String(phase.get("resolution", "")) == "timer"
 		if should_be_timed != is_timed:
 			errors.append("Modo de resolução incorreto na fase %d." % phase_number)
 		if phase_number == 6:
 			if String(phase.get("resolution", "")) != "balance" or float(phase.get("seconds_per_edict", 0)) != 5.0:
 				errors.append("A fase 6 deve usar a balança com cinco segundos de decisão.")
-			var rounds: Array = phase.get("balance_rounds", [])
-			if rounds.is_empty():
-				errors.append("A balança precisa de pelo menos uma rodada.")
-			for pair in rounds:
-				if not pair is Array or pair.size() != 2:
-					errors.append("Cada rodada da balança precisa de duas cartas.")
-					continue
-				if pair[0] == pair[1] or float(pair[0]) != int(pair[0]) or float(pair[1]) != int(pair[1]) or int(pair[0]) not in range(1, 5) or int(pair[1]) not in range(1, 5):
-					errors.append("As cartas da balança devem ter pesos diferentes entre 1 e 4.")
+			if phase.get("balance_round_count", 0) != 3:
+				errors.append("A balança precisa de três rodadas, com a última sem indicação de peso.")
+			var weight_min = phase.get("balance_weight_min", 0)
+			var weight_max = phase.get("balance_weight_max", 0)
+			if float(weight_min) != int(weight_min) or float(weight_max) != int(weight_max) or int(weight_min) < 1 or int(weight_max) > 20 or int(weight_min) >= int(weight_max):
+				errors.append("O sorteio da balança exige um intervalo válido de cartas entre 1 e 20.")
 			if float(phase.get("tilt_degrees", 0.0)) <= 0.0 or float(phase.get("tilt_degrees", 0.0)) > 30.0 or not is_equal_approx(float(phase.get("slide_tiles", 0.0)), 3.0):
 				errors.append("A balança exige inclinação parcial e deslizamento de três casas.")
 
-		var should_be_procedural := phase_number == 7 or phase_number == 9
+		if phase_number == 7 and String(phase.get("resolution", "")) != "card_order":
+			errors.append("A fase 7 deve usar duas rodadas de ordenação de cartas.")
+		if phase_number == 8 and String(phase.get("resolution", "")) != "card_match":
+			errors.append("A fase 8 deve usar associação e decreto falso.")
+		var should_be_procedural := phase_number in [1, 2, 3, 4, 5, 7, 8, 9]
 		var is_procedural := String(phase.get("configuration", "")) == "procedural"
 		if should_be_procedural != is_procedural:
 			errors.append("Configuração fixa/procedural incorreta na fase %d." % phase_number)

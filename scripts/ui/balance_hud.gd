@@ -1,10 +1,8 @@
 class_name BalanceHUD
 extends Control
 
-const CARDS := [
-	preload("res://assets/cards/1.jpg"), preload("res://assets/cards/2.jpg"),
-	preload("res://assets/cards/3.jpg"), preload("res://assets/cards/4.jpg"),
-]
+const Assets = preload("res://scripts/ui/roman_card_assets.gd")
+const CARDS = Assets.FRONTS
 
 var left_card: TextureRect
 var right_card: TextureRect
@@ -46,4 +44,6 @@ func _layout() -> void:
 func show_round(left: int, right: int) -> void:
 	left_card.texture = CARDS[left - 1]
 	right_card.texture = CARDS[right - 1]
+	left_card.material = Assets.card_material(left)
+	right_card.material = Assets.card_material(right)
 	show()

@@ -36,7 +36,24 @@ func _ready() -> void:
 	_player = get_node_or_null(player_path) as Node3D
 	_skeleton = $Model.find_child("Skeleton3D", true, false) as Skeleton3D
 	_configure_procedural_animation()
+	# Build and submit the dissolved scales during scene setup, before gameplay.
+	# The reveal shader discards every fragment at zero, warming its pipelines
+	# without showing the prop or loading/instantiating it at the phase-6 handoff.
+	_prepare_balance()
+	balance.show()
+	_finish_balance_warmup()
 	call_deferred("_raise_orb_vertically")
+
+
+func _finish_balance_warmup() -> void:
+	# The queen is hidden through the opening's first shots. Wait until she
+	# actually renders, so a cold shader cache is warmed before the handoff too.
+	while not is_visible_in_tree():
+		await get_tree().process_frame
+	for frame in range(3):
+		if DisplayServer.get_name() == "headless": await get_tree().process_frame
+		else: await RenderingServer.frame_post_draw
+	if is_inside_tree() and _ritual_generation == 0: balance.hide()
 
 
 func _prepare_balance() -> void:

@@ -6,12 +6,9 @@ signal burn_started
 signal burn_cancelled
 
 const CARD_BACK: Texture2D = preload("res://assets/cards/back.png")
-const CARD_FRONTS := [
-	preload("res://assets/cards/1.jpg"),
-	preload("res://assets/cards/2.jpg"),
-	preload("res://assets/cards/3.jpg"),
-	preload("res://assets/cards/4.jpg"),
-]
+const CARD_BACK_CHAOTIC: Texture2D = preload("res://assets/cards/back_chaotic.png")
+const Assets = preload("res://scripts/ui/roman_card_assets.gd")
+const CARD_FRONTS = Assets.FRONTS
 const BURN_SHADER: Shader = preload("res://shaders/card_burn.gdshader")
 const BURN_AURA_SHADER: Shader = preload("res://shaders/card_burn_aura.gdshader")
 const CARD_SIZE := Vector2(300.0, 427.0)
@@ -56,15 +53,15 @@ func cancel() -> void:
 	finished.emit()
 
 
-func present(values: Array) -> void:
+func present(values: Array, back_texture: Texture2D = CARD_BACK) -> void:
 	cancel()
 	var run_id := _generation
 	_current_values = values.duplicate()
 	visible = true
 	veil.modulate = Color.WHITE
 	card_area.modulate = Color.WHITE
-	_spawn_cards(values, run_id)
-	await get_tree().create_timer(0.75).timeout
+	_spawn_cards(values, run_id, back_texture)
+	await get_tree().create_timer(0.75, false).timeout
 	if run_id != _generation:
 		return
 	for card in _cards:
@@ -74,7 +71,7 @@ func present(values: Array) -> void:
 	await finished
 
 
-func _spawn_cards(values: Array, run_id: int) -> void:
+func _spawn_cards(values: Array, run_id: int, back_texture: Texture2D) -> void:
 	card_area.visible = true
 	card_area.modulate = Color.WHITE
 	var viewport_size := get_viewport_rect().size
@@ -91,10 +88,11 @@ func _spawn_cards(values: Array, run_id: int) -> void:
 			continue
 		var card := TextureButton.new()
 		card.name = "EdictCard%d" % index
-		card.texture_normal = CARD_BACK
+		card.texture_normal = back_texture
 		card.ignore_texture_size = true
 		card.stretch_mode = TextureButton.STRETCH_SCALE
 		card.size = card_size
+		card.material = Assets.card_material()
 		card.custom_minimum_size = card_size
 		card.pivot_offset = card_size * 0.5
 		card.position = Vector2(first_x + float(index) * (card_size.x + gap), top_y + 115.0 * scale_factor)
@@ -160,17 +158,17 @@ func _flip_card(index: int, run_id: int) -> void:
 	_track(close)
 	close.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 	close.tween_property(card, "scale:x", 0.0, 0.18)
-	await get_tree().create_timer(0.19).timeout
+	await get_tree().create_timer(0.19, false).timeout
 	if run_id != _generation:
 		return
 	var value := int(_current_values[index])
 	card.texture_normal = CARD_FRONTS[value - 1]
-	card.material = null
+	card.material = Assets.card_material(value)
 	var open := create_tween()
 	_track(open)
 	open.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	open.tween_property(card, "scale:x", 1.0, 0.24)
-	await get_tree().create_timer(0.25).timeout
+	await get_tree().create_timer(0.25, false).timeout
 	if run_id != _generation:
 		return
 	_revealed[index] = true
@@ -179,7 +177,7 @@ func _flip_card(index: int, run_id: int) -> void:
 
 
 func _finish_cards(run_id: int) -> void:
-	await get_tree().create_timer(1.45).timeout
+	await get_tree().create_timer(1.45, false).timeout
 	if run_id != _generation:
 		return
 	var overlays: Array[ColorRect] = []
@@ -188,6 +186,7 @@ func _finish_cards(run_id: int) -> void:
 		var card := _cards[index]
 		var material := ShaderMaterial.new()
 		material.shader = BURN_SHADER
+		Assets.apply_paper_tone(material, int(_current_values[index]))
 		material.set_shader_parameter("burn_seed", float(index) * 2.37 + 0.41)
 		card.material = material
 		var aura := _create_burn_aura(card, float(index) * 2.37 + 0.41)
@@ -197,7 +196,7 @@ func _finish_cards(run_id: int) -> void:
 		_track(burn)
 		burn.tween_interval(float(index) * 0.09)
 		burn.tween_method(_set_burn_progress.bind(card, aura), 0.0, 1.0, BURN_DURATION)
-	await get_tree().create_timer(BURN_DURATION + 0.13).timeout
+	await get_tree().create_timer(BURN_DURATION + 0.13, false).timeout
 	if run_id != _generation:
 		return
 	for card in _cards:
@@ -207,7 +206,7 @@ func _finish_cards(run_id: int) -> void:
 		_track(drift)
 		drift.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 		drift.tween_property(aura.material, "shader_parameter/aftermath", 1.0, 0.68)
-	await get_tree().create_timer(0.70).timeout
+	await get_tree().create_timer(0.70, false).timeout
 	if run_id != _generation:
 		return
 	var fade := create_tween()
@@ -215,7 +214,7 @@ func _finish_cards(run_id: int) -> void:
 	fade.set_parallel(true)
 	fade.tween_property(card_area, "modulate:a", 0.0, 0.25)
 	fade.tween_property(veil, "modulate:a", 0.0, 0.25)
-	await get_tree().create_timer(0.28).timeout
+	await get_tree().create_timer(0.28, false).timeout
 	if run_id != _generation:
 		return
 	visible = false

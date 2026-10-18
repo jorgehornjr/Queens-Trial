@@ -1,6 +1,7 @@
 extends SceneTree
 
 func _initialize() -> void:
+	DirAccess.make_dir_recursive_absolute("res://.godot/qa/ffxiv")
 	call_deferred("_run")
 
 func _run() -> void:

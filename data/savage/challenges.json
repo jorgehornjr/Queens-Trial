@@ -1,0 +1,254 @@
+{
+  "stages": [
+    {
+      "id": 101,
+      "name": "Chaotic 1",
+      "configuration": "fixed",
+      "mode": "savage",
+      "edict_values": [
+        2,
+        4
+      ],
+      "safe_spot": [
+        1,
+        0
+      ],
+      "preparation_seconds": 10.0,
+      "seconds_per_edict": 15.0,
+      "piece_waves": [
+        [
+          {
+            "type": "rook",
+            "side": "top",
+            "edge_slot": 3,
+            "edge_direction": -1,
+            "move_value": 2
+          },
+          {
+            "type": "bishop",
+            "side": "left",
+            "edge_slot": 0,
+            "edge_direction": 1,
+            "move_value": 4
+          }
+        ],
+        [
+          {
+            "type": "bishop",
+            "side": "bottom",
+            "edge_slot": 0,
+            "edge_direction": 1,
+            "move_value": 4
+          },
+          {
+            "type": "rook",
+            "side": "right",
+            "edge_slot": 3,
+            "edge_direction": 1,
+            "move_value": 1
+          }
+        ]
+      ]
+    },
+    {
+      "id": 102,
+      "name": "Chaotic 2",
+      "configuration": "fixed",
+      "mode": "savage",
+      "edict_values": [
+        3,
+        3
+      ],
+      "safe_spot": [
+        2,
+        0
+      ],
+      "preparation_seconds": 10.0,
+      "seconds_per_edict": 15.0,
+      "piece_waves": [
+        [
+          {
+            "type": "bishop",
+            "side": "top",
+            "edge_slot": 0,
+            "edge_direction": 1,
+            "move_value": 2
+          },
+          {
+            "type": "rook",
+            "side": "left",
+            "edge_slot": 0,
+            "edge_direction": 1,
+            "move_value": 3
+          }
+        ],
+        [
+          {
+            "type": "bishop",
+            "side": "right",
+            "edge_slot": 3,
+            "edge_direction": 1,
+            "move_value": 1
+          },
+          {
+            "type": "rook",
+            "side": "bottom",
+            "edge_slot": 1,
+            "edge_direction": -1,
+            "move_value": 1
+          }
+        ]
+      ]
+    },
+    {
+      "id": 103,
+      "name": "Chaotic 3",
+      "configuration": "fixed",
+      "mode": "savage",
+      "edict_values": [
+        4,
+        2
+      ],
+      "safe_spot": [
+        2,
+        4
+      ],
+      "preparation_seconds": 10.0,
+      "seconds_per_edict": 15.0,
+      "piece_waves": [
+        [
+          {
+            "type": "rook",
+            "side": "bottom",
+            "edge_slot": 2,
+            "edge_direction": -1,
+            "move_value": 1
+          },
+          {
+            "type": "rook",
+            "side": "top",
+            "edge_slot": 1,
+            "edge_direction": 1,
+            "move_value": 2
+          }
+        ],
+        [
+          {
+            "type": "rook",
+            "side": "right",
+            "edge_slot": 0,
+            "edge_direction": 1,
+            "move_value": 1
+          },
+          {
+            "type": "bishop",
+            "side": "left",
+            "edge_slot": 4,
+            "edge_direction": -1,
+            "move_value": 4
+          }
+        ]
+      ]
+    },
+    {
+      "id": 104,
+      "name": "Chaotic 4",
+      "configuration": "fixed",
+      "mode": "savage",
+      "edict_values": [
+        3,
+        4
+      ],
+      "safe_spot": [
+        0,
+        4
+      ],
+      "preparation_seconds": 10.0,
+      "seconds_per_edict": 15.0,
+      "piece_waves": [
+        [
+          {
+            "type": "rook",
+            "side": "bottom",
+            "edge_slot": 3,
+            "edge_direction": -1,
+            "move_value": 3
+          },
+          {
+            "type": "rook",
+            "side": "right",
+            "edge_slot": 4,
+            "edge_direction": -1,
+            "move_value": 1
+          }
+        ],
+        [
+          {
+            "type": "bishop",
+            "side": "top",
+            "edge_slot": 4,
+            "edge_direction": -1,
+            "move_value": 1
+          },
+          {
+            "type": "bishop",
+            "side": "left",
+            "edge_slot": 4,
+            "edge_direction": -1,
+            "move_value": 3
+          }
+        ]
+      ]
+    },
+    {
+      "id": 105,
+      "name": "Chaotic 5",
+      "configuration": "fixed",
+      "mode": "savage",
+      "edict_values": [
+        4,
+        3
+      ],
+      "safe_spot": [
+        1,
+        0
+      ],
+      "preparation_seconds": 10.0,
+      "seconds_per_edict": 15.0,
+      "piece_waves": [
+        [
+          {
+            "type": "rook",
+            "side": "bottom",
+            "edge_slot": 2,
+            "edge_direction": -1,
+            "move_value": 1
+          },
+          {
+            "type": "rook",
+            "side": "right",
+            "edge_slot": 0,
+            "edge_direction": 1,
+            "move_value": 2
+          }
+        ],
+        [
+          {
+            "type": "rook",
+            "side": "top",
+            "edge_slot": 0,
+            "edge_direction": 1,
+            "move_value": 2
+          },
+          {
+            "type": "bishop",
+            "side": "left",
+            "edge_slot": 3,
+            "edge_direction": 1,
+            "move_value": 1
+          }
+        ]
+      ]
+    }
+  ]
+}
