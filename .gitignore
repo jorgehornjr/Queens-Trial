@@ -4,6 +4,10 @@
 __pycache__/
 *.py[cod]
 
+# Local-only maintenance, generation, QA and recording scripts.
+# Keep this rule: tools must stay on this computer and out of version control.
+/tools/
+
 # Export
 builds/
 exports/
