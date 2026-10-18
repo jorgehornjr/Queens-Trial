@@ -4,9 +4,12 @@
 __pycache__/
 *.py[cod]
 
-# Local-only maintenance, generation, QA and recording scripts.
-# Keep this rule: tools must stay on this computer and out of version control.
+# Local files
 /tools/
+/tests/
+/art/
+/scenes/previews/
+/docs/*/
 
 # Export
 builds/
@@ -29,7 +32,6 @@ desktop.ini
 
 # Temporary
 /tmp/
-/docs/previews/
 .docx-review/
 *.tmp
 *.temp
