@@ -25,10 +25,11 @@ var bodies: Dictionary = {}
 var missing_assets: PackedStringArray = []
 
 func _ready() -> void:
-	var report: Array = JSON.parse_string(FileAccess.get_file_as_string(ASSET_ROOT + "preparation.json"))
+	var rotations: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(ASSET_ROOT + "rotation_axes.json"))
 	var axes: Dictionary = {}
-	for entry: Dictionary in report:
-		axes[entry.name] = Vector3(entry.spin_axis[0], entry.spin_axis[1], entry.spin_axis[2])
+	for asset_name: String in rotations:
+		var axis: Array = rotations[asset_name]
+		axes[asset_name] = Vector3(axis[0], axis[1], axis[2])
 	for data: Dictionary in LAYOUT:
 		var path: String = ASSET_ROOT + data.asset + ".glb"
 		if not ResourceLoader.exists(path):
