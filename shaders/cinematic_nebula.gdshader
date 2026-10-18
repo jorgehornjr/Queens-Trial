@@ -5,6 +5,7 @@ uniform sampler2D nebula_mask : filter_linear_mipmap, repeat_enable;
 // Panorama colorido usado como máscara de intensidade do fluxo.
 uniform sampler2D flow_reference : filter_linear_mipmap, repeat_enable;
 uniform float effect_time = 0.0;
+uniform float inferno_mix : hint_range(0.0, 1.0) = 0.0;
 uniform bool motion_enabled = true;
 uniform float motion_strength : hint_range(0.0, 0.02) = 0.007;
 uniform float motion_speed : hint_range(0.0, 3.0) = 1.0;
@@ -95,6 +96,11 @@ void sky() {
 	// Energia adicional restrita aos núcleos HDR.
 	float core = smoothstep(0.65, 3.5, luminance(color));
 	color *= 1.0 + core * core_glow_strength;
+	// Retain neutral stars; tint only the colored nebula filaments.
+	float neutral = min(min(color.r,color.g),color.b);
+	float energy = max(max(color.r,color.g),color.b) - neutral;
+	vec3 inferno = vec3(neutral) + vec3(1.06,0.055,0.018) * energy;
+	color = mix(color, inferno, inferno_mix);
 	if (AT_CUBEMAP_PASS) {
 		// IBL estável, sem os lampejos e filamentos da passagem visual.
 		color = min(color, vec3(8.0));

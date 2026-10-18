@@ -3,6 +3,7 @@ extends CanvasLayer
 
 const EdictDust = preload("res://scripts/ui/edict_dust.gd")
 const TutorialBookScene = preload("res://scripts/ui/tutorial_book.gd")
+const FailureView = preload("res://scripts/ui/failure_feedback.gd")
 const STORY_FONT: FontFile = preload("res://assets/fonts/CormorantSC-SemiBold.ttf")
 const JUPITER_FONT: FontFile = preload("res://assets/fonts/jupiter_pro.otf")
 const ANNOUNCEMENT_FONT_SIZE := 112
@@ -11,8 +12,9 @@ const ANNOUNCEMENT_FONT_SIZE := 112
 @onready var announcement: Control = $Announcement
 @onready var announcement_label: Label = $Announcement/EdictLabel
 @onready var announcement_halo: ColorRect = $Announcement/Halo
-@onready var result_panel: PanelContainer = $ResultPanel
-@onready var result_label: Label = $ResultPanel/ResultLabel
+var result_panel: PanelContainer
+var result_label: Label
+var failure_feedback: FailureFeedback
 @onready var card_presentation: CardPresentation = $CardPresentation
 
 var _dust_effect: Node2D
@@ -20,8 +22,6 @@ var _intro_generation := 0
 var _dust_tween: Tween
 var _phase_number := 0
 var tutorial_book: TutorialBook
-var _balance_reading := false
-var _balance_process_mode := Node.PROCESS_MODE_INHERIT
 var _consulting := false
 var book_button: TextureButton
 var _book_hover: Tween
@@ -32,11 +32,13 @@ func _ready() -> void:
 	tutorial_book = TutorialBookScene.new()
 	tutorial_book.name = "TutorialBook"
 	add_child(tutorial_book)
-	var trial := get_parent().get_node_or_null("BalanceTrialController")
-	if trial != null:
-		trial.round_started.connect(_hold_balance_for_reading)
+	failure_feedback = FailureView.new()
+	failure_feedback.name = "FailureFeedback"
+	add_child(failure_feedback)
+	result_panel = failure_feedback.panel
+	result_label = failure_feedback.body
 	announcement.visible = false
-	result_panel.visible = false
+	failure_feedback.cancel()
 	announcement_label.add_theme_font_override("font", STORY_FONT)
 	announcement_label.add_theme_font_size_override("font_size", ANNOUNCEMENT_FONT_SIZE)
 
@@ -46,21 +48,20 @@ func set_phase(phase_number: int, _phase_data: Dictionary, _phase_seed: int) -> 
 	_release_reading()
 	tutorial_book.cancel()
 	_phase_number = phase_number
-	tutorial_book.unlock_to(phase_number)
+	if phase_number <= PhaseManager.LAST_PLAYABLE_PHASE: tutorial_book.unlock_to(phase_number)
+	announcement.hide()
 	phase_label.text = ""
 	# A apresentação fica concentrada nos éditos inferiores e nas telas de resultado.
-	result_panel.visible = false
+	failure_feedback.cancel()
 	_clear_dust()
 	card_presentation.cancel()
-	if phase_number == 6 and tutorial_book.needs_chapter(6):
-		_balance_reading = true
-		call_deferred("_play_balance_intro", _intro_generation)
 
 
 func _exit_tree() -> void:
 	_intro_generation += 1
 	if is_instance_valid(tutorial_book): tutorial_book.cancel()
 	if is_instance_valid(card_presentation): card_presentation.cancel()
+	if is_instance_valid(failure_feedback): failure_feedback.cancel()
 	_clear_dust()
 	if _consulting: get_tree().paused = false
 
@@ -73,32 +74,13 @@ func play_phase_intro(values: Array) -> void:
 	await card_presentation.present(values)
 
 
-func _play_balance_intro(run_id: int) -> void:
-	if run_id != _intro_generation: return
+func play_balance_intro() -> bool:
+	var run_id := _intro_generation
 	var read_ok := await tutorial_book.present(6)
-	if not read_ok or run_id != _intro_generation: return
-	var trial := get_parent().get_node("BalanceTrialController") as BalanceTrialController
-	_balance_reading = false
-	trial.process_mode = _balance_process_mode
-	if trial.stage == BalanceTrialController.Stage.DECISION:
-		trial.trial_hud.show()
-		get_parent().get_node("World/Player").set_input_enabled(true)
-
-
-func _hold_balance_for_reading(_left: int, _right: int) -> void:
-	if not _balance_reading: return
-	var trial := get_parent().get_node("BalanceTrialController") as BalanceTrialController
-	_balance_process_mode = trial.process_mode
-	trial.process_mode = Node.PROCESS_MODE_DISABLED
-	trial.trial_hud.hide()
-	get_parent().get_node("World/Player").set_input_enabled(false)
+	return read_ok and run_id == _intro_generation
 
 
 func _release_reading() -> void:
-	if _balance_reading:
-		var trial := get_parent().get_node_or_null("BalanceTrialController")
-		if trial != null: trial.process_mode = _balance_process_mode
-	_balance_reading = false
 	if _consulting:
 		get_tree().paused = false
 		_consulting = false
@@ -109,21 +91,21 @@ func _release_reading() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_N:
 		var player := get_parent().get_node_or_null("World/Player") as GridPlayer
-		if not get_tree().paused and not tutorial_book.visible and player != null and player.input_enabled:
+		if _phase_number in range(1, 7) and not get_tree().paused and not tutorial_book.visible and player != null and player.input_enabled:
 			get_viewport().set_input_as_handled()
 			_consult_book()
 
 
 func _consult_book() -> void:
 	var player := get_parent().get_node_or_null("World/Player") as GridPlayer
-	if _consulting or tutorial_book.visible or get_tree().paused or player == null or not player.input_enabled: return
+	if _phase_number not in range(1, 7) or _consulting or tutorial_book.visible or failure_feedback.screen.visible or get_tree().paused or player == null or not player.input_enabled: return
 	var run_id := _intro_generation
 	_consulting = true
 	book_button.hide()
 	get_tree().paused = true
 	tutorial_book.process_mode = Node.PROCESS_MODE_ALWAYS
 	tutorial_book.consultation = true
-	var read_ok := await tutorial_book.present(_phase_number, true)
+	var read_ok := await tutorial_book.present(0 if _phase_number in [7, 8] else _phase_number, true)
 	if not read_ok or run_id != _intro_generation: return
 	_release_reading()
 
@@ -131,7 +113,7 @@ func _consult_book() -> void:
 func _process(_delta: float) -> void:
 	if not is_instance_valid(book_button) or not is_instance_valid(tutorial_book): return
 	var player := get_parent().get_node_or_null("World/Player") as GridPlayer
-	book_button.visible = _phase_number > 0 and player != null and player.input_enabled and not tutorial_book.visible and not card_presentation.visible and not get_tree().paused
+	book_button.visible = _phase_number in range(1, 7) and player != null and player.input_enabled and not tutorial_book.visible and not failure_feedback.screen.visible and not card_presentation.visible and not get_tree().paused
 
 
 func _build_book_button() -> void:
@@ -208,27 +190,32 @@ func _play_announcement(text_value: String) -> void:
 	_clear_dust()
 
 
-func show_failure(motivos: Array) -> void:
-	result_label.text = "\n".join(PackedStringArray(motivos))
-	result_label.add_theme_color_override("font_color", Color(0.96, 0.91, 0.82, 1.0))
-	_show_result_panel()
+func show_failure(reasons: Array, button_text := "Tentar novamente") -> bool:
+	announcement.hide()
+	book_button.hide()
+	return await failure_feedback.present(reasons, _failure_guidance(reasons), button_text)
+
+
+func _failure_guidance(reasons: Array) -> String:
+	var text := " ".join(PackedStringArray(reasons)).to_lower()
+	if _phase_number == 6:
+		return "Antes de o tabuleiro inclinar, procure o lado mais leve."
+	if "distância" in text:
+		return "Voltar pelo mesmo caminho gasta passos, mas não aumenta a distância do começo."
+	if "atacou" in text:
+		return "As torres atacam em linha reta. Observe onde vão parar." if _phase_number <= 4 else "As torres atacam em linha reta; os bispos, pelas diagonais. Observe onde vão parar."
+	if "iluminada" in text:
+		return "Planeje o caminho para terminar na casa iluminada."
+	return "Observe os números e ajuste sua resposta. Você pode tentar de novo."
 
 
 func show_success() -> void:
-	result_panel.visible = false
+	failure_feedback.cancel()
 	await _play_announcement("FASE CONCLUÍDA")
 
 
 func show_restart() -> void:
-	result_panel.visible = false
-
-
-func _show_result_panel() -> void:
-	result_panel.visible = true
-	result_panel.modulate = Color(1, 1, 1, 0)
-	var tween := create_tween()
-	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tween.tween_property(result_panel, "modulate", Color.WHITE, 0.24)
+	failure_feedback.cancel()
 
 
 func _clear_dust() -> void:

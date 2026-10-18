@@ -32,6 +32,7 @@ var _safe_spot_ink: ShaderMaterial
 var _tutorial_guide: StarredGuide
 var _tutorial_generation := 0
 var _presentation_time := 0.0
+var _safe_spot_enabled := true
 
 
 func _ready() -> void:
@@ -75,6 +76,7 @@ func set_safe_spot_cell(cell: Vector2i) -> bool:
 
 
 func set_safe_spot_visible(enabled: bool) -> void:
+	_safe_spot_enabled = enabled
 	if is_instance_valid(_safe_spot_marker):
 		_safe_spot_marker.visible = enabled
 	if is_instance_valid(_safe_spot_light):
@@ -86,6 +88,7 @@ func show_safe_spot(cell: Vector2i) -> void:
 		_safe_spot_marker.queue_free()
 	var marker := MeshInstance3D.new()
 	marker.name = "SafeSpot"
+	marker.visible = _safe_spot_enabled
 	marker.position = grid_to_world(cell) + Vector3(0.0, 0.16, 0.0)
 	var floor := PlaneMesh.new()
 	floor.size = Vector2(1.0, float(SANCTUARY_SYMBOL.get_height()) / SANCTUARY_SYMBOL.get_width()) * tile_size * 0.98
@@ -103,6 +106,7 @@ func show_safe_spot(cell: Vector2i) -> void:
 	appear.tween_method(func(value: float): ink.set_shader_parameter("reveal", value), 0.0, 1.0, 0.65)
 	_safe_spot_light = OmniLight3D.new()
 	_safe_spot_light.name = "StarFloorLight"
+	_safe_spot_light.visible = _safe_spot_enabled
 	_safe_spot_light.position.y = 0.26
 	_safe_spot_light.light_color = Color(1.0, 0.76, 0.35)
 	_safe_spot_light.light_energy = 0.72

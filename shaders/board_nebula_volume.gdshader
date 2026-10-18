@@ -8,6 +8,7 @@ uniform float density = 0.30;
 uniform float radiance = 2.2;
 uniform float motion_speed = 0.035;
 uniform float time_offset = 0.0;
+uniform float inferno_mix : hint_range(0.0, 1.0) = 0.0;
 varying vec3 world_vertex;
 
 void vertex() {
@@ -56,6 +57,7 @@ void fragment() {
 		float sigma = density * rim * height * edge_fade * pow(smoothstep(0.40,0.80,cloud),1.4);
 		float opacity = 1.0-exp(-sigma * step_length);
 		vec3 color = mix(vec3(0.18,0.018,0.48),vec3(0.04,0.42,1.1),smoothstep(0.30,0.72,cloud));
+		color = mix(color, mix(vec3(0.38,0.004,0.022),vec3(1.15,0.065,0.018),smoothstep(0.30,0.72,cloud)),inferno_mix);
 		accumulated += transmittance * opacity * color * radiance * (0.35+filaments*2.7);
 		transmittance *= 1.0-opacity;
 		if (transmittance < 0.015) { break; }

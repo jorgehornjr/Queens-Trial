@@ -75,7 +75,7 @@ func _run() -> void:
 	await create_timer(0.3).timeout
 	_expect(not book.visible, "Reiniciar um capítulo lido não deve repetir a apresentação.")
 	manager.start_phase(6)
-	await _until(func(): return book.state == TutorialBook.State.READING and trial.stage == BalanceTrialController.Stage.DECISION)
+	await _until(func(): return book.state == TutorialBook.State.READING and trial.stage == BalanceTrialController.Stage.TRANSITION)
 	var remaining := trial.remaining
 	for step in range(6):
 		book.turn_page(-1)
@@ -86,6 +86,7 @@ func _run() -> void:
 	_expect("lado leve" not in book.body_label.text.to_lower() and "coluna" not in book.body_label.text.to_lower(), "A balança não deve revelar a posição vencedora.")
 	await _click(Vector2(20, 20))
 	await _until(func(): return not book.visible)
+	await _until(func(): return trial.stage == BalanceTrialController.Stage.DECISION)
 	_expect(player.input_enabled and trial.trial_hud.visible and trial.process_mode != Node.PROCESS_MODE_DISABLED, "Fechar o livro deve liberar os cinco segundos da balança.")
 	manager.restart_phase()
 	await create_timer(0.15).timeout

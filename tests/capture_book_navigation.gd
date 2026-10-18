@@ -54,6 +54,7 @@ func _until(predicate: Callable) -> void:
 
 func _capture(name: String) -> void:
 	await RenderingServer.frame_post_draw
+	DirAccess.make_dir_recursive_absolute("res://docs/previews/tutorial_book")
 	var path := "res://docs/previews/tutorial_book/%s.png" % name
 	root.get_texture().get_image().save_png(path)
 	print("QA: " + ProjectSettings.globalize_path(path))

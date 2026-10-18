@@ -2,6 +2,7 @@ shader_type spatial;
 render_mode unshaded, cull_disabled, blend_add, depth_draw_never;
 
 uniform vec4 neon_color : source_color = vec4(0.82, 0.58, 0.21, 1.0);
+uniform vec3 core_color = vec3(1.0,0.86,0.52);
 uniform float phase = 0.0;
 
 float segment(vec2 p, vec2 a, vec2 b) {
@@ -31,7 +32,7 @@ void fragment() {
 		light += (tube + glow) * pulse;
 		core += tube * pulse;
 	}
-	vec3 radiance = neon_color.rgb * 2.2 + vec3(1.0, 0.86, 0.52) * core * 1.3;
+	vec3 radiance = neon_color.rgb * 2.2 + core_color * core * 1.3;
 	ALBEDO = radiance;
 	EMISSION = radiance;
 	ALPHA = clamp(light, 0.0, 1.0) * neon_color.a;

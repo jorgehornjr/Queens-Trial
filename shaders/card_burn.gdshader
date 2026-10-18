@@ -1,7 +1,10 @@
 shader_type canvas_item;
+#include "res://shaders/card_paper.gdshaderinc"
 
 uniform float burn_progress : hint_range(0.0, 1.0) = 0.0;
 uniform float burn_seed = 0.0;
+varying vec4 vertex_color;
+void vertex() { vertex_color = COLOR; }
 
 float hash21(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -29,7 +32,8 @@ float burn_arrival(vec2 uv) {
 }
 
 void fragment() {
-	vec4 artwork = texture(TEXTURE, UV) * COLOR;
+	vec4 artwork = texture(TEXTURE, UV);
+	artwork.rgb = balance_paper(artwork.rgb);
 	float fiber = hash21(floor(UV * vec2(390.0, 552.0)) + burn_seed * 17.0);
 	float live_edge = burn_progress - burn_arrival(UV) + (fiber - 0.5) * 0.016;
 	float activity = smoothstep(0.0, 0.10, burn_progress);
@@ -40,5 +44,5 @@ void fragment() {
 	vec3 ink = mix(artwork.rgb, vec3(0.105, 0.054, 0.035), charred * 0.88);
 	ink = mix(ink, vec3(0.43, 0.105, 0.025), coal * 0.72);
 	ink = mix(ink, vec3(1.0, 0.52, 0.17), ember * 0.83);
-	COLOR = vec4(ink, artwork.a * intact);
+	COLOR = vec4(ink, artwork.a * intact) * vertex_color;
 }

@@ -2,7 +2,6 @@ extends SceneTree
 
 const HudScene = preload("res://scenes/ui/hud.tscn")
 const CARD_BACK = preload("res://assets/cards/back.png")
-const CARD_FOUR = preload("res://assets/cards/4.jpg")
 
 var failures := PackedStringArray()
 
@@ -139,10 +138,11 @@ func _test_phase_one_presentation() -> void:
 		await create_timer(0.25).timeout
 		_expect(card.scale.is_equal_approx(Vector2.ONE), "A carta deve voltar ao tamanho normal ao sair do hover.")
 		presentation._cards[0].pressed.emit()
-		_expect(await _wait_until(func(): return presentation._cards[0].texture_normal == CARD_FOUR),
-			"O clique deve virar a carta IV para a frente correta.")
-		_expect(presentation._cards[0].material == null,
-			"A frente da carta deve manter o fundo claro e as cores originais.")
+		var expected_front := RomanCardAssets.front(int(manager.current_phase_data.edict_values[0]))
+		_expect(await _wait_until(func(): return presentation._cards[0].texture_normal == expected_front),
+			"O clique deve virar a carta para a frente do édito sorteado.")
+		_expect(presentation._cards[0].material.shader == RomanCardAssets.SURFACE,
+			"A frente deve preservar a arte original e os mesmos formato quadrado do verso.")
 		_expect(await _wait_until(func(): return presentation.card_area.get_node_or_null("CardBurnAura") != null),
 			"A queima deve criar a camada de chamas e fumaça junto à carta.")
 		_expect(presentation.card_area.get_node_or_null("CardEmbers") == null,

@@ -2,17 +2,17 @@
 
 Versão original do mod **Fandaniel+Elidibus Enshroud.pmp**, autor **Dekken**, opção **Hooded Fandaniel**, fornecida pelo usuário. Fonte de geometria: `chara/equipment/e8100/model/c0101e8100_top.mdl`; esqueleto: `chara/human/c0101/skeleton/base/b0001/skl_c0101b0001.sklb` da instalação local do FFXIV. Os arquivos instalados são lidos, sem importar o mod para o jogo.
 
-O modelo tem duas malhas, 5.341 vértices, 6.045 triângulos e 106 ossos. Geometria, UVs, hierarquia e pesos são preservados. A tabela de cores dos materiais CharacterLegacy e os mapas originais são convertidos para os materiais do Godot. A iluminação e a resposta especular são adaptadas ao renderizador; o desenho não foi redesenhado. O símbolo do rosto usa as texturas originais `asi_s006a0f`, `asi_s006c0f` e `asi_s006d0f`, espelhadas como no recurso original, ligadas ao osso `j_kao`.
+O modelo tem duas malhas, 5.341 vértices, 6.045 triângulos e 106 ossos. Geometria, UVs, hierarquia e pesos são preservados. A tabela de cores dos materiais CharacterLegacy e os mapas originais são convertidos para os materiais do Godot. A iluminação e a resposta especular são adaptadas ao renderizador; o desenho não foi redesenhado. A versão ativa não apresenta emblema vermelho nem iluminação facial. As texturas extraídas do símbolo continuam arquivadas, sem reprodução no personagem.
 
 O tecido bordô original foi restaurado a pedido do usuário. As texturas de cor coincidem com as cópias em `original_materials/`. A paleta preserva couro marrom, forro bege e ornamentos; a geometria e os pesos seguem originais.
 
-O interior do capuz agora contém um rosto fechado e escuro criado em `scripts/player/fandaniel_face.gd`, com testa, nariz e queixo discretos, ligado ao mesmo osso do símbolo. A forma bloqueia o cenário atrás da máscara sem usar o rosto humano do Fandaniel. A chegada usa `shaders/fandaniel_arrival_skin.gdshader`, preservando os mapas originais e a máscara de recorte, com revelação gradual e escrita de profundidade; não troca de modo de transparência ao terminar.
+O interior do capuz agora contém um rosto fechado e escuro criado em `scripts/player/fandaniel_face.gd`, com testa, nariz e queixo discretos, ligado ao osso da cabeça `j_kao`. A forma mantém o interior do capuz escuro e bloqueia o cenário sem usar o rosto humano do Fandaniel. A chegada usa `shaders/fandaniel_arrival_skin.gdshader`, preservando os mapas originais e a máscara de recorte, com revelação gradual e escrita de profundidade; não troca de modo de transparência ao terminar.
 
 A sombra continua sobre a parte superior da gola com um gradiente suave acima do colar, preservando suas dobras. A máscara é armazenada nas cores dos vértices da cópia de malha usada no Godot e segue os pesos originais do pescoço e do tronco, inclusive ao elevar a cabeça. As texturas e a geometria da fonte permanecem intactas.
 
 A chegada atual usa a animação original **cbfm_swalk_loop**, do arquivo `chara/human/c0101/animation/a0001/bt_common/event/event_swalk_loop.pap`. É a variante lenta de caminhada cinematográfica humana do jogo; não foi identificada como exclusiva dos Ascians. O ciclo nativo tem 2 s e é reproduzido a 80% da velocidade na abertura, com a câmera acompanhando o personagem até a rainha aparecer. A caminhada começa dentro da fumaça, permanece sobre o tabuleiro e termina na casa inicial, sem alterar a grade lógica. Os braços, mãos, dedos, torso e pernas vêm da amostragem original do Havok, aplicada ao mesmo esqueleto do modelo.
 
-Após 5,5 segundos de caminhada, o olhar começa a subir durante três segundos: quatro graus no pescoço e oito na cabeça. `fandaniel_cinematic_gaze.gd` aplica esse movimento depois da animação nativa, sem alterar o ciclo importado. O capuz e o símbolo acompanham a cabeça; a elevação retorna suavemente ao repouso após o corte para a rainha. A abertura completa tem 43 segundos, incluindo os dois planos iniciais sem personagens.
+Após 5,5 segundos de caminhada, o olhar começa a subir durante três segundos: quatro graus no pescoço e oito na cabeça. `fandaniel_cinematic_gaze.gd` aplica esse movimento depois da animação nativa, sem alterar o ciclo importado. O capuz e sua sombra acompanham a cabeça; a elevação retorna suavemente ao repouso após o corte para a rainha. A abertura completa tem 43 segundos, incluindo os dois planos iniciais sem personagens.
 
 `native_animations/` guarda os FBX amostrados e os hashes dos PAP originais. `extract_native_walks.py` lê os arquivos instalados e usa o exportador nativo do [XAT](https://github.com/Etheirys/XAT) para amostrar os movimentos. `import_native_walks.py` aplica os deltas de skin do esqueleto original, compensando somente a convenção de eixos do FBX/Blender. O deslocamento cinematográfico é calculado a partir da velocidade dos pés e da escala do personagem. A roupa preta e as apresentações anteriores permanecem apenas como versões de referência, sem uso na cena principal.
 
@@ -45,4 +45,8 @@ Somente os movimentos são transferidos dos FBX. A skin do sacerdote anterior n�
 - `tests/test_phase_playthrough.gd` e `tests/test_balance_trial.gd`: fases 1–6.
 - `tests/capture_fandaniel.gd`: capturas das seis animações e do rosto.
 
-Os testes específicos da capa e do rig anterior continuam destinados à cena do sacerdote preservada, com 139 ossos. O modelo atual usa seu próprio esqueleto de 106 ossos.
+O modelo atual usa seu próprio esqueleto de 106 ossos. As cenas, fontes e verificações do sacerdote anterior foram arquivadas em `Deleted/project_cleanup_2026-10-17/archived/`.
+
+## Backup de autoria
+
+As fontes Blender/FBX, as texturas intermediárias e o JSON de geometria foram movidos para `Deleted/project_cleanup_2026-10-17/archived/`, mantendo os caminhos relativos acima. O GLB atual, suas texturas extraídas, os scripts e os relatórios permanecem no projeto ativo. Para reexportar, restaure primeiro os insumos necessários com o utilitário de recuperação descrito no README do projeto.

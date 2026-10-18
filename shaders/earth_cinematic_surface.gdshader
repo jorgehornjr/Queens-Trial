@@ -7,6 +7,7 @@ uniform sampler2D roughness_map : filter_linear_mipmap_anisotropic, repeat_enabl
 uniform sampler2D city_map : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform vec3 sun_direction = vec3(-0.97, 0.12, -0.2);
 uniform float city_energy = 1.0;
+uniform float specular_strength = 0.5;
 varying vec3 world_normal;
 
 void vertex() {
@@ -22,7 +23,7 @@ void fragment() {
 	NORMAL_MAP_DEPTH = 0.8;
 	ROUGHNESS = clamp(texture(roughness_map, UV).g, 0.22, 1.0);
 	METALLIC = 0.0;
-	SPECULAR = 0.5;
+	SPECULAR = specular_strength;
 	// Luzes noturnas limitadas pelo terminador no espaço global.
 	EMISSION = texture(city_map, UV).rgb * city_energy * night
 		+ surface * vec3(0.002, 0.004, 0.008);

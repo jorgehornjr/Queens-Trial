@@ -37,8 +37,8 @@ func _run() -> void:
 	await _until(func(): return not paused)
 	await _until(func(): return player.input_enabled)
 	_expect(not guide.playing and guide.reveal > 0.999, "O movimento só deve ser liberado depois da última estrela.")
-	for direction in [Vector2i.LEFT, Vector2i.LEFT, Vector2i.UP, Vector2i.UP]:
-		player._try_move(direction)
+	for destination: Array in main.phase_manager.current_phase_data.tutorial_path:
+		player._try_move(Vector2i(int(destination[0]), int(destination[1])) - player.current_cell)
 		await _until(func(): return not player.movement_locked)
 	_expect(player.current_cell == board.safe_spot, "A orientação deve preservar a rota de quatro movimentos.")
 	# Reiniciar durante a revelação e trocar de fase deve cancelar o bloqueio antigo.

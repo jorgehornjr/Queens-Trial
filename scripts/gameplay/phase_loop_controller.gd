@@ -7,7 +7,6 @@ const EditoMachineModel = preload("res://scripts/gameplay/edito_state_machine.gd
 const EnemyPieceModel = preload("res://scripts/pieces/enemy_piece_controller.gd")
 const AttackVisualizerModel = preload("res://scripts/gameplay/attack_visualizer.gd")
 const PhaseCatalogModel = preload("res://scripts/data/phase_catalog.gd")
-const EdictTimerModel = preload("res://scripts/gameplay/edict_timer.gd")
 
 @export var phase_manager_path: NodePath
 @export var board_path: NodePath
@@ -28,8 +27,6 @@ var _piece_root: Node3D
 var _pending_piece_movements := 0
 var _generation := 0
 var _intro_running := false
-var _edict_timer: EdictTimer
-var _is_timed_phase := false
 
 
 func _ready() -> void:
@@ -45,12 +42,6 @@ func _ready() -> void:
 	_edito_machine.edito_iniciado.connect(_on_edito_iniciado)
 	_edito_machine.falha.connect(_on_falha)
 	_edito_machine.sucesso.connect(_on_sucesso)
-
-	_edict_timer = EdictTimerModel.new()
-	_edict_timer.name = "EdictTimer"
-	add_child(_edict_timer)
-	_edict_timer.expired.connect(_on_edict_timer_expired)
-	_edict_timer.tick.connect(_on_edict_timer_tick)
 
 	_attack_visualizer = AttackVisualizerModel.new()
 	_attack_visualizer.name = "AttackVisualizer"
@@ -73,9 +64,7 @@ func _on_phase_started(phase_number: int, phase_data: Dictionary, _phase_seed: i
 	_attack_visualizer.clear()
 	_board.clear_tutorial_path()
 	_current_phase_data = phase_data
-	_is_timed_phase = String(phase_data.get("resolution", "moves")) == "timer"
-	_edict_timer.stop()
-	_board.set_safe_spot_visible(phase_number != 6)
+	_board.set_safe_spot_visible(phase_number <= 5)
 	if phase_number > 5:
 		return
 	call_deferred("_begin_phase", run_id)
@@ -101,8 +90,7 @@ func _begin_phase(run_id: int) -> void:
 	_spawn_phase_pieces()
 	var editos := _build_editos(_current_phase_data)
 	_intro_running = true
-	var modo := &"timer" if _is_timed_phase else &"moves"
-	if not _edito_machine.configurar_fase(editos, _player.current_cell, modo):
+	if not _edito_machine.configurar_fase(editos, _player.current_cell):
 		push_error("Não foi possível configurar os éditos da fase atual.")
 		_intro_running = false
 		return
@@ -119,8 +107,6 @@ func _begin_phase(run_id: int) -> void:
 			return
 	_intro_running = false
 	_player.set_input_enabled(true)
-	if _is_timed_phase:
-		_edict_timer.start(float(_current_phase_data.get("seconds_per_edict", 15)))
 
 
 func _build_editos(phase_data: Dictionary) -> Array:
@@ -164,7 +150,6 @@ func _on_player_moved(cell: Vector2i, previous_cell: Vector2i) -> void:
 
 func _on_estado_mudou(estado: int) -> void:
 	if estado == EditoMachineModel.Estado.PRIMEIRA_PECA:
-		_edict_timer.pause()
 		_player.set_input_enabled(false)
 		_board.clear_tutorial_path()
 		var run_id := _generation
@@ -237,38 +222,19 @@ func _open_next_edict(run_id: int) -> void:
 	await get_tree().create_timer(0.46).timeout
 	if run_id == _generation:
 		_player.set_input_enabled(true)
-		if _is_timed_phase:
-			_edict_timer.start(float(_current_phase_data.get("seconds_per_edict", 15)))
 
 
 func _on_falha(reasons: Array) -> void:
-	_edict_timer.stop()
 	_audio.play_effect(&"fail")
 	var run_id := _generation
-	var feedback_started_at := Time.get_ticks_msec()
 	_player.set_input_enabled(false)
-	_hud.show_failure(reasons)
-	_restart_after_feedback(run_id, feedback_started_at)
-
-
-func _restart_after_feedback(run_id: int, feedback_started_at: int) -> void:
-	await get_tree().create_timer(0.28).timeout
-	if run_id != _generation:
-		return
-	await _player.play_death_animation()
-	if run_id != _generation:
-		return
-	var elapsed := float(Time.get_ticks_msec() - feedback_started_at) / 1000.0
-	var fail_duration := _audio.effect_duration(&"fail")
-	if elapsed < fail_duration:
-		await get_tree().create_timer(fail_duration - elapsed).timeout
-	await get_tree().create_timer(0.35).timeout
-	if run_id == _generation:
+	_player.play_death_animation()
+	var accepted := await _hud.show_failure(reasons)
+	if accepted and run_id == _generation:
 		_phase_manager.restart_phase()
 
 
 func _on_sucesso() -> void:
-	_edict_timer.stop()
 	_audio.play_effect(&"next_phase")
 	var run_id := _generation
 	_player.set_input_enabled(false)
@@ -281,17 +247,6 @@ func _advance_after_feedback(run_id: int) -> void:
 	await get_tree().create_timer(0.15).timeout
 	if run_id == _generation and _phase_manager.current_phase < 6:
 		_phase_manager.advance_phase()
-
-
-func _on_edict_timer_expired() -> void:
-	if not _is_timed_phase:
-		return
-	_edito_machine.expirar_tempo()
-
-
-func _on_edict_timer_tick(remaining: float) -> void:
-	if _hud.has_method("set_edict_timer"):
-		_hud.set_edict_timer(remaining)
 
 
 func _clear_pieces() -> void:
