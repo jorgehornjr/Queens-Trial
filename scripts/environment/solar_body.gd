@@ -46,7 +46,7 @@ func configure(asset: PackedScene, radius: float, sunlight_position: Vector3, ax
 					horizon.albedo_color = Color.BLACK
 					mesh.set_surface_override_material(index, horizon)
 				else:
-					# Material de acreção com transparência suave.
+
 					var disk := ShaderMaterial.new()
 					disk.shader = ACCRETION_SHADER
 					disk.set_shader_parameter("intensity", 0.4 if "ring" in String(mesh.name) else 0.75)
@@ -79,11 +79,11 @@ func set_axial_rotation(world_axis: Vector3, degrees_per_second: float) -> void:
 		var angle := atan2(correction_axis.length(), current_axis.dot(target_axis))
 		model.basis = Basis(Quaternion(correction_axis.normalized(), angle)) * model.basis
 	spin_speed = degrees_per_second
-	# Os anéis acompanham o plano equatorial e o sentido de rotação do planeta.
+
 	ring_speed = degrees_per_second * 0.60
 
 func _process(delta: float) -> void:
-	# Rotação em torno do eixo local do modelo.
+
 	for surface in surfaces:
 		surface.rotate(spin_axis, deg_to_rad(spin_speed) * delta)
 	for ring in rings:
@@ -92,7 +92,7 @@ func _process(delta: float) -> void:
 func _notification(what: int) -> void:
 	if what != NOTIFICATION_PREDELETE:
 		return
-	# Liberação dos materiais antes da destruição das instâncias de renderização.
+
 	for mesh in surfaces + rings:
 		if is_instance_valid(mesh) and mesh.mesh != null:
 			for index in mesh.mesh.get_surface_count():

@@ -47,6 +47,8 @@ var _reaction_started := false
 var _reaction_finished := false
 var _bars_tween: Tween
 var _reaction_end := ENTRY_END
+var _head_tracking_was_enabled := true
+var _head_tracking_saved := false
 
 
 func _ready() -> void:
@@ -55,6 +57,10 @@ func _ready() -> void:
 	top_bar.visible = false
 	bottom_bar.visible = false
 	player_key_light.visible = false
+
+
+func cover_entry() -> void:
+	fade.modulate.a = 1.0
 
 
 func play() -> void:
@@ -81,6 +87,9 @@ func play() -> void:
 	_spawn_anchor = _arrival_anchor + Vector3.BACK * _walk_speed * (WALK_END - ENTRY_START - WALK_RAMP)
 	if _walk_speed > 0.0: _reaction_end = WALK_END
 	_seraph = seraph
+	_head_tracking_was_enabled = _seraph.head_tracking_enabled
+	_head_tracking_saved = true
+	_seraph.set_head_tracking_enabled(false, true)
 	_rig.enter_gameplay(true)
 	var game_position := _rig.camera.global_position
 	var game_focus := board.global_position + Vector3.UP * _rig.gameplay_vertical_focus
@@ -99,7 +108,7 @@ func play() -> void:
 	_player.global_position = _spawn_anchor
 	_seraph.visible = false
 	teleport.stop()
-	# AVFX bind point 29 is the character's center, rather than its floor origin.
+	# O ponto AVFX 29 fica no centro do personagem, acima da origem no chão.
 	teleport.global_position = _spawn_anchor + Vector3.UP * (1.77 * 2.45 * 0.5)
 	teleport.scale = Vector3.ONE * 2.45
 	player_key_light.global_position = _player.global_position + Vector3(1.0, 2.8, -3.0)
@@ -165,7 +174,7 @@ func _process(delta: float) -> void:
 
 
 func _build_tracks(board: Vector3, player: Vector3, queen: Vector3, game_position: Vector3, game_focus: Vector3) -> void:
-	# Cada plano possui uma trajetória própria; as transições são cortes breves.
+
 	_tracks = [
 		{"start": 0.0, "end": FIRST_ESTABLISHING_END, "keys": [
 			_key(0.0, board + Vector3(-29.0, 38.0, -29.0), board + Vector3(0.0, 2.5, 0.0), 52.0),
@@ -298,6 +307,7 @@ func _complete() -> void:
 	if _character_model.has_method("set_arrival_reveal"):
 		_character_model.call("set_arrival_reveal", 1.0)
 	_seraph.visible = true
+	_restore_queen_tracking()
 	teleport.stop()
 	if _character_model != null and _character_model.has_method("stop_intro_looking"):
 		_character_model.call("stop_intro_looking")
@@ -309,3 +319,11 @@ func _complete() -> void:
 	fade.modulate.a = 0.0
 	_board.set_safe_spot_visible(true)
 	finished.emit()
+
+func _restore_queen_tracking() -> void:
+	if _head_tracking_saved and is_instance_valid(_seraph):
+		_seraph.set_head_tracking_enabled(_head_tracking_was_enabled)
+	_head_tracking_saved = false
+
+func _exit_tree() -> void:
+	_restore_queen_tracking()

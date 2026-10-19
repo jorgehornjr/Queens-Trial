@@ -1,6 +1,6 @@
 class_name BalanceTrialController
 extends Node
-## Phase-six-only encounter. Cards and physical scales use one weight pair.
+
 
 signal round_started(left_weight: int, right_weight: int)
 signal trial_completed
@@ -22,9 +22,7 @@ var _generation := 0
 var _elapsed := 0.0
 var _fall_velocity := Vector3.ZERO
 var _round_count := 3
-var _weight_min := 8
-var _weight_max := 20
-var _weight_rng := RandomNumberGenerator.new()
+var _rounds: Array = []
 var _decision_seconds := 5.0
 var _max_angle := deg_to_rad(21.0)
 var _slide_tiles := 3.0
@@ -42,7 +40,6 @@ var _slide_sound: StringName
 
 
 func _ready() -> void:
-	_weight_rng.randomize()
 	_manager = get_node("../PhaseManager")
 	_board = get_node("../World/Board")
 	_player = get_node("../World/Player")
@@ -68,13 +65,13 @@ func _on_phase_started(number: int, data: Dictionary, _seed: int) -> void:
 	_board.rotation.z = 0.0
 	trial_hud.hide()
 	stardust.clear()
-	_mist.set_follow_tilt(number == 6)
-	if number != 6:
+	var is_balance := String(data.get("resolution", "")) == "balance"
+	_mist.set_follow_tilt(is_balance)
+	if not is_balance:
 		_queen.set_balance_mode(false)
 		return
 	_round_count = int(data.get("balance_round_count", 3))
-	_weight_min = int(data.get("balance_weight_min", 8))
-	_weight_max = int(data.get("balance_weight_max", 20))
+	_rounds = data.get("balance_rounds", []).duplicate(true)
 	if is_instance_valid(_queen.balance):
 		_queen.balance.reset_weights()
 	_decision_seconds = float(data.get("seconds_per_edict", 5.0))
@@ -95,13 +92,13 @@ func _begin(run_id: int) -> void:
 	if run_id != _generation:
 		return
 	_queen.set_balance_mode(true)
-	# The reveal approaches 1 before the tween finishes hiding the old orb.
+
 	while _queen.balance.reveal < 0.999 or _queen.get_node("Model/Seraph/Skeleton3D/OrbAttachment/AstraiaOrb").visible:
 		await get_tree().process_frame
 		if run_id != _generation:
 			return
-	# Let the transformation finish unobstructed before the tutorial arrives.
-	if _hud.tutorial_book.needs_chapter(6):
+
+	if int(_manager.current_phase_data.get("tutorial_chapter", 0)) == 6 and _hud.tutorial_book.needs_chapter(6):
 		await get_tree().create_timer(0.55).timeout
 		if run_id != _generation: return
 		var read_ok := await _hud.play_balance_intro()
@@ -110,7 +107,6 @@ func _begin(run_id: int) -> void:
 
 
 func _open_round() -> void:
-	# Draw when this round opens, including a new attempt after a fall or R.
 	var pair := _draw_weights()
 	left_weight = pair.x
 	right_weight = pair.y
@@ -119,7 +115,7 @@ func _open_round() -> void:
 	_elapsed = 0.0
 	slide_distance = 0.0
 	slide_speed = 0.0
-	var concealed := round_index == _round_count - 1
+	var concealed := bool(_rounds[round_index].concealed)
 	_queen.balance.set_weights(left_weight, right_weight, concealed)
 	if concealed:
 		stage = Stage.MALFUNCTION
@@ -135,7 +131,7 @@ func _wait_for_malfunction(run_id: int) -> void:
 		_open_decision()
 
 func _open_decision() -> void:
-	var concealed := round_index == _round_count - 1
+	var concealed := bool(_rounds[round_index].concealed)
 	if not concealed:
 		_audio.play_effect(&"balance_weigh_right" if heavy_direction > 0 else &"balance_weigh_left")
 	trial_hud.show_round(left_weight, right_weight)
@@ -144,10 +140,8 @@ func _open_decision() -> void:
 	round_started.emit(left_weight, right_weight)
 
 func _draw_weights() -> Vector2i:
-	var left := _weight_rng.randi_range(_weight_min, _weight_max)
-	var right := _weight_rng.randi_range(_weight_min, _weight_max - 1)
-	if right >= left: right += 1
-	return Vector2i(left, right)
+	var round_data: Dictionary = _rounds[round_index]
+	return Vector2i(int(round_data.left), int(round_data.right))
 
 
 func _physics_process(delta: float) -> void:
@@ -165,8 +159,8 @@ func _physics_process(delta: float) -> void:
 			_elapsed += delta
 			stardust.strength = smoothstep(0.0,0.38,_elapsed)
 			_board.rotation.z = -heavy_direction * _max_angle * smoothstep(0.0, 1.0, minf(_elapsed / 0.95, 1.0))
-			# Gravity projected onto the board plane. Root motion stays disabled;
-			# only this integration moves the player during the strafe animation.
+			# A física move o personagem; a animação não aplica deslocamento próprio.
+
 			var acceleration := absf(sin(_board.rotation.z)) * _board.tile_size * 11.0
 			slide_speed += acceleration * delta
 			var step := minf(slide_speed * delta, _board.tile_size * _slide_tiles - slide_distance)
@@ -206,7 +200,7 @@ func _physics_process(delta: float) -> void:
 			stardust.strength = 1.0-smoothstep(0.0,0.75,_elapsed)
 			_fall_velocity.y -= 32.0 * delta
 			_player.global_position += _fall_velocity * delta
-			# Continue rotating toward the lowered edge after losing contact.
+
 			_player.rotation.z -= float(heavy_direction) * delta * 0.85
 			_board.rotation.z = move_toward(_board.rotation.z, 0.0, delta * _max_angle)
 			if stage == Stage.FALLING and _elapsed >= 1.5:

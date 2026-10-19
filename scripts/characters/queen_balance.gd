@@ -123,12 +123,12 @@ func reset_weights() -> void:
 
 func _apply_pose() -> void:
 	if not is_instance_valid(_beam): return
-	# Restore whole transforms, including translations, before applying any pose.
+
 	_beam.transform = _beam_rest
 	_left_pan.transform = _left_rest
 	_right_pan.transform = _right_rest
 	if broken:
-		# Both assemblies loosen and drop together. No roll or unequal heights.
+
 		var shudder := sin(_damage_progress * TAU * 8.0) * 0.65 * (1.0 - smoothstep(0.0, 0.4, _damage_progress))
 		_beam.position.y += shudder
 		var release := smoothstep(0.22, 0.78, _damage_progress)

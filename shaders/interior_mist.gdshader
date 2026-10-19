@@ -17,7 +17,7 @@ void fragment() {
 	float vapor = texture(cloud_field, drift + warp * 0.20).r * 0.68;
 	vapor += texture(cloud_field, drift * 1.83 - warp * 0.12 + 0.71).r * 0.32;
 	float wisp = smoothstep(0.26, 0.73, vapor);
-	// Low radiance and soft opacity: no luminous core inside the marble tile.
+
 	ALBEDO = tint.rgb * 0.82;
 	EMISSION = ALBEDO;
 	ALPHA = wisp * mask * layer_strength * tint.a * reveal;

@@ -24,8 +24,8 @@ vec2 intersect_box(vec3 origin, vec3 direction) {
 }
 
 void fragment() {
-	// Integração frontal de um campo contínuo de densidade.
-	// Intersect the actual volume orientation, including a gently rolling cloud.
+
+
 	mat4 world_to_volume = inverse(MODEL_MATRIX);
 	vec3 world_direction = normalize(world_vertex - CAMERA_POSITION_WORLD);
 	vec3 origin = (world_to_volume * vec4(CAMERA_POSITION_WORLD, 1.0)).xyz;
@@ -50,7 +50,7 @@ void fragment() {
 		float detail = textureLod(cloud_noise, q * 2.15 + vec3(warp * 0.22,0.53,0.17), 0.0).r;
 		float rim = exp(-pow((max(abs(p.x),abs(p.z)) - 24.0 + (cloud-0.5)*6.0)/4.2, 2.0));
 		float height = exp(-pow((p.y - 1.4 + (warp-0.5)*4.0)/3.1, 2.0));
-		// Extinção suave da densidade nas seis faces do volume.
+
 		vec3 boundary = half_size - abs(p);
 		float edge_fade = smoothstep(0.0, 2.0, min(min(boundary.x,boundary.y),boundary.z));
 		float filaments = pow(clamp(1.0-abs(detail-0.54)*2.0,0.0,1.0), 16.0);

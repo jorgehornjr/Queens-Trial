@@ -1,9 +1,15 @@
 class_name GameHUD
 extends CanvasLayer
 
+signal position_confirmed
+
 const EdictDust = preload("res://scripts/ui/edict_dust.gd")
 const TutorialBookScene = preload("res://scripts/ui/tutorial_book.gd")
 const FailureView = preload("res://scripts/ui/failure_feedback.gd")
+const Atlas = preload("res://scripts/ui/roman_star_map.gd")
+const BOOK_ICON: Texture2D = preload("res://assets/ui/hud/moon_book.tres")
+const ATLAS_ICON: Texture2D = preload("res://assets/ui/hud/roman_atlas.tres")
+const ICON_CUTOUT: Shader = preload("res://shaders/hud_paper_cutout.gdshader")
 const STORY_FONT: FontFile = preload("res://assets/fonts/CormorantSC-SemiBold.ttf")
 const JUPITER_FONT: FontFile = preload("res://assets/fonts/jupiter_pro.otf")
 const ANNOUNCEMENT_FONT_SIZE := 112
@@ -13,7 +19,6 @@ const ANNOUNCEMENT_FONT_SIZE := 112
 @onready var announcement_label: Label = $Announcement/EdictLabel
 @onready var announcement_halo: ColorRect = $Announcement/Halo
 var result_panel: PanelContainer
-var result_label: Label
 var failure_feedback: FailureFeedback
 @onready var card_presentation: CardPresentation = $CardPresentation
 
@@ -21,14 +26,27 @@ var _dust_effect: Node2D
 var _intro_generation := 0
 var _dust_tween: Tween
 var _phase_number := 0
+var _chapter := 0
+var _board_trial := false
+var _chaotic_trial := false
 var tutorial_book: TutorialBook
 var _consulting := false
 var book_button: TextureButton
+var atlas_button: TextureButton
+var roman_map: RomanStarMap
 var _book_hover: Tween
+var _atlas_hover: Tween
+var preparation: VBoxContainer
+var _preparing := false
 
 
 func _ready() -> void:
 	_build_book_button()
+	_build_preparation()
+	roman_map = Atlas.new() as RomanStarMap
+	roman_map.name = "RomanStarMap"
+	roman_map.z_index = 50
+	add_child(roman_map)
 	tutorial_book = TutorialBookScene.new()
 	tutorial_book.name = "TutorialBook"
 	add_child(tutorial_book)
@@ -36,7 +54,6 @@ func _ready() -> void:
 	failure_feedback.name = "FailureFeedback"
 	add_child(failure_feedback)
 	result_panel = failure_feedback.panel
-	result_label = failure_feedback.body
 	announcement.visible = false
 	failure_feedback.cancel()
 	announcement_label.add_theme_font_override("font", STORY_FONT)
@@ -45,13 +62,26 @@ func _ready() -> void:
 
 func set_phase(phase_number: int, _phase_data: Dictionary, _phase_seed: int) -> void:
 	_intro_generation += 1
+	end_preparation()
 	_release_reading()
+	roman_map.cancel()
 	tutorial_book.cancel()
 	_phase_number = phase_number
-	if phase_number <= PhaseManager.LAST_PLAYABLE_PHASE: tutorial_book.unlock_to(phase_number)
+	_chapter = int(_phase_data.get("tutorial_chapter", 0))
+	_board_trial = String(_phase_data.get("resolution", "")) in ["moves", "balance"]
+	_chaotic_trial = PhaseManager.Savage.contains(phase_number)
+	if _chaotic_trial:
+		_chapter = 7
+		tutorial_book.unlock_to(7)
+	tutorial_book.chaotic_style = _chaotic_trial
+	book_button.offset_left = -118
+	book_button.offset_right = -30
+	atlas_button.offset_left = -218
+	atlas_button.offset_right = -130
+	if _board_trial: tutorial_book.unlock_to(_chapter if _chapter > 0 else (6 if _phase_data.resolution == "balance" else 5))
 	announcement.hide()
 	phase_label.text = ""
-	# A apresentação fica concentrada nos éditos inferiores e nas telas de resultado.
+
 	failure_feedback.cancel()
 	_clear_dust()
 	card_presentation.cancel()
@@ -59,6 +89,7 @@ func set_phase(phase_number: int, _phase_data: Dictionary, _phase_seed: int) -> 
 
 func _exit_tree() -> void:
 	_intro_generation += 1
+	if is_instance_valid(roman_map): roman_map.cancel()
 	if is_instance_valid(tutorial_book): tutorial_book.cancel()
 	if is_instance_valid(card_presentation): card_presentation.cancel()
 	if is_instance_valid(failure_feedback): failure_feedback.cancel()
@@ -68,15 +99,23 @@ func _exit_tree() -> void:
 
 func play_phase_intro(values: Array) -> void:
 	var run_id := _intro_generation
-	var read_ok := await tutorial_book.present(_phase_number)
-	if not read_ok or run_id != _intro_generation:
-		return
+	if _chapter > 0:
+		var read_ok := await tutorial_book.present(_chapter)
+		if not read_ok or run_id != _intro_generation:
+			return
 	await card_presentation.present(values)
 
 
 func play_balance_intro() -> bool:
 	var run_id := _intro_generation
 	var read_ok := await tutorial_book.present(6)
+	return read_ok and run_id == _intro_generation
+
+
+func play_chaotic_intro() -> bool:
+	var run_id := _intro_generation
+	if not tutorial_book.needs_chapter(7): return true
+	var read_ok := await tutorial_book.present(7, true)
 	return read_ok and run_id == _intro_generation
 
 
@@ -89,37 +128,128 @@ func _release_reading() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_N:
-		var player := get_parent().get_node_or_null("World/Player") as GridPlayer
-		if _phase_number in range(1, 7) and not get_tree().paused and not tutorial_book.visible and player != null and player.input_enabled:
-			get_viewport().set_input_as_handled()
-			_consult_book()
+	if not (event is InputEventKey and event.pressed and not event.echo): return
+	if _preparing and event.keycode in [KEY_ENTER, KEY_KP_ENTER] and _reference_available():
+		get_viewport().set_input_as_handled()
+		position_confirmed.emit()
+	elif event.keycode == KEY_N and _reference_available() and (_board_trial or _chaotic_trial):
+		get_viewport().set_input_as_handled()
+		_consult_book()
+	elif event.keycode == KEY_M and not _chaotic_trial and _reference_available():
+		get_viewport().set_input_as_handled()
+		show_roman_map()
+
+
+func show_roman_map(guided := false) -> bool:
+	if _consulting or tutorial_book.visible or roman_map.visible or get_tree().paused: return false
+	if not guided and (_chaotic_trial or not _reference_available()): return false
+	# A ordem dos irmãos define os cliques dos modais, independentemente do z_index.
+
+	move_child(roman_map, get_child_count() - 1)
+	var run_id := _intro_generation
+	_consulting = true
+	preparation.hide()
+	book_button.hide()
+	atlas_button.hide()
+	get_tree().paused = true
+	var completed := await roman_map.present(guided)
+	if not is_inside_tree() or run_id != _intro_generation: return false
+	_release_reading()
+	return completed
 
 
 func _consult_book() -> void:
 	var player := get_parent().get_node_or_null("World/Player") as GridPlayer
-	if _phase_number not in range(1, 7) or _consulting or tutorial_book.visible or failure_feedback.screen.visible or get_tree().paused or player == null or not player.input_enabled: return
+	if not (_board_trial or _chaotic_trial) or _consulting or tutorial_book.visible or failure_feedback.screen.visible or get_tree().paused or player == null or not player.input_enabled: return
 	var run_id := _intro_generation
 	_consulting = true
+	preparation.hide()
 	book_button.hide()
+	atlas_button.hide()
 	get_tree().paused = true
 	tutorial_book.process_mode = Node.PROCESS_MODE_ALWAYS
 	tutorial_book.consultation = true
-	var read_ok := await tutorial_book.present(0 if _phase_number in [7, 8] else _phase_number, true)
+	var read_ok := await tutorial_book.present(_chapter if _chapter > 0 else tutorial_book.unlocked_chapter, true)
 	if not read_ok or run_id != _intro_generation: return
 	_release_reading()
 
 
 func _process(_delta: float) -> void:
 	if not is_instance_valid(book_button) or not is_instance_valid(tutorial_book): return
+	var available := _reference_available()
+	preparation.visible = _preparing and available
+	book_button.visible = available and (_board_trial or _chaotic_trial)
+	atlas_button.visible = available and not _chaotic_trial
+
+
+func _build_preparation() -> void:
+	preparation = VBoxContainer.new()
+	preparation.name = "Prepositioning"
+	preparation.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	preparation.add_theme_constant_override("separation", 2)
+	add_child(preparation)
+	preparation.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	preparation.offset_left = -310
+	preparation.offset_right = 310
+	preparation.offset_top = -100
+	preparation.offset_bottom = -8
+	var heading := Label.new()
+	heading.text = "Escolha sua posição inicial"
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heading.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	heading.add_theme_font_override("font", STORY_FONT)
+	heading.add_theme_font_size_override("font_size", 30)
+	heading.add_theme_color_override("font_color", Color(1.0, 0.93, 0.78))
+	heading.add_theme_color_override("font_shadow_color", Color(0.015, 0.02, 0.055, 0.95))
+	heading.add_theme_constant_override("shadow_offset_y", 2)
+	preparation.add_child(heading)
+	var confirm := Button.new()
+	confirm.name = "ConfirmPosition"
+	confirm.text = "Confirmar posição · Enter"
+	confirm.focus_mode = Control.FOCUS_NONE
+	confirm.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	confirm.add_theme_font_override("font", STORY_FONT)
+	confirm.add_theme_font_size_override("font_size", 27)
+	confirm.add_theme_color_override("font_color", Color(0.88, 0.72, 0.43))
+	confirm.add_theme_color_override("font_hover_color", Color(1.0, 0.94, 0.78))
+	confirm.add_theme_color_override("font_pressed_color", Color(1.0, 0.83, 0.47))
+	confirm.add_theme_color_override("font_shadow_color", Color(0.015, 0.02, 0.055, 0.95))
+	confirm.add_theme_constant_override("shadow_offset_y", 2)
+	confirm.add_theme_color_override("font_outline_color", Color(0.01, 0.015, 0.035, 0.95))
+	confirm.add_theme_constant_override("outline_size", 3)
+	for style in ["normal", "hover", "pressed", "focus"]:
+		confirm.add_theme_stylebox_override(style, StyleBoxEmpty.new())
+	confirm.pressed.connect(func(): position_confirmed.emit())
+	preparation.add_child(confirm)
+	preparation.hide()
+
+
+func begin_preparation() -> void:
+	_preparing = true
+	preparation.show()
+
+
+func end_preparation() -> void:
+	_preparing = false
+	if is_instance_valid(preparation): preparation.hide()
+
+
+func _reference_available() -> bool:
+	if _phase_number <= 0 or _consulting or get_tree().paused or tutorial_book.visible or roman_map.visible or failure_feedback.screen.visible or card_presentation.visible: return false
+	var manager := get_parent().get_node_or_null("PhaseManager") as PhaseManager
+	if manager == null or manager.campaign_finished: return false
 	var player := get_parent().get_node_or_null("World/Player") as GridPlayer
-	book_button.visible = _phase_number in range(1, 7) and player != null and player.input_enabled and not tutorial_book.visible and not failure_feedback.screen.visible and not card_presentation.visible and not get_tree().paused
+	if _board_trial or _chaotic_trial: return player != null and player.input_enabled
+	var cards := get_parent().get_node_or_null("CardTrialController") as CardTrialController
+	return cards != null and cards.active and cards.table.visible and not cards._advancing and not cards._feedback_pending
 
 
 func _build_book_button() -> void:
 	book_button = TextureButton.new()
 	book_button.name = "OpenTutorialBook"
-	book_button.texture_normal = TutorialBookScene.COVER
+	book_button.texture_normal = BOOK_ICON
+	book_button.material = ShaderMaterial.new()
+	(book_button.material as ShaderMaterial).shader = ICON_CUTOUT
 	book_button.ignore_texture_size = true
 	book_button.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 	book_button.focus_mode = Control.FOCUS_NONE
@@ -128,20 +258,47 @@ func _build_book_button() -> void:
 	book_button.visible = false
 	add_child(book_button)
 	book_button.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	book_button.offset_left = -108
-	book_button.offset_right = -32
+	book_button.offset_left = -118
+	book_button.offset_right = -30
 	book_button.offset_top = 24
-	book_button.offset_bottom = 138
-	book_button.pivot_offset = Vector2(38, 57)
+	book_button.offset_bottom = 112
+	book_button.pivot_offset = Vector2(44, 44)
 	book_button.pressed.connect(_consult_book)
 	book_button.mouse_entered.connect(_hover_book.bind(true))
 	book_button.mouse_exited.connect(_hover_book.bind(false))
+	atlas_button = TextureButton.new()
+	atlas_button.name = "OpenRomanAtlas"
+	atlas_button.texture_normal = ATLAS_ICON
+	atlas_button.material = ShaderMaterial.new()
+	(atlas_button.material as ShaderMaterial).shader = ICON_CUTOUT
+	atlas_button.ignore_texture_size = true
+	atlas_button.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+	atlas_button.focus_mode = Control.FOCUS_NONE
+	atlas_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	atlas_button.tooltip_text = "Atlas de números romanos (M)"
+	atlas_button.visible = false
+	add_child(atlas_button)
+	atlas_button.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	atlas_button.offset_left = -218
+	atlas_button.offset_right = -130
+	atlas_button.offset_top = 24
+	atlas_button.offset_bottom = 112
+	atlas_button.pivot_offset = Vector2(44, 44)
+	atlas_button.pressed.connect(func(): show_roman_map())
+	atlas_button.mouse_entered.connect(_hover_atlas.bind(true))
+	atlas_button.mouse_exited.connect(_hover_atlas.bind(false))
 
 
 func _hover_book(hovered: bool) -> void:
 	if _book_hover != null and _book_hover.is_valid(): _book_hover.kill()
 	_book_hover = create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	_book_hover.tween_property(book_button, "scale", Vector2.ONE * (1.04 if hovered else 1.0), 0.18)
+
+
+func _hover_atlas(hovered: bool) -> void:
+	if _atlas_hover != null and _atlas_hover.is_valid(): _atlas_hover.kill()
+	_atlas_hover = create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_atlas_hover.tween_property(atlas_button, "scale", Vector2.ONE * (1.08 if hovered else 1.0), 0.18)
 
 
 func _play_announcement(text_value: String) -> void:
@@ -190,15 +347,15 @@ func _play_announcement(text_value: String) -> void:
 	_clear_dust()
 
 
-func show_failure(reasons: Array, button_text := "Tentar novamente") -> bool:
+func show_failure(reasons: Array, button_text := "Tentar novamente", auto_seconds := 0.0) -> bool:
 	announcement.hide()
 	book_button.hide()
-	return await failure_feedback.present(reasons, _failure_guidance(reasons), button_text)
+	return await failure_feedback.present(reasons, _failure_guidance(reasons), button_text, auto_seconds)
 
 
 func _failure_guidance(reasons: Array) -> String:
 	var text := " ".join(PackedStringArray(reasons)).to_lower()
-	if _phase_number == 6:
+	if _board_trial and _phase_number in range(8, 11):
 		return "Antes de o tabuleiro inclinar, procure o lado mais leve."
 	if "distância" in text:
 		return "Voltar pelo mesmo caminho gasta passos, mas não aumenta a distância do começo."
@@ -212,10 +369,6 @@ func _failure_guidance(reasons: Array) -> String:
 func show_success() -> void:
 	failure_feedback.cancel()
 	await _play_announcement("FASE CONCLUÍDA")
-
-
-func show_restart() -> void:
-	failure_feedback.cancel()
 
 
 func _clear_dust() -> void:

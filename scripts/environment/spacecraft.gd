@@ -33,7 +33,7 @@ func configure(asset: PackedScene, size: float, sunlight_position: Vector3, laye
 			var material := imported.duplicate() as StandardMaterial3D
 			material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 			material.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
-			# Rugosidade mínima para reduzir aliasing especular à distância.
+
 			material.roughness = maxf(material.roughness, 0.68)
 			material.roughness_texture = null
 			material.metallic = minf(material.metallic, 0.45)
@@ -56,7 +56,7 @@ func _process(delta: float) -> void:
 		if habitat_ring != null:
 			habitat_ring.rotate_x(deg_to_rad(ring_degrees_per_second) * delta)
 		return
-	# Deriva limitada ao entorno do ponto de ancoragem.
+
 	var phase := elapsed * 0.065 + phase_offset
 	position = anchor + Vector3(sin(phase) - sin(phase_offset),
 		0.35 * (sin(phase * 0.7) - sin(phase_offset * 0.7)),

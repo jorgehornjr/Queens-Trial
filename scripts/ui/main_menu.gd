@@ -1,21 +1,26 @@
 class_name QueenMainMenu
 extends Control
-## Menu principal diante da Lua, usando apenas o cenário 3D existente.
+
 
 const BASE_SIZE := Vector2(1920, 1080)
 const GAME_PATH := "res://scenes/main/main.tscn"
 const ENTRY_META := &"queen_trial_start_phase"
+const CHAOTIC_META := &"queen_trial_start_chaotic"
+const Book = preload("res://scripts/ui/tutorial_book.gd")
+const Astrolabe = preload("res://scripts/ui/main_menu_astrolabe.gd")
+const MENU_SHADE = preload("res://shaders/main_menu_astrolabe_shade.gdshader")
 const JUPITER: Font = preload("res://assets/fonts/jupiter_pro.otf")
 const LOGO: Texture2D = preload("res://assets/logo/QTlogo.png")
 const MoonWorld = preload("res://scripts/ui/main_menu_moon_world.gd")
 const LOGO_GLOW = preload("res://shaders/main_menu_logo_glow.gdshader")
 const MENU_SCORE = preload("res://assets/audio/music/menu_orbits.ogg")
+const PIANO_SCORE = preload("res://assets/audio/music/ending_answers_piano.ogg")
 const SCORE_BODY_TIME := 12.0
 const LENS = preload("res://shaders/main_menu_lens.gdshader")
 const GRADE = preload("res://shaders/main_menu_grade.gdshader")
 const IVORY := Color(0.94, 0.87, 0.73)
 
-enum Page { HOME, LAUNCHING }
+enum Page { HOME, STORY, LAUNCHING }
 var page := Page.HOME
 var effect_time := 0.0
 var world: MainMenuMoonWorld
@@ -25,12 +30,20 @@ var fade: ColorRect
 var logo: TextureRect
 var music: AudioStreamPlayer
 var start_button: Button
+var chaotic_button: Button
+var about_button: Button
+var exit_button: Button
+var menu_panel: Panel
+var story_book: TutorialBook
 var _hover_tweens: Dictionary = {}
 var intro_ready := false
 var _lens_material: ShaderMaterial
 var _logo_material: ShaderMaterial
 var _grade_material: ShaderMaterial
 var _launch_tween: Tween
+var _astrolabe: Node2D
+var _piano_score := false
+var _music_level_db := -2.0
 
 
 func _ready() -> void:
@@ -41,15 +54,25 @@ func _ready() -> void:
 	_build_fade()
 	get_viewport().size_changed.connect(_fit)
 	_fit()
-	start_button.modulate.a = 0.0
-	start_button.disabled = true
+	menu_panel.modulate.a = 0.0
+	_set_buttons_enabled(false)
 	world.intro_finished.connect(_finish_intro)
 	_update_intro()
 	_build_audio()
 	for argument in OS.get_cmdline_user_args():
-		if argument.begins_with("--phase="):
+		if argument == "--chaotic-intro" and not get_tree().has_meta(&"queen_trial_chaotic_preview_done"):
+			if PhaseManager.can_start_phase(PhaseManager.Savage.FIRST):
+				get_tree().call_deferred("change_scene_to_file",GAME_PATH)
+			else: get_tree().set_meta(&"queen_trial_chaotic_preview_done",true)
+			return
+		if argument == "--ending" and not get_tree().has_meta(&"queen_trial_ending_preview_done"):
+			get_tree().call_deferred("change_scene_to_file",GAME_PATH)
+			return
+		if argument.begins_with("--phase=") and not get_tree().has_meta(&"queen_trial_phase_preview_done"):
 			var number := int(argument.trim_prefix("--phase="))
-			if PhaseManager.can_start_phase(number): call_deferred("launch_phase", number)
+			if PhaseManager.can_start_phase(number):
+				get_tree().set_meta(&"queen_trial_phase_preview_done",true)
+				call_deferred("launch_phase", number)
 
 
 func _exit_tree() -> void:
@@ -77,13 +100,13 @@ func _input(event: InputEvent) -> void:
 func skip_intro() -> void:
 	world.skip_intro()
 	_update_intro()
-	if music != null and music.playing and music.get_playback_position() < SCORE_BODY_TIME:
+	if music != null and not _piano_score and music.playing and music.get_playback_position() < SCORE_BODY_TIME:
 		music.seek(SCORE_BODY_TIME)
 
 
 func _finish_intro() -> void:
 	intro_ready = true
-	start_button.disabled = false
+	_set_buttons_enabled(true)
 	if page == Page.HOME: start_button.grab_focus()
 
 
@@ -95,13 +118,14 @@ func _update_intro() -> void:
 	_lens_material.set_shader_parameter("strength", world.light_strength)
 	_lens_material.set_shader_parameter("aspect", get_viewport_rect().size.x / maxf(get_viewport_rect().size.y, 1.0))
 	_grade_material.set_shader_parameter("opening", smoothstep(0.0, 1.3, time))
-	start_button.modulate.a = smoothstep(9.5, 10.5, time)
+	menu_panel.modulate.a = smoothstep(9.5, 10.5, time)
+	exit_button.modulate.a = menu_panel.modulate.a
 
 
-func launch_phase(number: int) -> void:
-	if page == Page.LAUNCHING or (number != 0 and not PhaseManager.can_start_phase(number)): return
+func launch_phase(number: int, chaotic_intro := false) -> void:
+	if page != Page.HOME or (number != 0 and not PhaseManager.can_start_phase(number)): return
 	page = Page.LAUNCHING
-	start_button.disabled = true
+	_set_buttons_enabled(false)
 	fade.show()
 	_launch_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	_launch_tween.tween_property(fade, "color:a", 1.0, 0.7)
@@ -112,22 +136,59 @@ func launch_phase(number: int) -> void:
 		_launch_failed()
 		return
 	get_tree().paused = false
-	get_tree().set_meta(ENTRY_META, number)
+	if chaotic_intro: get_tree().set_meta(CHAOTIC_META, true)
+	else: get_tree().set_meta(ENTRY_META, number)
 	var error := get_tree().change_scene_to_packed(scene)
 	if error != OK:
-		get_tree().remove_meta(ENTRY_META)
+		if get_tree().has_meta(ENTRY_META): get_tree().remove_meta(ENTRY_META)
+		if get_tree().has_meta(CHAOTIC_META): get_tree().remove_meta(CHAOTIC_META)
 		_launch_failed()
 
 
 func _launch_failed() -> void:
 	push_error("Não foi possível abrir a cena do jogo pelo menu.")
 	page = Page.HOME
-	music.volume_db = -2.0
+	music.volume_db = _music_level_db
 	fade.hide()
 	fade.color.a = 0.0
-	start_button.disabled = false
+	_set_buttons_enabled(true)
+	world.show()
 	home.show()
 	start_button.grab_focus()
+
+
+func _set_buttons_enabled(enabled: bool) -> void:
+	for button: Button in [start_button, chaotic_button, about_button, exit_button]:
+		button.disabled = not enabled
+
+
+func _open_story(start_game := false) -> void:
+	if page != Page.HOME or not intro_ready: return
+	page = Page.STORY
+	_set_buttons_enabled(false)
+	home.hide()
+	world.hide()
+	var quiet := create_tween()
+	quiet.tween_property(music, "volume_db", _music_level_db - 13.0, 0.6)
+	var completed := await story_book.present_story()
+	if not is_inside_tree(): return
+	fade.color.a = 1.0
+	fade.show()
+	if start_game and completed:
+		page = Page.HOME
+		launch_phase(0)
+		return
+	world.show()
+	home.show()
+	var restore := create_tween().set_parallel(true)
+	restore.tween_property(music, "volume_db", _music_level_db, 0.6)
+	restore.tween_property(fade, "color:a", 0.0, 0.6)
+	await restore.finished
+	if not is_inside_tree(): return
+	fade.hide()
+	page = Page.HOME
+	_set_buttons_enabled(true)
+	about_button.grab_focus()
 
 
 func _fit() -> void:
@@ -172,18 +233,83 @@ func _build_home() -> void:
 	_logo_material = ShaderMaterial.new()
 	_logo_material.shader = LOGO_GLOW
 	logo.material = _logo_material
-	logo.position = Vector2(490, 195)
+	logo.position = Vector2(490, 150)
 	logo.size = Vector2(940, 415)
 	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	home.add_child(logo)
-	start_button = _button(home, "Start", "Iniciar", Rect2(680, 625, 560, 78), 50)
-	start_button.pressed.connect(launch_phase.bind(0))
+	menu_panel = Panel.new()
+	menu_panel.name = "CelestialChoices"
+	menu_panel.position = Vector2(440, 590)
+	menu_panel.size = Vector2(1040, 340)
+	menu_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	menu_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	home.add_child(menu_panel)
+	var shade := ColorRect.new()
+	shade.name = "LunarShade"
+	shade.position = Vector2(-80, -35)
+	shade.size = Vector2(1200, 400)
+	shade.material = ShaderMaterial.new()
+	(shade.material as ShaderMaterial).shader = MENU_SHADE
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	menu_panel.add_child(shade)
+	_astrolabe = Astrolabe.new()
+	_astrolabe.name = "Astrolabe"
+	menu_panel.add_child(_astrolabe)
+	start_button = _button(menu_panel, "Start", "Iniciar", Rect2(340, 57, 360, 84), 56)
+	start_button.set_meta("constellation_index", 0)
+	start_button.pressed.connect(_open_story.bind(true))
+	chaotic_button = _button(menu_panel, "Chaotic", "Chaotic", Rect2(70, 170, 300, 78), 46)
+	chaotic_button.set_meta("constellation_index", 1)
+	chaotic_button.visible = PhaseManager.can_start_phase(PhaseManager.Savage.FIRST)
+	chaotic_button.pressed.connect(launch_phase.bind(PhaseManager.Savage.FIRST, true))
+	about_button = _button(menu_panel, "About", "Sobre", Rect2(670, 170, 300, 78), 46)
+	about_button.set_meta("constellation_index", 2)
+	about_button.pressed.connect(_open_story)
+	_astrolabe.set("chaotic_available", chaotic_button.visible)
+	if not chaotic_button.visible:
+		start_button.position = Vector2(135, 128)
+		start_button.set_meta("rest_position", start_button.position)
+		about_button.position = Vector2(575, 128)
+		about_button.set_meta("rest_position", about_button.position)
+		_astrolabe.set("anchors", [Vector2(315, 110), Vector2.ZERO, Vector2(725, 110)])
+	start_button.focus_neighbor_bottom = start_button.get_path_to(chaotic_button if chaotic_button.visible else about_button)
+	chaotic_button.focus_neighbor_top = chaotic_button.get_path_to(start_button)
+	chaotic_button.focus_neighbor_right = chaotic_button.get_path_to(about_button)
+	about_button.focus_neighbor_top = about_button.get_path_to(start_button)
+	about_button.focus_neighbor_left = about_button.get_path_to(chaotic_button if chaotic_button.visible else start_button)
+	exit_button = _button(home, "Exit", "Sair", Rect2(1640, 934, 190, 70), 36)
+	exit_button.set_meta("constellation_index", -1)
+	exit_button.pressed.connect(_quit_game)
+
+func _quit_game() -> void:
+	if page != Page.HOME or not intro_ready: return
+	page = Page.LAUNCHING
+	_set_buttons_enabled(false)
+	fade.show()
+	_launch_tween = create_tween().set_parallel(true)
+	_launch_tween.tween_property(fade, "color:a", 1.0, 0.4)
+	_launch_tween.tween_property(music, "volume_db", -60.0, 0.4)
+	await _launch_tween.finished
+	get_tree().quit()
 
 func _build_audio() -> void:
+	var continuing: AudioStreamPlayer
+	if get_tree().has_meta(EndingCutscene.PIANO_META):
+		continuing = get_tree().get_meta(EndingCutscene.PIANO_META) as AudioStreamPlayer
+		get_tree().remove_meta(EndingCutscene.PIANO_META)
+	if is_instance_valid(continuing):
+		music = continuing
+		music.reparent(self)
+		music.pitch_scale = 1.0
+		_piano_score = true
+		_music_level_db = music.volume_db
+		return
+	_piano_score = CampaignProgress.savage_unlocked()
+	_music_level_db = -6.0 if _piano_score else -2.0
 	music = AudioStreamPlayer.new()
 	music.name = "MenuMusic"
-	music.stream = MENU_SCORE
-	music.volume_db = -2.0
+	music.stream = PIANO_SCORE if _piano_score else MENU_SCORE
+	music.volume_db = _music_level_db
 	if AudioServer.get_bus_index("Music") >= 0: music.bus = "Music"
 	add_child(music)
 	music.play()
@@ -192,11 +318,16 @@ func _build_audio() -> void:
 func _build_fade() -> void:
 	fade = ColorRect.new()
 	fade.name = "LaunchFade"
+	fade.z_index = 30
 	fade.color = Color(0.008, 0.010, 0.02, 0.0)
 	fade.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(fade)
 	fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fade.hide()
+	story_book = Book.new() as TutorialBook
+	story_book.name = "StoryBook"
+	story_book.z_index = 40
+	add_child(story_book)
 
 
 func _button(parent: Control, node_name: String, words: String, rect: Rect2, font_size: int) -> Button:
@@ -210,12 +341,18 @@ func _button(parent: Control, node_name: String, words: String, rect: Rect2, fon
 	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	button.add_theme_font_override("font", JUPITER)
 	button.add_theme_font_size_override("font_size", font_size)
-	button.add_theme_color_override("font_color", Color.BLACK if parent == home else IVORY)
-	button.add_theme_color_override("font_disabled_color", Color.BLACK if parent == home else IVORY)
-	button.add_theme_color_override("font_hover_color", Color.BLACK if parent == home else Color(1.0, 0.96, 0.83))
-	button.add_theme_color_override("font_focus_color", Color.BLACK if parent == home else Color(1.0, 0.96, 0.83))
-	button.add_theme_color_override("font_pressed_color", Color.BLACK if parent == home else Color(1.0, 0.90, 0.63))
-	button.add_theme_color_override("font_shadow_color", Color.TRANSPARENT if parent == home else Color(0.01, 0.02, 0.06, 0.95))
+	button.add_theme_color_override("font_color", IVORY)
+	button.add_theme_color_override("font_disabled_color", IVORY)
+	button.add_theme_color_override("font_hover_color", Color(1.0, 0.96, 0.83))
+	button.add_theme_color_override("font_focus_color", Color(1.0, 0.96, 0.83))
+	button.add_theme_color_override("font_pressed_color", Color(1.0, 0.90, 0.63))
+	if node_name == "Chaotic":
+		button.add_theme_color_override("font_color", Color(0.88, 0.16, 0.12))
+		button.add_theme_color_override("font_disabled_color", Color(0.88, 0.16, 0.12))
+		button.add_theme_color_override("font_hover_color", Color(1.0, 0.38, 0.24))
+		button.add_theme_color_override("font_focus_color", Color(1.0, 0.38, 0.24))
+		button.add_theme_color_override("font_pressed_color", Color(1.0, 0.24, 0.14))
+	button.add_theme_color_override("font_shadow_color", Color.TRANSPARENT)
 	button.add_theme_constant_override("outline_size", 0)
 	button.add_theme_constant_override("shadow_offset_y", 0 if parent == home else 3)
 	for style in ["normal", "hover", "pressed", "focus", "disabled"]:
@@ -244,4 +381,6 @@ func _hover(button: Button, active: bool) -> void:
 	var rest: Vector2 = button.get_meta("rest_position")
 	tween.tween_property(button, "position", rest - Vector2(0, 5 if active else 0), 0.22)
 	button.z_index = 10 if active else 0
-
+	var index := int(button.get_meta("constellation_index", 0))
+	if index >= 0:
+		tween.tween_property(_astrolabe, "emphasis:" + ["x", "y", "z"][index], 1.0 if active else 0.0, 0.22)

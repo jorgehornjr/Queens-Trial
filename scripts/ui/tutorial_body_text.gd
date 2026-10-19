@@ -1,6 +1,6 @@
 class_name TutorialBodyText
 extends Control
-## Capitulares da arte aprovada, com texto vivo e espaçamento controlado.
+
 
 const BODY_FONT: Font = preload("res://assets/fonts/Alegreya-Variable.ttf")
 const INITIAL_SHADER: Shader = preload("res://shaders/tutorial_illuminated_initial.gdshader")
@@ -12,6 +12,7 @@ const INITIALS := {
 }
 
 var text := ""
+var narrative_layout := false
 var _height := 0
 var _glyph: TextureRect
 var _lines: Array[Label] = []
@@ -43,6 +44,11 @@ func set_story(content: String, font_size: int) -> void:
 		ink.shader = INITIAL_SHADER
 		_glyph.material = ink
 		add_child(_glyph)
+	if narrative_layout:
+		_glyph.hide()
+		_layout_prose(font_size)
+		return
+	_glyph.show()
 	var initial: String = text.left(1)
 	var spec: Array = INITIALS.get(initial, INITIALS["A"])
 	var atlas := AtlasTexture.new()
@@ -60,8 +66,11 @@ func set_story(content: String, font_size: int) -> void:
 		var paragraph := paragraphs[paragraph_index].substr(1) if paragraph_index == 0 else paragraphs[paragraph_index]
 		var words := paragraph.split(" ", false)
 		var word_index := 0
+		var first_line := true
 		while word_index < words.size():
-			var indent := _glyph.size.x + 14.0 if y < 124.0 else 0.0
+			var initial_inset := _glyph.size.x + 14.0 if y < 124.0 else 0.0
+			var paragraph_inset := float(font_size) if first_line and paragraph_index > 0 else 0.0
+			var indent := maxf(initial_inset, paragraph_inset)
 			var available := size.x - indent
 			var line_text := ""
 			var width := 0.0
@@ -82,12 +91,58 @@ func set_story(content: String, font_size: int) -> void:
 			line.add_theme_font_override("font", BODY_FONT)
 			line.add_theme_font_size_override("font_size", font_size)
 			line.add_theme_color_override("font_color", Color(0.16, 0.09, 0.065))
+			line.set_meta("paragraph", paragraph_index)
+			if word_index < words.size():
+				line.horizontal_alignment = HORIZONTAL_ALIGNMENT_FILL
+				line.justification_flags = TextServer.JUSTIFICATION_WORD_BOUND | TextServer.JUSTIFICATION_DO_NOT_SKIP_SINGLE_LINE
 			add_child(line)
 			_lines.append(line)
 			y += line_step
+			first_line = false
 		if paragraph_index < paragraphs.size() - 1: y += 14.0
 	_height = int(maxf(y, 124.0))
 
 
 func get_content_height() -> int:
 	return _height
+
+func _layout_prose(font_size: int) -> void:
+	var line_step := ceilf(BODY_FONT.get_height(font_size) * 1.12)
+	var space := BODY_FONT.get_string_size(" ", HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	var y := 0.0
+	var paragraphs := text.split("\n\n", false)
+	for paragraph_index in range(paragraphs.size()):
+		var words := paragraphs[paragraph_index].split(" ", false)
+		var word_index := 0
+		var first_line := true
+		while word_index < words.size():
+			var indent := float(font_size) if first_line else 0.0
+			var available := size.x - indent
+			var line_text := ""
+			var width := 0.0
+			while word_index < words.size():
+				var word: String = words[word_index]
+				var extra := BODY_FONT.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x + (space if not line_text.is_empty() else 0.0)
+				if not line_text.is_empty() and width + extra > available: break
+				line_text += (" " if not line_text.is_empty() else "") + word
+				width += extra
+				word_index += 1
+			var line := Label.new()
+			line.text = line_text
+			line.position = Vector2(indent, y)
+			line.size = Vector2(available, line_step)
+			line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			line.material = _reveal_material
+			line.add_theme_font_override("font", BODY_FONT)
+			line.add_theme_font_size_override("font_size", font_size)
+			line.add_theme_color_override("font_color", Color(0.16, 0.09, 0.065))
+			line.set_meta("paragraph", paragraph_index)
+			if word_index < words.size():
+				line.horizontal_alignment = HORIZONTAL_ALIGNMENT_FILL
+				line.justification_flags = TextServer.JUSTIFICATION_WORD_BOUND | TextServer.JUSTIFICATION_DO_NOT_SKIP_SINGLE_LINE
+			add_child(line)
+			_lines.append(line)
+			y += line_step
+			first_line = false
+		if paragraph_index < paragraphs.size() - 1: y += line_step * 0.35
+	_height = ceili(y)

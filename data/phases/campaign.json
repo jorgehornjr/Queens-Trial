@@ -1,6 +1,6 @@
 {
-  "schema_version": 2,
-  "source": "docs/Queens Trial - Documentação Final.docx",
+  "schema_version": 3,
+  "source": "docs/Queens Trial - DocumentaÃƒÂ§ÃƒÂ£o Final.docx",
   "phases": [
     {
       "number": 1,
@@ -11,10 +11,36 @@
       "second_pair": [],
       "pair_order": "horizontal_first",
       "focus": "Um edito e movimento basico",
-      "configuration": "procedural",
+      "configuration": "fixed",
       "piece_waves": [
         [],
         []
+      ],
+      "tutorial_chapter": 1,
+      "starting_cell": [
+        2,
+        2
+      ],
+      "edict_values": [
+        3
+      ],
+      "safe_spot": [
+        3,
+        0
+      ],
+      "tutorial_path": [
+        [
+          2,
+          1
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ]
       ]
     },
     {
@@ -26,10 +52,23 @@
       "second_pair": [],
       "pair_order": "horizontal_first",
       "focus": "Dois editos e safe spot",
-      "configuration": "procedural",
+      "configuration": "fixed",
       "piece_waves": [
         [],
         []
+      ],
+      "tutorial_chapter": 2,
+      "edict_values": [
+        3,
+        1
+      ],
+      "starting_cell": [
+        0,
+        4
+      ],
+      "safe_spot": [
+        2,
+        4
       ]
     },
     {
@@ -44,7 +83,7 @@
       "second_pair": [],
       "pair_order": "horizontal_first",
       "focus": "Introducao dos ataques",
-      "configuration": "procedural",
+      "configuration": "fixed",
       "piece_waves": [
         [
           {
@@ -63,6 +102,19 @@
           }
         ],
         []
+      ],
+      "tutorial_chapter": 3,
+      "edict_values": [
+        4,
+        1
+      ],
+      "starting_cell": [
+        0,
+        1
+      ],
+      "safe_spot": [
+        3,
+        0
       ]
     },
     {
@@ -80,7 +132,7 @@
       ],
       "pair_order": "horizontal_first",
       "focus": "Duas ondas",
-      "configuration": "procedural",
+      "configuration": "fixed",
       "piece_waves": [
         [
           {
@@ -114,6 +166,19 @@
             "move_value": 2
           }
         ]
+      ],
+      "tutorial_chapter": 4,
+      "edict_values": [
+        4,
+        3
+      ],
+      "starting_cell": [
+        1,
+        1
+      ],
+      "safe_spot": [
+        2,
+        1
       ]
     },
     {
@@ -131,7 +196,7 @@
       ],
       "pair_order": "horizontal_first",
       "focus": "Introducao do Bispo",
-      "configuration": "procedural",
+      "configuration": "fixed",
       "piece_waves": [
         [
           {
@@ -165,30 +230,251 @@
             "move_value": 2
           }
         ]
+      ],
+      "tutorial_chapter": 5,
+      "edict_values": [
+        2,
+        4
+      ],
+      "starting_cell": [
+        3,
+        4
+      ],
+      "safe_spot": [
+        4,
+        0
       ]
     },
     {
       "number": 6,
+      "resolution": "moves",
+      "edict_count": 2,
+      "seconds_per_edict": 0,
+      "first_pair": [
+        "rook",
+        "bishop"
+      ],
+      "second_pair": [
+        "bishop",
+        "rook"
+      ],
+      "pair_order": "horizontal_first",
+      "focus": "Pratica dos editos e ataques combinados",
+      "configuration": "fixed",
+      "piece_waves": [
+        [
+          {
+            "type": "rook",
+            "side": "left",
+            "edge_slot": 4,
+            "edge_direction": -1,
+            "move_value": 3
+          },
+          {
+            "type": "bishop",
+            "side": "right",
+            "edge_slot": 3,
+            "edge_direction": 1,
+            "move_value": 1
+          }
+        ],
+        [
+          {
+            "type": "bishop",
+            "side": "top",
+            "edge_slot": 0,
+            "edge_direction": 1,
+            "move_value": 4
+          },
+          {
+            "type": "rook",
+            "side": "bottom",
+            "edge_slot": 1,
+            "edge_direction": 1,
+            "move_value": 2
+          }
+        ]
+      ],
+      "tutorial_chapter": 0,
+      "edict_values": [
+        2,
+        1
+      ],
+      "starting_cell": [
+        0,
+        4
+      ],
+      "safe_spot": [
+        1,
+        2
+      ]
+    },
+    {
+      "number": 7,
+      "resolution": "moves",
+      "edict_count": 2,
+      "seconds_per_edict": 0,
+      "first_pair": [
+        "bishop",
+        "rook"
+      ],
+      "second_pair": [
+        "rook",
+        "bishop"
+      ],
+      "pair_order": "horizontal_first",
+      "focus": "Pratica dos editos e ataques combinados",
+      "configuration": "fixed",
+      "piece_waves": [
+        [
+          {
+            "type": "bishop",
+            "side": "left",
+            "edge_slot": 4,
+            "edge_direction": -1,
+            "move_value": 3
+          },
+          {
+            "type": "rook",
+            "side": "right",
+            "edge_slot": 3,
+            "edge_direction": 1,
+            "move_value": 1
+          }
+        ],
+        [
+          {
+            "type": "rook",
+            "side": "top",
+            "edge_slot": 0,
+            "edge_direction": 1,
+            "move_value": 4
+          },
+          {
+            "type": "bishop",
+            "side": "bottom",
+            "edge_slot": 1,
+            "edge_direction": 1,
+            "move_value": 2
+          }
+        ]
+      ],
+      "tutorial_chapter": 0,
+      "edict_values": [
+        2,
+        3
+      ],
+      "starting_cell": [
+        1,
+        2
+      ],
+      "safe_spot": [
+        0,
+        4
+      ]
+    },
+    {
+      "number": 8,
       "resolution": "balance",
       "edict_count": 0,
       "seconds_per_edict": 5,
       "balance_round_count": 3,
-      "balance_weight_min": 8,
-      "balance_weight_max": 20,
       "tilt_degrees": 21,
       "slide_tiles": 3,
       "first_pair": [],
       "second_pair": [],
       "pair_order": "horizontal_first",
       "focus": "Julgamento da balanca: fugir para o lado mais leve",
-      "configuration": "fixed"
+      "configuration": "fixed",
+      "tutorial_chapter": 6,
+      "balance_rounds": [
+        {
+          "left": 16,
+          "right": 12,
+          "concealed": false
+        },
+        {
+          "left": 19,
+          "right": 16,
+          "concealed": false
+        },
+        {
+          "left": 9,
+          "right": 13,
+          "concealed": true
+        }
+      ]
     },
     {
-      "number": 7,
+      "number": 9,
+      "resolution": "balance",
+      "edict_count": 0,
+      "seconds_per_edict": 5,
+      "balance_round_count": 3,
+      "tilt_degrees": 21,
+      "slide_tiles": 3,
+      "first_pair": [],
+      "second_pair": [],
+      "pair_order": "horizontal_first",
+      "focus": "Julgamento da balanca: fugir para o lado mais leve",
+      "configuration": "fixed",
+      "tutorial_chapter": 0,
+      "balance_rounds": [
+        {
+          "left": 17,
+          "right": 20,
+          "concealed": false
+        },
+        {
+          "left": 12,
+          "right": 10,
+          "concealed": true
+        },
+        {
+          "left": 18,
+          "right": 14,
+          "concealed": true
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "resolution": "balance",
+      "edict_count": 0,
+      "seconds_per_edict": 5,
+      "balance_round_count": 3,
+      "tilt_degrees": 21,
+      "slide_tiles": 3,
+      "first_pair": [],
+      "second_pair": [],
+      "pair_order": "horizontal_first",
+      "focus": "Julgamento da balanca: fugir para o lado mais leve",
+      "configuration": "fixed",
+      "tutorial_chapter": 0,
+      "balance_rounds": [
+        {
+          "left": 13,
+          "right": 15,
+          "concealed": false
+        },
+        {
+          "left": 15,
+          "right": 17,
+          "concealed": true
+        },
+        {
+          "left": 14,
+          "right": 11,
+          "concealed": true
+        }
+      ]
+    },
+    {
+      "number": 11,
       "resolution": "card_order",
       "configuration": "procedural",
-      "focus": "Seis cartas: ordem crescente e decrescente",
-      "rounds": 2,
+      "focus": "Duas ordens crescentes e duas decrescentes",
+      "rounds": 4,
       "slots": 6,
       "deck_max": 20,
       "anchor_positions": [
@@ -196,54 +482,22 @@
         2,
         3,
         4
-      ]
+      ],
+      "tutorial_chapter": 0
     },
     {
-      "number": 8,
+      "number": 12,
       "resolution": "card_match",
       "configuration": "procedural",
-      "focus": "Associacao de numeros e decreto falso",
-      "rounds": 2,
+      "focus": "Associacao e dois decretos falsos",
+      "rounds": 3,
       "match_targets": [
         14,
         18,
         19
       ],
-      "deck_max": 20
-    },
-    {
-      "number": 9,
-      "resolution": "timer",
-      "edict_count": 2,
-      "seconds_per_edict": 15,
-      "first_pair": [
-        "rook",
-        "bishop"
-      ],
-      "second_pair": [
-        "rook",
-        "bishop"
-      ],
-      "pair_order": "announced_dynamic",
-      "focus": "Pares mistos dificeis",
-      "configuration": "procedural"
-    },
-    {
-      "number": 10,
-      "resolution": "timer",
-      "edict_count": 2,
-      "seconds_per_edict": 15,
-      "first_pair": [
-        "rook",
-        "bishop"
-      ],
-      "second_pair": [
-        "rook",
-        "bishop"
-      ],
-      "pair_order": "announced_dynamic",
-      "focus": "Desafio final",
-      "configuration": "fixed"
+      "deck_max": 20,
+      "tutorial_chapter": 0
     }
   ]
 }

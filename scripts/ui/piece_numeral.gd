@@ -1,6 +1,6 @@
 class_name PieceNumeral
 extends Node3D
-## Screen-space glyphs anchored above the piece, independent of 3D mipmaps/lighting.
+
 const FONT = preload("res://assets/fonts/jupiter_pro.otf")
 const FONT_SIZE := 48
 var text := ""

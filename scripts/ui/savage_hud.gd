@@ -1,13 +1,18 @@
 class_name SavageHUD
 extends CanvasLayer
 
+signal banner_finished
+signal countdown_warning(second: int)
+const FireTitle = preload("res://scripts/ui/chaotic_title_fire.gd")
 const FONT = preload("res://assets/fonts/jupiter_pro.otf")
 const IVORY := Color(1.0, 0.91, 0.78)
 const RUBY := Color(1.0, 0.34, 0.22)
 var canvas: Control
 var timer: Label
-var banner: Label
 var _banner_tween: Tween
+var fire_title: Node2D
+var _presenting := false
+var _last_warning_second := 0
 
 func _ready() -> void:
 	layer = 3
@@ -15,9 +20,12 @@ func _ready() -> void:
 	canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(canvas)
 	canvas.size = Vector2(1920,1080)
-	timer = _label("Countdown", Vector2(1740,76), Vector2(144,88), 66, true)
-	banner = _label("SavageBanner", Vector2(0,400), Vector2(1920,200), 154)
-	banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	timer = _label("Countdown", Vector2(1740,142), Vector2(144,88), 66, true)
+	fire_title = FireTitle.new()
+	fire_title.name = "ChaoticFireTitle"
+	fire_title.position = Vector2(240, 70)
+	canvas.add_child(fire_title)
+	fire_title.prepare()
 	canvas.hide()
 	get_viewport().size_changed.connect(_fit)
 	_fit()
@@ -48,24 +56,41 @@ func present(_number: int, _values: Array) -> void:
 	cancel()
 	canvas.show()
 	timer.hide()
-	banner.text = "Chaotic"
-	banner.modulate.a = 0.0
-	banner.show()
+	_presenting = true
+	fire_title.show()
+	fire_title.set_elapsed(0.0)
 	_banner_tween = create_tween()
-	_banner_tween.tween_property(banner, "modulate:a", 1.0, 0.45)
-	_banner_tween.tween_interval(1.0)
-	_banner_tween.tween_property(banner, "modulate:a", 0.0, 0.8)
-	_banner_tween.tween_callback(banner.hide)
+	_banner_tween.tween_method(fire_title.set_elapsed, 0.0, FireTitle.DURATION, FireTitle.DURATION)
+	_banner_tween.tween_callback(_finish_banner)
 
-func update_timer(seconds: float, _preparing: bool, _wave: int) -> void:
+func _finish_banner() -> void:
+	fire_title.hide()
+	_presenting = false
+	banner_finished.emit()
+
+func update_timer(seconds: float, preparing: bool, _wave: int) -> void:
+	if not preparing:
+		timer.hide()
+		return
 	timer.show()
-	timer.text = "%02d" % ceili(maxf(seconds,0.0))
+	var whole_seconds := ceili(maxf(seconds, 0.0))
+	timer.text = "%02d" % whole_seconds
 	timer.modulate = RUBY if seconds <= 3.0 else Color.WHITE
+	if whole_seconds > 3:
+		_last_warning_second = 0
+	elif whole_seconds >= 1 and whole_seconds != _last_warning_second:
+		_last_warning_second = whole_seconds
+		countdown_warning.emit(whole_seconds)
 
 func resolving() -> void:
 	timer.text = ""
+	timer.hide()
 
 func cancel() -> void:
+	_last_warning_second = 0
 	if _banner_tween != null and _banner_tween.is_valid(): _banner_tween.kill()
 	canvas.hide()
-	banner.hide()
+	fire_title.hide()
+	if _presenting:
+		_presenting = false
+		banner_finished.emit()

@@ -1,5 +1,6 @@
 shader_type spatial;
 render_mode cull_back, diffuse_burley, specular_schlick_ggx;
+#include "res://shaders/simulation_assembly.gdshaderinc"
 uniform float effect_time = 0.0;
 uniform float lower_height = -14.0;
 uniform float upper_height = 4.0;
@@ -25,6 +26,7 @@ void vertex() {
 	world_position = (MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;
 }
 void fragment() {
+	if (simulation_progress<simulation_threshold(world_position)) { discard; }
 	vec2 fabric_uv = UV*uv_scale+uv_offset;
 	vec3 fabric = fabric_color.rgb;
 	if (has_fabric_texture) { fabric *= texture(fabric_texture,fabric_uv).rgb; }
@@ -32,11 +34,11 @@ void fragment() {
 		NORMAL_MAP = texture(normal_texture,fabric_uv).rgb;
 		NORMAL_MAP_DEPTH = normal_strength;
 	}
-	// UV-anchored fissures stay attached when the queen breathes or turns.
+	// As fissuras acompanham as coordenadas UV durante a animação da Rainha.
 	vec2 p = UV*vec2(180.0,220.0);
 	vec2 warp = vec2(noise(p*0.24),noise(p*0.24+17.0))*1.8;
 	float charred_cavities = noise(p+warp)*0.68+noise(p*2.8+warp)*0.32;
-	// Bounded motion within each burn patch, rather than scrolling the whole pattern.
+
 	vec2 stirring = vec2(sin(effect_time*1.35+p.y*0.08),cos(effect_time*1.10+p.x*0.13))*0.48;
 	float cavities = noise(p+warp+stirring)*0.68
 		+noise(p*2.8+warp+vec2(effect_time*0.80,-effect_time*1.15))*0.32;
@@ -57,5 +59,5 @@ void fragment() {
 	METALLIC = fabric_metallic*(1.0-char);
 	vec3 hot = mix(vec3(1.7,0.015,0.002),vec3(7.0,1.4,0.09),temperature);
 	hot = mix(hot,vec3(9.0,2.8,0.35),smoothstep(0.86,1.0,temperature)*core);
-	EMISSION = hot*heat;
+	EMISSION = hot*heat+simulation_trace(world_position);
 }

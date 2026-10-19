@@ -1,8 +1,8 @@
 class_name PlanetRotation
 extends RefCounted
 
-# Períodos siderais em horas. Inclinações acima de 90° já indicam giro retrógrado;
-# inverter também a velocidade produziria uma segunda inversão.
+# Inclinações acima de 90° já incluem o giro retrógrado; os períodos estão em horas.
+
 const PROFILES := {
 	"Mercury": {"hours": 58.6 * 24.0, "tilt": 0.1},
 	"Venus": {"hours": 243.0 * 24.0, "tilt": 177.0},
@@ -20,5 +20,5 @@ static func axis_for(id: String) -> Vector3:
 
 static func speed_for(id: String, earth_turn_seconds: float, exact_ratios := false) -> float:
 	var ratio := float(PROFILES.Earth.hours) / float(PROFILES[id].hours)
-	# Compressão dos períodos para legibilidade da rotação dos planetas lentos.
+
 	return 360.0 / maxf(earth_turn_seconds, 1.0) * pow(ratio, 1.0 if exact_ratios else 0.25)

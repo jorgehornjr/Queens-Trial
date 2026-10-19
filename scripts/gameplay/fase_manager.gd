@@ -7,17 +7,16 @@ signal campaign_completed
 signal savage_completed
 
 const Catalog = preload("res://scripts/data/phase_catalog.gd")
-const Vanilla = preload("res://scripts/data/vanilla_board_generator.gd")
-const LAST_PLAYABLE_PHASE := 8
+const LAST_PLAYABLE_PHASE := 12
 const Savage = preload("res://scripts/data/savage_catalog.gd")
 const Progress = preload("res://scripts/data/campaign_progress.gd")
-## Temporary direct access requested for playtesting. Disable for release.
-const SAVAGE_TEST_ACCESS := true
+
+const SAVAGE_TEST_ACCESS := false
 
 static func can_start_phase(number: int) -> bool:
 	return number in range(1, LAST_PLAYABLE_PHASE + 1) or (Savage.contains(number) and (SAVAGE_TEST_ACCESS or Progress.savage_unlocked()))
 
-@export_range(1, 10) var initial_phase := 1
+@export_range(1, 12) var initial_phase := 1
 @export var auto_start := true
 @export var save_progress := true
 
@@ -25,9 +24,9 @@ var campaign: Dictionary = {}
 var current_phase := 0
 var current_phase_data: Dictionary = {}
 var current_seed := 0
-var _vanilla_history: Array = []
 var _opening_board: Dictionary = {}
 var _opening_seed := 0
+var campaign_finished := false
 
 
 func _ready() -> void:
@@ -42,9 +41,10 @@ func _ready() -> void:
 
 
 func prepare_opening_board() -> Dictionary:
-	if initial_phase not in range(1, 6): return {}
-	_opening_seed = randi()
-	_opening_board = Vanilla.generate(Catalog.find_phase(campaign, initial_phase), _opening_seed, _vanilla_history)
+	var first := Catalog.find_phase(campaign, initial_phase)
+	if String(first.get("resolution", "")) != "moves": return {}
+	_opening_seed = 0
+	_opening_board = first.duplicate(true)
 	return _opening_board.duplicate(true)
 
 
@@ -54,20 +54,16 @@ func start_phase(phase_number: int, seed_override: int = -1) -> void:
 	if phase_data.is_empty():
 		push_error("Fase fora da campanha: %d" % phase_number)
 		return
+	campaign_finished = false
 
 	if String(phase_data.get("configuration", "fixed")) == "procedural":
 		current_seed = seed_override if seed_override >= 0 else randi()
 	else:
 		current_seed = 0
-	if phase_number in range(1, 6):
+	if String(phase_data.get("resolution", "")) == "moves":
 		if not _opening_board.is_empty() and int(_opening_board.number) == phase_number and seed_override < 0:
 			phase_data = _opening_board
 			current_seed = _opening_seed
-		else:
-			phase_data = Vanilla.generate(phase_data, current_seed, _vanilla_history)
-		if phase_data.is_empty(): return
-		_vanilla_history.append(phase_data.duplicate(true))
-		if _vanilla_history.size() > 12: _vanilla_history.pop_front()
 	current_phase = phase_number
 	current_phase_data = phase_data
 	_opening_board = {}
@@ -76,21 +72,25 @@ func start_phase(phase_number: int, seed_override: int = -1) -> void:
 
 
 func restart_phase() -> void:
-	if current_phase == 0:
+	if current_phase == 0 or campaign_finished:
 		return
 	var preserved_seed := current_seed
-	# Retry the same puzzle; only entering another phase draws a new board.
+
 	phase_started.emit(current_phase, current_phase_data.duplicate(true), preserved_seed)
 	phase_restarted.emit(current_phase, preserved_seed)
 
 
 func advance_phase() -> void:
+	if current_phase == 0 or campaign_finished: return
 	if Savage.contains(current_phase):
-		if current_phase == Savage.LAST: savage_completed.emit()
+		if current_phase == Savage.LAST:
+			campaign_finished = true
+			savage_completed.emit()
 		else: start_phase(current_phase + 1)
 		return
 	if save_progress: Progress.record_completion(current_phase)
 	if current_phase >= LAST_PLAYABLE_PHASE:
+		campaign_finished = true
 		campaign_completed.emit()
 		return
 	start_phase(current_phase + 1)

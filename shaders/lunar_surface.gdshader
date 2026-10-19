@@ -28,7 +28,7 @@ void fragment() {
 	vec3 geometric_world = normalize((INV_VIEW_MATRIX * vec4(geometric_normal, 0.0)).xyz);
 	float daylight = max(dot(normal_world, sun), 0.0);
 	float light_gate = smoothstep(0.02, 0.48, dot(geometric_world, sun));
-	// Máscara de realces nos detalhes claros das crateras, com contraste dos mares.
+
 	float luminance = dot(color, vec3(0.2126, 0.7152, 0.0722));
 	float broad_luminance = dot(broad_color, vec3(0.2126, 0.7152, 0.0722));
 	float highlands = smoothstep(0.20, 0.65, luminance);

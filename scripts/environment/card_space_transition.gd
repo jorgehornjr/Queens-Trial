@@ -77,8 +77,8 @@ func _step(amount: float) -> void:
 	camera.global_position = _from.origin + Vector3.UP * travel * 16.0 + _from.basis.z * travel * 22.0
 	camera.global_basis = _from.basis.slerp(Basis.from_euler(Vector3(0.12, 0, 0)), travel)
 	camera.fov = lerpf(_from_fov, 64.0, travel)
-	# Keep the sky's clock and flow untouched. Multiplying its accumulated
-	# effect_time by an animated speed made the blue filaments jump backwards.
+	# Preserva o relógio do céu para evitar inversões no fluxo durante a transição.
+
 	if amount >= 0.5 and not _hidden:
 		_hidden = true
 		for node: Node3D in _visibility: node.hide()

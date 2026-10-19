@@ -17,6 +17,15 @@ acabamento visual, iluminação, efeitos e seleção da trilha sonora.
 - **Teleporte:** mod **Ascian and Ancient Teleport**, de **Dekken**, variante
   AscianTeleport. Modelos e texturas de `pop_tlep1t1h.avfx`, de Final Fantasy XIV.
   Áudio: `sound/vfx/monster7/SE_Vfx_Monster_c0101_wrp01.scd`.
+- **Liberação de éter:** texturas `dist_uv_00r.atex`,
+  `glow_a8_00r.atex`, `tb_00r.atex` e `fire_04r.atex`, utilizadas por
+  `vfx/common/eff/c0601_ysayle_stlp01x.avfx`, de Final Fantasy XIV / Square Enix.
+  Conversões em `assets/effects/queen_departure/`; dissolução em partículas
+  e aglomerado estelar com nébula de reflexão adaptados ao Godot.
+- **Ruptura do globo:** fragmentos derivados da geometria do instrumento Astraia,
+  com ondas de energia e iluminação próprias.
+- **Despedida da rainha:** efeitos sonoros sintetizados para a ruptura, a liberação
+  de éter e a dissipação final em `assets/audio/sfx/queen_*.wav`.
 - **Referências de formatos:** [Lumina](https://github.com/NotAdam/Lumina),
   [Dalamud VFXEditor](https://github.com/0ceal0t/Dalamud-VFXEditor),
   [Penumbra](https://github.com/xivdev/Penumbra) e
@@ -90,8 +99,13 @@ acabamento visual, iluminação, efeitos e seleção da trilha sonora.
 - **Old Standard TT:** Alexey Kryukov. SIL Open Font License 1.1 em
   `assets/fonts/OLD_STANDARD_LICENSE.txt`.
 - **Jupiter Pro:** fonte fornecida para o projeto, em `assets/fonts/jupiter_pro.otf`.
+- **Anton:** Vernon Adams, distribuída pelo
+  [Google Fonts](https://github.com/google/fonts/tree/main/ofl/anton).
+  SIL Open Font License 1.1 em `assets/fonts/ANTON_LICENSE.txt`.
 - **OPTIEngraversOldEnglish:** fonte fornecida no pacote
   `engravers-old-english.zip`, sem documento de licença no pacote.
+- **Letreiro Fim:** desenho caligráfico fornecido como referência para o projeto,
+  convertido em curvas em `assets/ui/ending/fim_calligraphy.svg`.
 
 ## Efeitos sonoros
 
@@ -102,6 +116,12 @@ acabamento visual, iluminação, efeitos e seleção da trilha sonora.
 - **Queima das cartas:** trecho de `candle.mp3`, fornecido para o projeto,
   em `assets/audio/sfx/cards/paper_burn.wav`.
 - **Livro:** efeitos de papel e tecido em `assets/audio/sfx/book/`.
+- **Anúncios Chaotic:** voz sintética feminina Microsoft Sonia Neural, em inglês
+  britânico, com entonação natural. Frases: “Chaotic simulation started.” e
+  “Simulation completed.” Arquivos: `assets/audio/sfx/chaotic_announcement.wav`
+  e `assets/audio/sfx/chaotic_completed.wav`.
+- **Reconstrução da simulação:** síntese modal original em
+  `assets/audio/sfx/chaotic_reconstruction.wav`.
 
 ## Trilha sonora
 
@@ -115,7 +135,18 @@ Arquivo: `assets/audio/music/menu_orbits.ogg`.
 Arranjo original da abertura sob direção de Jorge Horn.
 Arquivo: `assets/audio/music/priest_opening.ogg`.
 
-As duas faixas utilizam instrumentos do **MuseScore General**, por
+### Última Constelação
+
+Trilha instrumental original do encerramento, retomando o tema da rainha da
+abertura com piano, cordas, harpa e celesta.
+Arquivo: `assets/audio/music/queen_last_constellation.ogg`.
+
+### Simulação Chaotic
+
+Trilha original de transição, com piano, teclas elétricas, cordas e celesta.
+Arquivo: `assets/audio/music/chaotic_simulation_intro.ogg`.
+
+As quatro faixas utilizam instrumentos do **MuseScore General**, por
 S. Christian Collins e colaboradores, renderizados com FluidSynth. A licença
 MIT e os créditos das amostras estão em
 `licenses/musescore/MuseScore_General_License.md` e

@@ -55,8 +55,8 @@ func _physics_process(_delta: float) -> void:
 		return
 	if _animation_state == &"death":
 		return
-	# Movement is deliberately grid-locked and driven by one tween per key press.
-	# Keep physics processing only for the non-looping death state guard.
+
+
 	if not movement_locked:
 		_set_animation_state(false)
 
@@ -84,7 +84,7 @@ func reset_to_start() -> void:
 
 
 func begin_platform_slide(direction: int) -> void:
-	# Freeze the actual visual position at the deadline, including a partial step.
+	# Preserva a posição visual, inclusive um passo incompleto, no instante da inclinação.
 	if _move_tween != null:
 		_move_tween.kill()
 		_move_tween = null
@@ -180,8 +180,8 @@ func _try_move(direction: Vector2i) -> void:
 	tween.set_ease(Tween.EASE_IN_OUT)
 	var desired_yaw := _yaw_for_direction(facing_direction)
 	var shortest_turn := wrapf(desired_yaw - rotation.y, -PI, PI)
-	# Let the shoulders start turning before taking the next full stride.
-	# The small lead grows for a U-turn, while the cell still resolves on time.
+
+
 	var turn_lead := minf(0.12, absf(shortest_turn) / PI * 0.12)
 	tween.tween_property(
 		self,
@@ -261,7 +261,7 @@ func _set_animation_state(moving: bool) -> void:
 func _find_animation(hints: PackedStringArray) -> StringName:
 	if _animation_player == null:
 		return &""
-	# Prefer gameplay's exact clip names before cinematic comparison clips.
+
 	for hint in hints:
 		if _animation_player.has_animation(hint): return StringName(hint)
 	for animation_name in _animation_player.get_animation_list():
@@ -273,8 +273,8 @@ func _find_animation(hints: PackedStringArray) -> StringName:
 
 
 static func camera_direction_for_action(camera_yaw: float, action: StringName) -> Vector2i:
-	# The game remains cardinal/cell-based, even when the view is diagonal.
-	# Quantize the camera, never the player's last heading; exact ties use the next sector.
+	# A direção usa quadrantes da câmera; o movimento permanece preso à grade.
+
 	var sector := posmod(int(floor((camera_yaw + PI / 4.0) / (PI / 2.0))), 4)
 	var forwards: Array[Vector2i] = [Vector2i.UP, Vector2i.LEFT, Vector2i.DOWN, Vector2i.RIGHT]
 	return relative_direction_for_action(forwards[sector], action)

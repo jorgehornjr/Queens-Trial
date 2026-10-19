@@ -1,4 +1,4 @@
-// Balance only the pale, neutral paper; keep dark ink and coloured pigments.
+// Ajusta apenas o papel claro e neutro, preservando tinta e pigmentos.
 uniform vec3 paper_source = vec3(0.88, 0.85, 0.79);
 uniform vec3 paper_target = vec3(0.8941, 0.8667, 0.7922);
 uniform bool paper_tone_enabled = false;

@@ -7,7 +7,7 @@ varying vec3 world_position;
 
 void vertex() {
 	world_position = MODEL_MATRIX[3].xyz;
-	// Tiny camera-facing glints retain their particle scale and board position.
+
 	float sx = length(MODEL_MATRIX[0].xyz), sy = length(MODEL_MATRIX[1].xyz);
 	MODELVIEW_MATRIX = VIEW_MATRIX * mat4(vec4(INV_VIEW_MATRIX[0].xyz*sx,0.0),
 		vec4(INV_VIEW_MATRIX[1].xyz*sy,0.0),INV_VIEW_MATRIX[2],MODEL_MATRIX[3]);

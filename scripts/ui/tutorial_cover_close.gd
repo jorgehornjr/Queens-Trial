@@ -1,5 +1,5 @@
 extends Node2D
-## A mesma capa rígida abre e fecha sobre a lombada: 0 aberta, 1 fechada.
+
 
 var paper: Texture2D
 var front: Texture2D

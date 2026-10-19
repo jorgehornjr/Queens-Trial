@@ -1,6 +1,6 @@
 class_name FailureFeedback
 extends CanvasLayer
-## A readable correction that stays until the learner chooses to continue.
+
 
 signal dismissed(accepted: bool)
 
@@ -20,6 +20,7 @@ var hint: Label
 var action: Button
 var _generation := 0
 var _animation: Tween
+var _automatic := false
 
 
 func _ready() -> void:
@@ -117,13 +118,15 @@ func _center_panel() -> void:
 	panel.pivot_offset = panel.size * 0.5
 
 
-func present(reasons: Array, guidance: String, button_text := "Tentar novamente") -> bool:
+func present(reasons: Array, guidance: String, button_text := "Tentar novamente", auto_seconds := 0.0) -> bool:
 	cancel()
 	var run_id := _generation
+	_automatic = auto_seconds > 0.0
 	body.text = "\n\n".join(PackedStringArray(reasons))
 	hint.text = guidance
 	hint.visible = not guidance.is_empty()
 	action.text = button_text
+	action.visible = not _automatic
 	action.disabled = true
 	panel.show()
 	screen.show()
@@ -133,16 +136,27 @@ func present(reasons: Array, guidance: String, button_text := "Tentar novamente"
 	_animation = create_tween().set_parallel(true).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
 	_animation.tween_property(screen, "modulate:a", 1.0, 0.24)
 	_animation.tween_property(panel, "scale", Vector2.ONE, 0.32)
-	# Do not let the click/Enter that submitted an answer also dismiss its correction.
+	# Evita que o envio da resposta também feche a correção.
 	await get_tree().create_timer(0.40).timeout
 	if run_id != _generation or not screen.visible: return false
+	if _automatic:
+		await get_tree().create_timer(maxf(0.0, auto_seconds - 0.4), false).timeout
+		if run_id != _generation or not screen.visible: return false
+		_animation = create_tween()
+		_animation.tween_property(screen, "modulate:a", 0.0, 0.25)
+		await _animation.finished
+		if run_id != _generation: return false
+		panel.hide()
+		screen.hide()
+		dismissed.emit(true)
+		return true
 	action.disabled = false
 	action.grab_focus()
 	return await dismissed
 
 
 func acknowledge() -> void:
-	if not screen.visible or action.disabled: return
+	if not screen.visible or action.disabled or _automatic: return
 	panel.hide()
 	screen.hide()
 	dismissed.emit(true)

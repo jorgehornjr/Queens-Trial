@@ -46,19 +46,8 @@ func set_occupant(cell: Vector2i, occupant: StringName) -> bool:
 	return true
 
 
-func clear_occupant(cell: Vector2i) -> bool:
-	if not _occupants.has(cell):
-		return false
-	_occupants.erase(cell)
-	return true
-
-
 func clear_dynamic_occupants() -> void:
 	reset()
-
-
-func get_occupant(cell: Vector2i) -> StringName:
-	return StringName(_occupants.get(cell, &""))
 
 
 func manhattan_distance(origin: Vector2i, destination: Vector2i) -> int:

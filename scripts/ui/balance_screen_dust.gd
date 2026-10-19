@@ -1,6 +1,6 @@
 class_name BalanceScreenDust
 extends Control
-## Foreground glints drift with the same gust that carries the player.
+
 
 const DUST_COUNT := 210
 var flow_direction := 0
@@ -88,7 +88,7 @@ func _draw() -> void:
 		var alpha := strength * edges * (0.62 + 0.30 * sin(_elapsed * 5.0 + phase))
 		var diameter := mote.w * fit
 		var tint := Color(1.0, 0.91, 0.67, alpha)
-		# A short tapered wake gives the tiny points a readable direction.
+
 		var tail := Vector2(float(-flow_direction) * diameter * 1.8, 0.0)
 		for segment in range(3):
 			var from := center + tail * float(segment) / 3.0

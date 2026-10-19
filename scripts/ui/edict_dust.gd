@@ -1,5 +1,5 @@
 extends Node2D
-## Rasterize the current font once; every moving grain samples that exact glyph mask.
+
 const EROSION = preload("res://shaders/edict_erosion.gdshader")
 const STARDUST = preload("res://shaders/edict_stardust.gdshader")
 const DURATION := 2.25
@@ -64,7 +64,7 @@ func prepare(source: Label) -> void:
 		point += Vector2(rng.randf(), rng.randf()) * spacing
 		multimesh.set_instance_transform_2d(index, Transform2D(0.0, point))
 		multimesh.set_instance_custom_data(index, Color(point.x / source.size.x, point.y / source.size.y, rng.randf(), rng.randf()))
-	# Explicit bounds include the wind plume outside the original text rectangle.
+
 	multimesh.custom_aabb = AABB(Vector3(-20, -200, -1), Vector3(source.size.x + 620, source.size.y + 400, 2))
 	var dust := MultiMeshInstance2D.new()
 	dust.name = "GlyphGrains"

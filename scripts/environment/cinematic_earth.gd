@@ -9,7 +9,7 @@ const CLOUD_SHADER = preload("res://shaders/earth_cinematic_clouds.gdshader")
 var spin_axis := Vector3.UP
 
 func _process(delta: float) -> void:
-	# O limite entre dia e noite depende do Sol, independentemente do giro do globo.
+
 	$Model.rotate(spin_axis, deg_to_rad(rotation_degrees_per_second) * delta)
 
 func set_axial_rotation(world_axis: Vector3, degrees_per_second: float) -> void:
@@ -22,7 +22,7 @@ func _ready() -> void:
 	var direction := sun_direction.normalized()
 	var sunlight := $PlanetSun as DirectionalLight3D
 	sunlight.look_at_from_position(global_position, global_position - direction)
-	# Materiais por instância para os parâmetros de iluminação da Terra.
+
 	for mesh: MeshInstance3D in $Model.find_children("*", "MeshInstance3D", true, false):
 		mesh.layers = 2
 		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

@@ -67,7 +67,7 @@ func enter_gameplay(instant := false) -> void:
 		return
 	cinematic_mode = false
 	gameplay_mode = true
-	# Gameplay always starts square to the board, even if presentation was orbited.
+
 	yaw_degrees = 0.0
 	_yaw = 0.0
 	if _mode_transition != null:
@@ -111,10 +111,10 @@ func update_framing(delta: float, snap := false) -> void:
 	global_position = _board.global_position
 	camera.global_basis = Basis.from_euler(Vector3(deg_to_rad(-_active_elevation), _yaw, 0.0))
 	minimum_distance = fit_distance(camera.global_basis)
-	# Distância mínima evita cortes durante interpolação e redimensionamento.
+
 	_distance = maxf(minimum_distance, lerpf(_distance, minimum_distance * _active_zoom_ratio, weight))
-	# Moving the lens upward without changing its basis lowers the board in the
-	# composition. Gameplay gains a steeper view while retaining the upper sky.
+
+
 	camera.global_position = global_position + Vector3.UP * _active_vertical_focus + camera.global_basis.z * _distance
 
 
@@ -127,7 +127,7 @@ func fit_distance(view_basis: Basis) -> float:
 	for world_point in framing_points:
 		var p := view_basis.inverse() * (world_point - global_position)
 		distance = maxf(distance, p.z + absf(p.x) / (horizontal_tangent * 0.90))
-		# Margem inferior de enquadramento em todos os ângulos da órbita.
+
 		var vertical_margin := 0.78 if p.y >= 0.0 else 0.72
 		distance = maxf(distance, p.z + absf(p.y) / (vertical_tangent * vertical_margin))
 	return distance + 1.0
@@ -166,13 +166,13 @@ func _unhandled_input(event: InputEvent) -> void:
 				_active_zoom_ratio = presentation_zoom_ratio
 			get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion and _dragging:
-		# Órbita horizontal com inclinação e centro fixos.
+
 		yaw_degrees = wrapf(yaw_degrees - event.relative.x * orbit_sensitivity, -180.0, 180.0)
 		get_viewport().set_input_as_handled()
 
 
 func _input(event: InputEvent) -> void:
-	# Libera o mouse mesmo quando a interface consome o evento.
+
 	if _dragging and ((event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and not event.pressed)
 			or (event is InputEventKey and event.keycode == KEY_ESCAPE and event.pressed)):
 		_end_orbit()

@@ -5,6 +5,7 @@ const FIRST := 101
 const LAST := 105
 const PATH := "res://data/savage/challenges.json"
 const BoardModel = preload("res://scripts/board/board_state.gd")
+const Routes = preload("res://scripts/data/vanilla_board_generator.gd")
 
 static func contains(number: int) -> bool:
 	return number in range(FIRST, LAST + 1)
@@ -22,6 +23,15 @@ static func find(number: int) -> Dictionary:
 
 static func cell(value: Array) -> Vector2i:
 	return Vector2i(int(value[0]), int(value[1]))
+
+static func operation_result(equation: Dictionary) -> int:
+	var left := int(equation.get("left", 0))
+	var right := int(equation.get("right", 0))
+	if left not in range(1, 21) or right not in range(1, 21): return 0
+	match String(equation.get("operator", "")):
+		"subtract": return left - right
+		"divide": return int(left / right) if left % right == 0 else 0
+	return 0
 
 static func destination(piece: Dictionary) -> Vector2i:
 	var amount := int(piece.move_value)
@@ -61,27 +71,7 @@ static func route(origin: Vector2i, target: Vector2i, limit: int, occupied: Arra
 	return []
 
 static func solutions(stage: Dictionary) -> Array:
-	var board := BoardModel.new()
-	var result: Array = []
-	var first := attacked(stage.piece_waves[0])
-	var second := attacked(stage.piece_waves[1])
-	var final := cell(stage.safe_spot)
-	var occupied: Array[Vector2i] = []
-	for piece: Dictionary in stage.piece_waves[0]: occupied.append(destination(piece))
-	if final in second or final in occupied: return []
-	for x in range(5):
-		for y in range(5):
-			var middle := Vector2i(x, y)
-			if middle in first or board.manhattan_distance(middle, final) != int(stage.edict_values[1]): continue
-			var second_path := route(middle, final, int(stage.edict_values[1]), occupied)
-			if second_path.is_empty(): continue
-			for sx in range(5):
-				for sy in range(5):
-					var start := Vector2i(sx, sy)
-					if board.manhattan_distance(start, middle) != int(stage.edict_values[0]): continue
-					var first_path := route(start, middle, int(stage.edict_values[0]))
-					if not first_path.is_empty(): result.append({"start": start, "middle": middle, "first": first_path, "second": second_path})
-	return result
+	return Routes.plans(stage)
 
 static func validate() -> PackedStringArray:
 	var errors := PackedStringArray()
@@ -96,6 +86,13 @@ static func validate() -> PackedStringArray:
 			errors.append("Éditos Chaotic inválidos.")
 			continue
 		if float(stage.get("preparation_seconds", 0)) != 10.0: errors.append("A preparação deve durar dez segundos.")
+		var operations: Array = stage.get("edict_operations", [])
+		if operations.size() != 2:
+			errors.append("Chaotic precisa de duas operações e quatro cartas.")
+		else:
+			for operation_index in range(2):
+				if operation_result(operations[operation_index]) != int(values[operation_index]):
+					errors.append("A operação não corresponde ao édito Chaotic.")
 		var slots := {}
 		var sides := {}
 		var landings := {}

@@ -1,5 +1,5 @@
 extends Node3D
-## Original Hooded Fandaniel skin, native cinematic walk and Mixamo gameplay.
+
 
 const Face := preload("res://scripts/player/fandaniel_face.gd")
 const Gaze := preload("res://scripts/player/fandaniel_cinematic_gaze.gd")
@@ -62,6 +62,12 @@ func play_intro_looking(duration_scale := 1.0) -> void:
 func begin_cinematic_arrival(duration_scale: float) -> void:
 	play_intro_looking(duration_scale)
 
+func begin_cinematic_idle() -> void:
+	if _gaze_release != null and _gaze_release.is_valid(): _gaze_release.kill()
+	cinematic = true
+	animation_player.speed_scale = 1.0
+	animation_player.play("breathing_idle",0.5)
+
 func cinematic_walk_speed() -> float:
 	return NATIVE_WALK_SPEED * CINEMATIC_WALK_RATE * scale.x
 
@@ -94,8 +100,8 @@ func _collect_materials(node: Node) -> void:
 			material.set_shader_parameter("emission_tint", Vector3(original.emission.r, original.emission.g, original.emission.b) * original.emission_energy_multiplier)
 			material.set_shader_parameter("tint", original.albedo_color)
 			material.set_shader_parameter("throat_shadow_enabled", original.resource_name == "Fandaniel_d")
-			# Keep the depth-writing pipeline throughout arrival: changing from
-			# alpha blending to cutout mid-shot caused a sorting/opacity jump.
+			# Mantém o recorte durante toda a chegada para evitar saltos de ordenação.
+
 			mesh.set_surface_override_material(index, material)
 			_appearance.append(material)
 	for child in node.get_children(): _collect_materials(child)
@@ -114,8 +120,8 @@ func _prepare_throat_shadow(instance: MeshInstance3D) -> void:
 		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		var colors := PackedColorArray()
 		for vertex in vertices:
-			# Store the gradient at bind pose, so it moves with the original
-			# skin weights instead of sliding over the neck as the head rises.
+			# A máscara acompanha os pesos originais da pele, sem deslizar sobre o pescoço.
+
 			var height := smoothstep(1.405, 1.480, vertex.y)
 			var radius := Vector2(vertex.x, vertex.z - 0.015).length()
 			var center := 1.0 - smoothstep(0.110, 0.145, radius)

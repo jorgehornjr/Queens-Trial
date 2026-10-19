@@ -9,7 +9,7 @@ uniform float reveal : hint_range(0.0, 1.0) = 1.0;
 
 void fragment() {
 	vec4 source = texture(glyph, UV);
-	// Use the supplied white silhouette exactly; its blue backdrop is not ink.
+
 	float ink = smoothstep(0.19, 0.93, min(source.r, min(source.g, source.b))) * source.a;
 	ALBEDO = tint.rgb * energy;
 	EMISSION = tint.rgb * energy;

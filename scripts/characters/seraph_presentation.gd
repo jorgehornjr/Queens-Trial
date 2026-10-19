@@ -1,5 +1,5 @@
 extends Node3D
-## Epic encounter figure staged just beyond the north edge of the board.
+
 
 const CHARACTER_LAYER := 64
 const BalanceModel = preload("res://scripts/characters/queen_balance.gd")
@@ -22,6 +22,7 @@ var _neck_bone := -1
 var _head_pose := Quaternion.IDENTITY
 var _neck_pose := Quaternion.IDENTITY
 var _elapsed := 0.0
+var head_tracking_enabled := true
 
 const HEAD_CENTER_YAW := 0.0
 const PLAYER_YAW_LIMIT := deg_to_rad(22.0)
@@ -36,9 +37,8 @@ func _ready() -> void:
 	_player = get_node_or_null(player_path) as Node3D
 	_skeleton = $Model.find_child("Skeleton3D", true, false) as Skeleton3D
 	_configure_procedural_animation()
-	# Build and submit the dissolved scales during scene setup, before gameplay.
-	# The reveal shader discards every fragment at zero, warming its pipelines
-	# without showing the prop or loading/instantiating it at the phase-6 handoff.
+
+
 	_prepare_balance()
 	balance.show()
 	_finish_balance_warmup()
@@ -46,8 +46,8 @@ func _ready() -> void:
 
 
 func _finish_balance_warmup() -> void:
-	# The queen is hidden through the opening's first shots. Wait until she
-	# actually renders, so a cold shader cache is warmed before the handoff too.
+
+
 	while not is_visible_in_tree():
 		await get_tree().process_frame
 	for frame in range(3):
@@ -90,7 +90,7 @@ func set_balance_mode(enabled: bool) -> void:
 		balance.reset_weights()
 		_ritual_tween.tween_property(balance, "reveal", 0.0, 0.95)
 		_ritual_tween.tween_property(orb, "ritual_reveal", 1.0, 1.15)
-	# Killing a replaced tween must also discard its completion callback.
+
 	_ritual_tween.tween_callback(func():
 		if run_id == _ritual_generation:
 			orb.visible = not enabled
@@ -103,8 +103,8 @@ func _raise_orb_vertically() -> void:
 	if orb == null or orb_world_height_offset <= 0.0:
 		return
 	var attachment := orb.get_parent() as Node3D
-	# The attachment axes are rotated with the queen. Convert a world-up offset to
-	# the bone's local space so height changes never push the orb into the board.
+	# Converte a altura global para os eixos locais do osso.
+
 	orb.position += attachment.global_basis.inverse() * Vector3.UP * orb_world_height_offset
 
 
@@ -126,8 +126,8 @@ func _configure_character_appearance() -> void:
 		return
 	for surface in range(dress.mesh.get_surface_count()):
 		var source := dress.get_active_material(surface) as StandardMaterial3D
-		# Keep imported textures shared. Deep-copying compressed embedded textures can
-		# duplicate an invalid texture RID and trigger `Parameter "tex" is null`.
+		# Duplica apenas o material; copiar texturas importadas pode invalidar seus recursos gráficos.
+
 		var black_fabric := source.duplicate(false) as StandardMaterial3D if source != null else StandardMaterial3D.new()
 		black_fabric.albedo_color = Color(0.014, 0.014, 0.020, 1.0)
 		black_fabric.metallic = 0.04
@@ -219,9 +219,14 @@ func _snap_head_to_player() -> void:
 
 
 func _target_yaw() -> float:
+	if not head_tracking_enabled: return HEAD_CENTER_YAW
 	var local_direction := global_transform.basis.inverse() * (_player.global_position - global_position)
 	var player_yaw := clampf(atan2(local_direction.x, local_direction.z), -PLAYER_YAW_LIMIT, PLAYER_YAW_LIMIT)
 	return HEAD_CENTER_YAW + player_yaw
+
+func set_head_tracking_enabled(enabled: bool, snap := false) -> void:
+	head_tracking_enabled = enabled
+	if snap: _snap_head_to_player()
 
 
 func _remember_base_pose(bone: int) -> void:

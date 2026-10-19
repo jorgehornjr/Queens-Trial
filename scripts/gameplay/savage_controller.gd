@@ -1,11 +1,12 @@
 class_name SavageController
 extends Node
-## Separate from the Vanilla edict state machine and authored starting cell.
+
 const Catalog = preload("res://scripts/data/savage_catalog.gd")
 const Piece = preload("res://scripts/pieces/savage_enemy_piece.gd")
 const Attacks = preload("res://scripts/gameplay/attack_visualizer.gd")
 const UI = preload("res://scripts/ui/savage_hud.gd")
 const Effects = preload("res://scripts/environment/savage_effects.gd")
+const OperationCards = preload("res://scenes/ui/chaotic_card_presentation.tscn")
 enum Stage { INACTIVE, PRESENTATION, PREPARATION, MOVING, RESOLVING, FAILED, CLEARED }
 var stage := Stage.INACTIVE
 var remaining := 0.0
@@ -21,6 +22,8 @@ var _waves: Array = []
 var _pending := 0
 var _attack: AttackVisualizer
 var _rng := RandomNumberGenerator.new()
+var cards: ChaoticCardPresentation
+var steps_taken := 0
 @onready var manager: PhaseManager = get_node("../PhaseManager")
 @onready var board: Board3D = get_node("../World/Board")
 @onready var player: GridPlayer = get_node("../World/Player")
@@ -32,6 +35,12 @@ func _ready() -> void:
 	ui = UI.new()
 	ui.name = "SavageHUD"
 	add_child(ui)
+	ui.countdown_warning.connect(func(_second: int): audio.play_effect(&"preparation_tick"))
+	cards = OperationCards.instantiate() as ChaoticCardPresentation
+	hud.add_child(cards)
+	cards.burn_started.connect(audio.play_effect.bind(&"paper_burn"))
+	cards.burn_cancelled.connect(audio.stop_effect.bind(&"paper_burn"))
+	player.cell_changed.connect(_on_player_moved)
 	_attack = Attacks.new()
 	_attack.name = "SavageAttacks"
 	board.add_child(_attack)
@@ -45,19 +54,23 @@ func _ready() -> void:
 	for error in errors: push_error(error)
 
 func _phase_started(number: int, phase_data: Dictionary, _seed_value: int) -> void:
+	stop_encounter()
+	effects.set_active(Catalog.contains(number))
+	if not Catalog.contains(number): return
+	data = phase_data.duplicate(true)
+	_begin.call_deferred(_generation)
+
+func stop_encounter() -> void:
 	_generation += 1
 	stage = Stage.INACTIVE
 	ui.cancel()
+	cards.cancel()
 	_attack.clear()
 	if is_instance_valid(_pieces):
 		_pieces.queue_free()
 	_pieces = null
 	_waves.clear()
 	_pending = 0
-	effects.set_active(Catalog.contains(number))
-	if not Catalog.contains(number): return
-	data = phase_data.duplicate(true)
-	_begin.call_deferred(_generation)
 
 func _begin(run_id: int) -> void:
 	await get_tree().process_frame
@@ -82,16 +95,17 @@ func _begin(run_id: int) -> void:
 				push_error("Peça Chaotic inválida.")
 				piece.queue_free()
 				continue
-			piece.show_planning(index == 0)
+			piece.show_preparation()
 			wave.append(piece)
 		_waves.append(wave)
 	wave_index = 0
 	stage = Stage.PRESENTATION
+	player.set_input_enabled(false)
+	if not await hud.play_chaotic_intro() or run_id != _generation: return
 	ui.present(manager.current_phase, data.edict_values)
-	await get_tree().create_timer(2.3,false).timeout
+	await ui.banner_finished
 	if run_id != _generation: return
-	var cards: CardPresentation = get_node("../HUD").card_presentation
-	await cards.present(data.edict_values, CardPresentation.CARD_BACK_CHAOTIC)
+	await cards.present_operations(data.edict_operations)
 	if run_id != _generation: return
 	remaining = float(data.preparation_seconds)
 	stage = Stage.PREPARATION
@@ -99,15 +113,13 @@ func _begin(run_id: int) -> void:
 	player.set_input_enabled(true)
 
 func _process(delta: float) -> void:
-	if stage not in [Stage.PREPARATION, Stage.MOVING]: return
+	if stage != Stage.PREPARATION: return
 	remaining = maxf(0.0, remaining - delta)
 	ui.update_timer(remaining, stage == Stage.PREPARATION, wave_index)
 	if remaining > 0.0: return
-	var preparing := stage == Stage.PREPARATION
 	stage = Stage.RESOLVING
 	player.input_enabled = false
-	if preparing: _finish_preparation(_generation)
-	else: _resolve(_generation)
+	_finish_preparation(_generation)
 
 func _input(event: InputEvent) -> void:
 	if stage not in [Stage.PREPARATION, Stage.MOVING] or get_tree().paused: return
@@ -132,30 +144,71 @@ func _settle(run_id: int) -> bool:
 
 func _finish_preparation(run_id: int) -> void:
 	if not await _settle(run_id): return
+	ui.resolving()
+	var attacked := await _play_wave(0, run_id)
+	if run_id != _generation: return
+	if player.current_cell in attacked:
+		_fail(["O primeiro par atacou a posição que você escolheu."], run_id)
+		return
 	_open_edict()
 
 func _open_edict() -> void:
 	edict_origin = player.current_cell
-	remaining = float(data.seconds_per_edict)
+	remaining = 0.0
+	steps_taken = 0
 	stage = Stage.MOVING
 	for index in range(_waves.size()):
 		for piece: SavageEnemyPiece in _waves[index]:
-			if index < wave_index: piece.finish_wave()
-			else: piece.show_planning(index == wave_index)
-	ui.update_timer(remaining, false, wave_index)
+			if index <= wave_index: piece.finish_wave()
+			else: piece.show_planning(index == wave_index + 1)
+	ui.resolving()
 	player.set_input_enabled(true)
+
+func _on_player_moved(cell: Vector2i, previous: Vector2i) -> void:
+	if stage != Stage.MOVING or cell == previous: return
+	steps_taken += 1
+	if steps_taken < int(data.edict_values[wave_index]): return
+	stage = Stage.RESOLVING
+	player.input_enabled = false
+	_resolve(_generation)
 
 func _resolve(run_id: int) -> void:
 	if not await _settle(run_id): return
 	ui.resolving()
 	var correct_distance: bool = board.state.manhattan_distance(edict_origin, player.current_cell) == int(data.edict_values[wave_index])
-	var pieces: Array = _waves[wave_index]
+	var attacked: Array[Vector2i] = []
+	if wave_index == 0:
+		attacked = await _play_wave(1, run_id)
+	else:
+		audio.play_effect(&"attack")
+		await _attack.play_final_judgment()
+		if run_id != _generation: return
+		audio.stop_effect(&"attack")
+	if run_id != _generation: return
+	var reasons: Array = []
+	if not correct_distance:
+		var distance: int = board.state.manhattan_distance(edict_origin, player.current_cell)
+		var expected := int(data.edict_values[wave_index])
+		var position_feedback := "Você voltou ao ponto de partida." if distance == 0 else "Você terminou a %d %s do ponto de partida." % [distance, "casa" if distance == 1 else "casas"]
+		reasons.append("O resultado do %s édito pedia uma distância de %d %s.\n%s" % ["primeiro" if wave_index == 0 else "segundo", expected, "casa" if expected == 1 else "casas", position_feedback])
+	if player.current_cell in attacked: reasons.append("Uma peça atacou a casa onde você parou.")
+	if not reasons.is_empty(): _fail(reasons, run_id)
+	elif wave_index == 1 and player.current_cell != board.state.safe_spot: _fail(["Você cumpriu os éditos, mas terminou fora da casa iluminada."], run_id)
+	elif wave_index == 0:
+		wave_index = 1
+		audio.play_effect(&"round_success")
+		_open_edict()
+	else: _clear(run_id)
+
+
+func _play_wave(index: int, run_id: int) -> Array[Vector2i]:
+	var pieces: Array = _waves[index]
 	_pending = pieces.size()
 	for piece: EnemyPieceController in pieces:
-		piece.movement_finished.connect(_piece_finished, CONNECT_ONE_SHOT)
+		piece.movement_finished.connect(_piece_finished.bind(run_id), CONNECT_ONE_SHOT)
 		piece.play_resolution()
 	while _pending > 0 and run_id == _generation: await get_tree().process_frame
-	if run_id != _generation: return
+	if run_id != _generation: return []
 	var attacked: Array[Vector2i] = []
 	var origins: Array[Vector2i] = []
 	var paths: Array = []
@@ -169,24 +222,13 @@ func _resolve(run_id: int) -> void:
 			if cell not in attacked: attacked.append(cell)
 	audio.play_effect(&"attack")
 	await _attack.play_attack(attacked, origins, paths)
-	if run_id != _generation: return
+	if run_id != _generation: return []
 	audio.stop_effect(&"attack")
-	var reasons: Array = []
-	if not correct_distance:
-		var distance: int = board.state.manhattan_distance(edict_origin, player.current_cell)
-		var expected := int(data.edict_values[wave_index])
-		var position_feedback := "Você voltou ao ponto de partida." if distance == 0 else "Você terminou a %d %s do ponto de partida." % [distance, "casa" if distance == 1 else "casas"]
-		reasons.append("A carta %s pedia uma distância de %d %s.\n%s" % [GameConstants.to_roman(expected), expected, "casa" if expected == 1 else "casas", position_feedback])
-	if player.current_cell in attacked: reasons.append("Uma peça atacou a casa onde você parou.")
-	if not reasons.is_empty(): _fail(reasons, run_id)
-	elif wave_index == 1 and player.current_cell != board.state.safe_spot: _fail(["Você cumpriu os éditos, mas terminou fora da casa iluminada."], run_id)
-	elif wave_index == 0:
-		wave_index = 1
-		audio.play_effect(&"round_success")
-		_open_edict()
-	else: _clear(run_id)
+	for piece: SavageEnemyPiece in pieces: piece.finish_wave()
+	return attacked
 
-func _piece_finished(_piece: EnemyPieceController) -> void:
+func _piece_finished(_piece: EnemyPieceController, run_id: int) -> void:
+	if run_id != _generation: return
 	_pending -= 1
 
 func _fail(reasons: Array, run_id: int) -> void:
@@ -200,6 +242,9 @@ func _fail(reasons: Array, run_id: int) -> void:
 func _clear(run_id: int) -> void:
 	stage = Stage.CLEARED
 	player.set_input_enabled(false)
+	if manager.current_phase == Catalog.LAST:
+		manager.advance_phase()
+		return
 	audio.play_effect(&"next_phase")
 	await hud.show_success()
 	if run_id != _generation: return

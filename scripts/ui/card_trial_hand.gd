@@ -73,10 +73,6 @@ func _reflow() -> void:
 		motion.tween_property(art, "scale", Vector2.ONE, 0.24)
 		_cards.append(art)
 
-func card_point(value: int) -> Vector2:
-	var art: TextureRect = _art_by_value.get(value)
-	return get_global_transform() * Vector2(art.position.x + 20, 240) if art != null else Vector2(-1, -1)
-
 func _index_at(point: Vector2) -> int:
 	if order.is_empty(): return -1
 	if point.y >= 210 and point.y <= 480:

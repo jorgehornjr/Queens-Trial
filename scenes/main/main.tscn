@@ -16,6 +16,9 @@
 [ext_resource type="Script" path="res://scripts/gameplay/balance_trial_controller.gd" id="13_balance"]
 [ext_resource type="Script" path="res://scripts/gameplay/card_trial_controller.gd" id="14_cards"]
 [ext_resource type="Script" path="res://scripts/gameplay/savage_controller.gd" id="15_savage"]
+[ext_resource type="PackedScene" path="res://scenes/main/ending_cutscene.tscn" id="16_ending"]
+[ext_resource type="PackedScene" path="res://scenes/main/chaotic_opening_cutscene.tscn" id="17_chaotic"]
+[ext_resource type="PackedScene" path="res://scenes/main/chaotic_completion.tscn" id="18_simulation_end"]
 
 [node name="Main" type="Node" unique_id=1396135177]
 script = ExtResource("1_main")
@@ -107,3 +110,9 @@ script = ExtResource("14_cards")
 
 [node name="SavageController" type="Node" parent="."]
 script = ExtResource("15_savage")
+
+[node name="EndingCutscene" parent="." instance=ExtResource("16_ending")]
+
+[node name="ChaoticOpeningCutscene" parent="." instance=ExtResource("17_chaotic")]
+
+[node name="ChaoticCompletion" parent="." instance=ExtResource("18_simulation_end")]

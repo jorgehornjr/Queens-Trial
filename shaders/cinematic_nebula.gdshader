@@ -2,7 +2,7 @@ shader_type sky;
 
 uniform sampler2D panorama : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D nebula_mask : filter_linear_mipmap, repeat_enable;
-// Panorama colorido usado como máscara de intensidade do fluxo.
+
 uniform sampler2D flow_reference : filter_linear_mipmap, repeat_enable;
 uniform float effect_time = 0.0;
 uniform float inferno_mix : hint_range(0.0, 1.0) = 0.0;
@@ -19,17 +19,17 @@ float luminance(vec3 color) {
 }
 
 vec2 panorama_uv(vec2 uv) {
-	// Repetição longitudinal sem descontinuidade das derivadas.
+
 	return vec2(uv.x, clamp(uv.y, 0.0001, 0.9999));
 }
 
 vec2 panorama_gradient(vec2 gradient) {
-	// Correção da derivada na emenda 1→0 de SKY_COORDS para evitar artefatos de mipmap.
+	// Corrige as derivadas na emenda horizontal para estabilizar os mipmaps.
 	return vec2(gradient.x - round(gradient.x), gradient.y);
 }
 
 vec3 point_detail(vec3 sharp, vec3 blurred) {
-	// Separação aproximada entre estrelas neutras e filamentos coloridos em movimento.
+
 	float peak = max(max(sharp.r, sharp.g), sharp.b);
 	float neutral = min(min(sharp.r, sharp.g), sharp.b) / max(peak, 0.0001);
 	return max(sharp - blurred, vec3(0.0)) * smoothstep(0.25, 0.75, neutral);
@@ -40,7 +40,7 @@ float hash21(vec2 p) {
 }
 
 vec3 occasional_glint(vec2 uv) {
-	// Derivadas calculadas antes das ramificações divergentes por célula.
+
 	float radius = max(0.00032, fwidth(uv.y) * 1.5);
 	vec2 grid = vec2(128.0, 64.0);
 	vec2 cell = floor(uv * grid);
@@ -93,16 +93,16 @@ void sky() {
 		vec3 moving_stars = point_detail(warped, textureLod(panorama, warped_uv, 2.0).rgb);
 		color = mix(base - base_stars, warped - moving_stars, mask * 0.88) + base_stars;
 	}
-	// Energia adicional restrita aos núcleos HDR.
+
 	float core = smoothstep(0.65, 3.5, luminance(color));
 	color *= 1.0 + core * core_glow_strength;
-	// Retain neutral stars; tint only the colored nebula filaments.
+
 	float neutral = min(min(color.r,color.g),color.b);
 	float energy = max(max(color.r,color.g),color.b) - neutral;
 	vec3 inferno = vec3(neutral) + vec3(1.06,0.055,0.018) * energy;
 	color = mix(color, inferno, inferno_mix);
 	if (AT_CUBEMAP_PASS) {
-		// IBL estável, sem os lampejos e filamentos da passagem visual.
+		// A iluminação ambiente usa um céu estável, sem os lampejos animados.
 		color = min(color, vec3(8.0));
 	} else if (sparkles_enabled) {
 		color += occasional_glint(uv);

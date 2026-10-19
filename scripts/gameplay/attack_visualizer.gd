@@ -17,6 +17,16 @@ func configure(board: Board3D) -> void:
 	_board = board
 
 
+func play_final_judgment() -> void:
+	var cells: Array[Vector2i] = []
+	for y in range(5):
+		for x in range(5):
+			var cell := Vector2i(x, y)
+			if cell != _board.state.safe_spot: cells.append(cell)
+	var origins: Array[Vector2i] = [_board.state.safe_spot]
+	await play_attack(cells, origins, [[]])
+
+
 func play_attack(cells: Array[Vector2i], origins: Array[Vector2i], attack_paths: Array = []) -> void:
 	clear()
 	var run_id := _generation

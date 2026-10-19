@@ -40,7 +40,7 @@ var _composition_tween: Tween
 
 
 func _ready() -> void:
-	# O movimento deve pertencer a esta instância, não ao recurso compartilhado.
+	# Cada instância mantém seus próprios parâmetros de ambiente.
 	_environment = world_environment.environment.duplicate() as Environment
 	world_environment.environment = _environment
 	_environment.sky = _environment.sky.duplicate() as Sky
@@ -93,7 +93,7 @@ func enter_gameplay_composition(camera: Camera3D, duration: float) -> void:
 func _advance_sky(delta: float) -> void:
 	if not sky_drift_enabled or _environment == null:
 		return
-	# Deriva rígida do panorama: não deforma as estrelas gravadas no HDR.
+
 	var orientation := _environment.sky_rotation
 	orientation.y = wrapf(orientation.y + deg_to_rad(sky_degrees_per_second) * delta, -PI, PI)
 	_environment.sky_rotation = orientation

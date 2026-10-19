@@ -1,11 +1,11 @@
 class_name SavageEnemyPiece
 extends EnemyPieceController
-## Own cancellable motion so rapid Savage restarts never resume an old attack.
+
 var _motion: Tween
 const NEON_RED := Color(1.0,0.025,0.035,1.0)
 
 func _create_edge_arrows() -> void:
-	# Reuse the original animated neon arrows, including their footprint and spacing.
+
 	super._create_edge_arrows()
 	for arrow in _arrows:
 		var material := arrow.mesh.material as ShaderMaterial
@@ -13,12 +13,8 @@ func _create_edge_arrows() -> void:
 		material.set_shader_parameter("core_color",Vector3(1.0,0.20,0.14))
 
 func show_planning(active_pair: bool) -> void:
-	# Only the pair about to attack has arrows; the next pair waits without them.
-	set_wave_active(active_pair)
 
-func finish_wave() -> void:
-	_roman_label.suppressed = true
-	for arrow in _arrows: arrow.hide()
+	set_wave_active(active_pair)
 
 func play_resolution() -> void:
 	set_wave_active(false)

@@ -1,5 +1,5 @@
 extends Node3D
-## A neon perimeter and four upright, flowing veils. The marble stays visible.
+
 
 const AURA_SHADER = preload("res://shaders/square_aura.gdshader")
 const INTERIOR_MIST_SHADER = preload("res://shaders/interior_mist.gdshader")
@@ -26,7 +26,7 @@ func configure(size: float, color: Color, height: float, phase := 0.0, interior_
 		var mesh := _add_mesh("RisingVeil%d" % index, veil, wall_material)
 		mesh.rotation.y = float(index) * PI * 0.5
 		mesh.position = Vector3(sin(mesh.rotation.y) * half, height * 0.5, cos(mesh.rotation.y) * half)
-	# Opt-in only: attack markers retain their approved materials and geometry.
+
 	if interior_mist:
 		_add_interior_mist(size, color, height, phase)
 

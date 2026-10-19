@@ -1,6 +1,6 @@
 class_name SkinnedClothFire
 extends Node3D
-## Internal embers on the actual fabric, with ash emitted from its skinned surface.
+
 const SURFACE = preload("res://shaders/savage_cloth_embers.gdshader")
 const ASH = preload("res://shaders/savage_cloth_ash.gdshader")
 const SAMPLE_COUNT := 192
@@ -94,9 +94,9 @@ func _collect_surface_points() -> void:
 			selected[index] = true
 			var sample := {"vertex":vertices[index],"bones":bones.slice(index*4,index*4+4),"weights":weights.slice(index*4,index*4+4)}
 			var world := _deformed(sample)
-			# Dress mesh only: include the hem and shoulders, keeping face/crown separate.
+
 			if world.y < lower or world.y > upper or world.z < _skeleton.global_position.z+3.5: continue
-			# Keep most sparks above the board, with the remaining samples on the skirt.
+
 			if _samples.size() < SAMPLE_COUNT*3/4 and world.y < visible_torso: continue
 			_samples.append(sample)
 

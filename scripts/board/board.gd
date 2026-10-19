@@ -13,7 +13,7 @@ const StarredGuideModel = preload("res://scripts/gameplay/starred_guide.gd")
 @export_category("Geometry")
 @export_range(1.0, 12.0, 0.1) var tile_size := 7.6
 @export var safe_spot := Vector2i(4, 0)
-## Center between the playable inset and the outer frame, measured from the mesh.
+
 var _frame_inner := Vector2(19.225, 19.225)
 var _frame_outer := Vector2(24.0, 24.0)
 
@@ -21,7 +21,6 @@ var _frame_outer := Vector2(24.0, 24.0)
 @export var show_preview_pieces := true
 
 @onready var board_visual: Node3D = $BoardVisual
-@onready var spawn_points_root: Node3D = $SpawnPoints
 @onready var preview_pieces_root: Node3D = $PreviewPieces
 @onready var markers_root: Node3D = $Markers
 
@@ -198,23 +197,6 @@ func can_player_enter(cell: Vector2i) -> bool:
 
 func manhattan_distance(origin: Vector2i, destination: Vector2i) -> int:
 	return state.manhattan_distance(origin, destination)
-
-
-func get_spawn_marker(corner_name: StringName) -> Marker3D:
-	var points_root := spawn_points_root
-	if points_root == null:
-		points_root = get_node_or_null("SpawnPoints") as Node3D
-	if points_root == null:
-		return null
-	return points_root.get_node_or_null(NodePath(String(corner_name))) as Marker3D
-
-
-func get_spawn_transform(corner_name: StringName) -> Transform3D:
-	var marker := get_spawn_marker(corner_name)
-	if marker == null:
-		push_warning("Ponto de spawn externo desconhecido: %s" % corner_name)
-		return global_transform
-	return marker.global_transform
 
 
 func _clear_children(parent: Node) -> void:

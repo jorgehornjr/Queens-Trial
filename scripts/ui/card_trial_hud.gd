@@ -2,7 +2,6 @@ class_name CardTrialHUD
 extends Control
 
 signal submitted
-signal continued
 signal slot_clicked(index: int)
 signal card_dropped(index: int, value: int)
 const Hand = preload("res://scripts/ui/card_trial_hand.gd")
@@ -18,8 +17,8 @@ var slots: Array[CardTrialSlot] = []
 var title: Label
 var feedback: Label
 var submit: Button
-var continue_button: Button
 var revision := 0
+var _turn_tween: Tween
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -37,14 +36,13 @@ func _ready() -> void:
 	add_child(canvas)
 	title = _label(Rect2(150, 84, 1620, 85), 56)
 	slots_root = Control.new()
+	slots_root.size = BASE
+	slots_root.pivot_offset = BASE * 0.5
 	slots_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	canvas.add_child(slots_root)
 	feedback = _label(Rect2(200, 650, 1520, 62), 31, true)
 	submit = _button("Confirmar", Rect2(810, 722, 300, 60))
 	submit.pressed.connect(func(): submitted.emit())
-	continue_button = _button("Continuar", Rect2(790, 722, 340, 60))
-	continue_button.pressed.connect(func(): continued.emit())
-	continue_button.hide()
 	hand = Hand.new() as CardTrialHand
 	hand.name = "ShuffledDeck"
 	hand.position = Vector2(80, 595)
@@ -89,10 +87,10 @@ func _fit() -> void:
 	canvas.position = (viewport - BASE * fit) * 0.5
 
 func show_round(state: CardTrialState) -> void:
+	cancel_turn()
 	revision += 1
 	canvas.show()
 	slots_root.show()
-	continue_button.text = "Continuar"
 	hand.mouse_filter = Control.MOUSE_FILTER_STOP
 	for child in slots_root.get_children():
 		slots_root.remove_child(child)
@@ -123,7 +121,6 @@ func show_round(state: CardTrialState) -> void:
 	hand.configure(state.deck, state.slots, revision)
 	submit.visible = state.kind != CardTrialState.Kind.FALSE_DECREE
 	submit.text = "Confirmar ordem" if state.kind == CardTrialState.Kind.ORDER else "Confirmar"
-	continue_button.hide()
 	show()
 
 func refresh(state: CardTrialState) -> void:
@@ -135,21 +132,10 @@ func refresh(state: CardTrialState) -> void:
 func show_feedback(result: Dictionary) -> void:
 	feedback.text = String(result.message)
 	if result.correct:
+		title.text = "Fase concluída"
 		hand._leave()
 		hand.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		submit.hide()
-		continue_button.show()
-		continue_button.grab_focus()
-
-func show_completed() -> void:
-	title.text = "Provas concluídas"
-	feedback.text = ""
-	slots_root.hide()
-	hand.hide()
-	submit.hide()
-	continue_button.text = "Repetir fase"
-	continue_button.show()
-	show()
 
 func show_transition() -> void:
 	title.text = "Fase concluída"
@@ -157,4 +143,22 @@ func show_transition() -> void:
 	slots_root.hide()
 	hand.hide()
 	submit.hide()
-	continue_button.hide()
+
+func cancel_turn() -> void:
+	if _turn_tween != null and _turn_tween.is_valid(): _turn_tween.kill()
+	slots_root.scale = Vector2.ONE
+	slots_root.modulate.a = 1.0
+
+func turn_out() -> void:
+	_turn_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	_turn_tween.tween_property(slots_root, "scale:x", 0.02, 0.3)
+	_turn_tween.tween_property(slots_root, "modulate:a", 0.0, 0.3)
+	await _turn_tween.finished
+
+func turn_in() -> void:
+	slots_root.scale.x = 0.02
+	slots_root.modulate.a = 0.0
+	_turn_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_turn_tween.tween_property(slots_root, "scale:x", 1.0, 0.4)
+	_turn_tween.tween_property(slots_root, "modulate:a", 1.0, 0.4)
+	await _turn_tween.finished

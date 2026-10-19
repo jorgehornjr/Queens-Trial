@@ -9,8 +9,8 @@ func configure(skeleton: Skeleton3D) -> void:
 	attachment.name = "HiddenHoodFace"
 	attachment.bone_name = "j_kao"
 	skeleton.add_child(attachment)
-	# A closed, softly shaped head blocks the scenery through the hollow hood.
-	# Its only features are a brow, nose and tapered chin, all kept in shadow.
+
+
 	var shadow := MeshInstance3D.new()
 	shadow.name = "ShadowedFace"
 	shadow.mesh = _shadow_head_mesh()

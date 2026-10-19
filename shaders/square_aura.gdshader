@@ -33,7 +33,7 @@ void fragment() {
 		float top_fade = 1.0 - smoothstep(0.48, 1.0, height);
 		core = exp(-height * 48.0) * 0.65;
 		light = core + (vapor * plume * 0.30 + strands * plume * 0.9) * top_fade;
-		// Sparse pinpoints rise inside the wisps, never over the marble center.
+
 		vec2 stars = vec2(UV.x * 30.0, height * 8.0 - t * 1.5);
 		float speck = pow(max(0.0, 1.0 - length((fract(stars) - 0.5) * vec2(2.0, 3.0))), 9.0);
 		light += speck * step(0.82, hash(floor(stars))) * top_fade * 0.8;

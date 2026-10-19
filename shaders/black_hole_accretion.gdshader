@@ -16,7 +16,7 @@ float soft_noise(vec2 p) {
 void vertex() { local_position = VERTEX; }
 void fragment() {
 	float radius = length(local_position.xz);
-	// Filamentos de gás com amostragem cartesiana contínua na emenda polar.
+
 	float swirl = radius * 4.5;
 	mat2 turn = mat2(vec2(cos(swirl), sin(swirl)), vec2(-sin(swirl), cos(swirl)));
 	vec2 p = turn * local_position.xz * 5.0;

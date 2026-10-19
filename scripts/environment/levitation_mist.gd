@@ -1,6 +1,5 @@
 extends Node3D
-## The standalone board editor has no WorldEnvironment. Keep the raymarched
-## preview there; create the volumetric component only in the running world.
+
 
 @export var fog_material: ShaderMaterial
 @export var fog_size := Vector3(72, 14, 72)
@@ -43,7 +42,7 @@ func set_follow_tilt(enabled: bool) -> void:
 func _process(delta: float) -> void:
 	if not _follow_tilt or _board == null:
 		return
-	# Clouds follow only part of the board's roll, with inertia rather than a hinge.
+
 	var board_orientation := _board.global_basis.get_rotation_quaternion() * _rest_transform.basis.get_rotation_quaternion()
 	var orientation := _rest_world_basis.get_rotation_quaternion().slerp(board_orientation, 0.55)
 	var target := Transform3D(Basis(orientation), _board.to_global(_rest_transform.origin))

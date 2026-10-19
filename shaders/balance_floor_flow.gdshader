@@ -16,7 +16,7 @@ void fragment() {
 	vec2 id = floor(grid);
 	float seed = hash(id);
 	vec2 p = fract(grid)-vec2(0.18+hash(id+5.3)*0.64,0.18+hash(id+12.4)*0.64);
-	// Short strands move along the platform, with separate glitter flashes.
+
 	float strand = exp(-p.x*p.x*13.0-p.y*p.y*210.0)*smoothstep(0.36,0.81,seed);
 	float flash = pow(max(0.0,sin(effect_time*9.0+seed*57.0)),9.0);
 	float glint = exp(-dot(p,p)*130.0)*flash;

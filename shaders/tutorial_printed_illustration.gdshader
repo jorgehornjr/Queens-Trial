@@ -1,7 +1,7 @@
 shader_type canvas_item;
 render_mode unshaded;
 
-// Printed pigment over the page, retaining the approved source bitmap.
+
 uniform vec4 source_paper : source_color = vec4(0.97, 0.93, 0.83, 1.0);
 uniform float paint_progress : hint_range(0.0, 1.0) = 1.0;
 varying vec4 vertex_tint;
@@ -14,8 +14,8 @@ float brush_mask(vec2 uv) {
 	if (paint_progress <= 0.0001) return 0.0;
 	if (paint_progress >= 0.999) return 1.0;
 	float painted = 0.0;
-	// Broad, overlapping vertical gestures; each brush bends on its own path.
-	// Continuous curves and soft wet edges avoid a visible grid of pixels.
+
+
 	for (int stroke = 0; stroke < 7; stroke++) {
 		float n = float(stroke);
 		float upwards = stroke == 2 || stroke == 5 ? 1.0 : 0.0;

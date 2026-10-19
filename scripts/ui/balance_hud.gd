@@ -35,7 +35,7 @@ func _layout() -> void:
 	var top := viewport.y * 0.47 - card_size.y * 0.20
 	left_card.size = card_size
 	right_card.size = card_size
-	# Center each card in its side gutter while keeping the existing artwork size.
+
 	var gutter_center := viewport.x * 0.17
 	left_card.position = Vector2(gutter_center - card_size.x * 0.5, top)
 	right_card.position = Vector2(viewport.x - gutter_center - card_size.x * 0.5, top)

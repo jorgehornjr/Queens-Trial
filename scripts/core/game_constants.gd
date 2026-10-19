@@ -2,7 +2,6 @@ class_name GameConstants
 extends RefCounted
 
 const BOARD_SIZE := 5
-const QUEEN_CELL := Vector2i(2, 2)
 
 const PIECE_ROOK: StringName = &"rook"
 const PIECE_BISHOP: StringName = &"bishop"

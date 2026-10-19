@@ -26,7 +26,7 @@ float fbm(vec3 p) {
 	return noise3(p) * 0.57 + noise3(p * 2.03 + 7.3) * 0.28 + noise3(p * 4.13 + 19.1) * 0.15;
 }
 void fog() {
-	// Centro do volume seis unidades abaixo do tabuleiro.
+
 	vec3 p = WORLD_POSITION - OBJECT_POSITION - vec3(0, 6, 0);
 	if (follow_tilt) {
 		p = (world_to_mist * vec4(WORLD_POSITION, 1.0)).xyz - vec3(0, 6, 0);

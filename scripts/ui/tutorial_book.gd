@@ -7,28 +7,28 @@ signal chapter_ready(number: int)
 signal page_changed(number: int)
 
 const Chapters = preload("res://scripts/ui/tutorial_chapters.gd")
+const Chronicle = preload("res://scripts/ui/queen_chronicle.gd")
 const TurningPage = preload("res://scripts/ui/tutorial_page_turn.gd")
 const ClosingCover = preload("res://scripts/ui/tutorial_cover_close.gd")
 const InkOrnaments = preload("res://scripts/ui/tutorial_ink_ornaments.gd")
 const StoryText = preload("res://scripts/ui/tutorial_body_text.gd")
 const SPREAD: Texture2D = preload("res://assets/ui/tutorial_book/spread_cosmic.png")
-const CONSULT_SPREAD: Texture2D = preload("res://assets/ui/tutorial_book/spread_consult.png")
+const STORY_SPREAD: Texture2D = preload("res://assets/ui/tutorial_book/spread_story.png")
 const COVER: Texture2D = preload("res://assets/ui/tutorial_book/cover_burgundy.png")
 const TITLE_FONT: Font = preload("res://assets/fonts/OPTIEngraversOldEnglish.otf")
 const BODY_FONT: Font = preload("res://assets/fonts/Alegreya-Variable.ttf")
 const SMALL_FONT: Font = preload("res://assets/fonts/CormorantSC-SemiBold.ttf")
-const NUMERAL_FONT: Font = preload("res://assets/fonts/jupiter_pro.otf")
 const PAGE_SOUND: AudioStream = preload("res://assets/audio/sfx/book/page_turn.wav")
 const SHUT_SOUND: AudioStream = preload("res://assets/audio/sfx/book/book_close.wav")
 const PRINTED_INK: Shader = preload("res://shaders/tutorial_printed_illustration.gdshader")
 const TEXT_REVEAL: Shader = preload("res://shaders/tutorial_text_reveal.gdshader")
+const BORDER_FIRE: Shader = preload("res://shaders/chaotic_book_border.gdshader")
+const FIRE_NOISE: Texture2D = preload("res://assets/effects/chaotic_title/turbulence.exr")
 const REVEAL_DURATION := 5.0
 const BOOK_SIZE := Vector2(1600, 1067)
 const INK := Color(0.19, 0.105, 0.07)
 const RUBRIC := Color(0.35, 0.08, 0.105)
 const BODY_RECT := Rect2(198, 443, 542, 372)
-const NUMERAL_ROW_Y := 424.0
-const NUMERAL_ROW_STEP := 51.0
 const ART_PAPER := {
 	"color_first_edict": Color8(237, 212, 177),
 	"color_two_edicts": Color8(252, 236, 211),
@@ -44,13 +44,14 @@ var current_chapter := 0
 var last_chapter := 0
 var unlocked_chapter := 0
 var seen_chapters: Dictionary = {}
-var table_visible := false
 var consultation := false
+var narrative := false
+var chaotic_style := false
+var epilogue := false
 var _generation := 0
 var _animation: Tween
 var _reveal_tween: Tween
 var _text_material: ShaderMaterial
-var _header_ink: ShaderMaterial
 var reveal_progress := 1.0
 var _requested_close := false
 var _fit := 1.0
@@ -76,8 +77,10 @@ var body_label: TutorialBodyText
 var initial_ornaments: Node2D
 var controls: Control
 var illustration: TextureRect
-var numeral_table: Control
 var leaf: Node2D
+var border_fire: ColorRect
+var _fire_strength := 0.0
+var _fire_elapsed := 0.0
 
 
 func _ready() -> void:
@@ -94,6 +97,15 @@ func _exit_tree() -> void:
 	cancel()
 
 
+func _process(delta: float) -> void:
+	var burning := chaotic_style and not narrative and state in [State.READING, State.TURNING]
+	_fire_strength = move_toward(_fire_strength, 1.0 if burning else 0.0, delta * 2.5)
+	_fire_elapsed += delta
+	border_fire.visible = _fire_strength > 0.001
+	(border_fire.material as ShaderMaterial).set_shader_parameter("strength", _fire_strength)
+	(border_fire.material as ShaderMaterial).set_shader_parameter("elapsed", _fire_elapsed)
+
+
 func _delay(seconds: float) -> void:
 	_wait_timer.start(seconds)
 	await _wait_timer.timeout
@@ -104,7 +116,33 @@ func needs_chapter(number: int) -> bool:
 
 
 func unlock_to(number: int) -> void:
-	unlocked_chapter = maxi(unlocked_chapter, clampi(number, 0, 6))
+	unlocked_chapter = maxi(unlocked_chapter, clampi(number, 0, Chapters.CHAPTERS.size()))
+
+
+func present_story() -> bool:
+	epilogue = false
+	narrative = true
+	consultation = false
+	unlocked_chapter = Chronicle.PAGES.size()
+	veil.color = Color.BLACK
+	return await present(1, true)
+
+func present_epilogue() -> bool:
+	epilogue = true
+	narrative = true
+	consultation = false
+	unlocked_chapter = Chronicle.PAGES.size() + 1
+	veil.color = Color.BLACK
+	return await present(unlocked_chapter, true)
+
+func epilogue_read_seconds() -> float:
+	var words := String(Chronicle.EPILOGUE.body).split(" ", false).size()
+	return REVEAL_DURATION + maxf(18.0, float(words) / 2.8)
+
+
+func _page_data(number: int) -> Dictionary:
+	if narrative and epilogue and number == Chronicle.PAGES.size() + 1: return Chronicle.EPILOGUE
+	return Chronicle.PAGES.get(number, {}) if narrative else Chapters.chapter(number)
 
 
 func present(number: int, force := false) -> bool:
@@ -118,6 +156,7 @@ func present(number: int, force := false) -> bool:
 	current_chapter = number
 	_requested_close = false
 	var starting_page := number if force or number <= 1 else number - 1
+	if epilogue: starting_page = number - 1
 	_set_page(starting_page)
 	_set_reveal_progress(1.0 if starting_page != number else 0.0)
 	show()
@@ -162,7 +201,9 @@ func present(number: int, force := false) -> bool:
 		_start_reveal()
 	state = State.READING
 	chapter_ready.emit(number)
-	if not _requested_close:
+	if epilogue:
+		await _delay(epilogue_read_seconds())
+	elif not _requested_close:
 		await continue_requested
 	if run_id != _generation: return false
 	await _close(run_id)
@@ -178,8 +219,10 @@ func present(number: int, force := false) -> bool:
 
 
 func can_turn(direction: int) -> bool:
+	if epilogue: return false
 	var target := _displayed_chapter + direction
-	return target >= 0 and target <= unlocked_chapter
+	if narrative: return direction == 1 and target <= Chronicle.PAGES.size()
+	return target >= 1 and target <= unlocked_chapter
 
 
 func turn_page(direction: int) -> void:
@@ -194,7 +237,10 @@ func turn_page(direction: int) -> void:
 
 
 func request_close() -> void:
+	if epilogue: return
 	if state == State.HIDDEN or state == State.CLOSING:
+		return
+	if narrative and (state != State.READING or _displayed_chapter != Chronicle.PAGES.size()):
 		return
 	_requested_close = true
 	if state != State.TURNING:
@@ -202,6 +248,11 @@ func request_close() -> void:
 
 
 func _page_click(position: Vector2) -> void:
+	if narrative:
+		if state == State.READING:
+			if can_turn(1): turn_page(1)
+			else: request_close()
+		return
 	var local := volume.get_global_transform_with_canvas().affine_inverse() * position
 	if not Rect2(40, 30, 1520, 1010).has_point(local):
 		request_close()
@@ -218,7 +269,10 @@ func _input(event: InputEvent) -> void:
 		_page_click(event.position)
 		get_viewport().set_input_as_handled()
 	elif event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode in [KEY_LEFT, KEY_RIGHT]:
+		if narrative:
+			if event.keycode in [KEY_RIGHT, KEY_SPACE, KEY_ENTER]: _page_click(Vector2.ZERO)
+			get_viewport().set_input_as_handled()
+		elif event.keycode in [KEY_LEFT, KEY_RIGHT]:
 			turn_page(-1 if event.keycode == KEY_LEFT else 1)
 			get_viewport().set_input_as_handled()
 		elif consultation and event.keycode in [KEY_ESCAPE, KEY_N]:
@@ -232,6 +286,8 @@ func cancel() -> void:
 	if _animation != null and _animation.is_valid(): _animation.kill()
 	if _reveal_tween != null and _reveal_tween.is_valid(): _reveal_tween.kill()
 	state = State.HIDDEN
+	_fire_strength = 0.0
+	if is_instance_valid(border_fire): border_fire.hide()
 	if is_instance_valid(_wait_timer):
 		_wait_timer.stop()
 		_wait_timer.timeout.emit()
@@ -274,11 +330,7 @@ func _turn_to(number: int, run_id: int) -> void:
 
 
 func _set_page(number: int) -> void:
-	_displayed_chapter = number
-	if number == 0:
-		_set_table(true)
-	else:
-		_set_chapter(number)
+	_set_chapter(number)
 
 
 func _start_reveal() -> void:
@@ -293,7 +345,6 @@ func _set_reveal_progress(value: float) -> void:
 	_text_material.set_shader_parameter("reveal_progress", value)
 	body_label.set_ink_progress(value)
 	(illustration.material as ShaderMaterial).set_shader_parameter("paint_progress", value)
-	_header_ink.set_shader_parameter("paint_progress", value)
 	controls.modulate.a = value
 
 
@@ -321,7 +372,9 @@ func _close(run_id: int) -> void:
 	_animation = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	_animation.tween_property(volume, "position:y", volume.position.y + 75.0 * _fit, 0.5)
 	_animation.tween_property(volume, "modulate:a", 0.0, 0.5)
-	_animation.tween_property(veil, "modulate:a", 0.0, 0.5)
+	# O céu 3D continua ativo com o mundo oculto; mantenha o véu preto até a próxima cena.
+
+	if not narrative: _animation.tween_property(veil, "modulate:a", 0.0, 0.5)
 	await _delay(0.52)
 
 
@@ -341,60 +394,40 @@ func _close_cover_progress(value: float) -> void:
 	closing_cover.set("progress", value)
 	right_stack.scale = Vector2(lerpf(1.0, 0.8, value), lerpf(1.0, 960.0 / 1067.0, value))
 	right_stack.position.y = 51.0 * value
-	# The exposed page block vanishes continuously as the front covers it.
-	# Hiding the node at the end therefore cannot pop a strip beside the spine.
+
+
 	right_stack.modulate.a = 1.0 - smoothstep(0.82, 1.0, value)
 	volume.position.x = _close_origin.x - 320.0 * _fit * smoothstep(0.5, 1.0, value)
 
 
 func _set_chapter(number: int) -> void:
-	var data := Chapters.chapter(number)
+	var data := _page_data(number)
 	if data.is_empty(): return
 	_displayed_chapter = number
-	table_visible = false
-	numeral_table.hide()
-	spread.texture = SPREAD
-	chapter_label.text = "FASE %s" % [GameConstants.to_roman(number)]
+	spread.texture = STORY_SPREAD if narrative else SPREAD
+	chapter_label.text = "CRÔNICAS · %s" % GameConstants.to_roman(number) if narrative else String(data.get("label", "FASE %s" % GameConstants.to_roman(number)))
 	title_label.text = data.title
+	title_label.visible = not narrative
 	_style_title(96 if "\n" in String(data.title) else 106)
-	var body_top := 443.0 if "\n" in String(data.title) else (369.0 if number == 6 else 397.0)
+	var body_top := 443.0 if "\n" in String(data.title) else (369.0 if number in [2, 6, 7] else 397.0)
+	if narrative: body_top = 230.0
 	body_label.position = Vector2(BODY_RECT.position.x, body_top)
-	body_label.size = Vector2(BODY_RECT.size.x, 815.0 - body_top)
+	var body_bottom := 770.0 if narrative else 815.0
+	body_label.size = Vector2(BODY_RECT.size.x, body_bottom - body_top)
 	body_label.show()
-	initial_ornaments.show()
-	controls.visible = number == 1
+	initial_ornaments.visible = not narrative
+	controls.visible = number == 1 and not narrative
 	illustration.show()
-	_set_body(String(data.body), 34)
+	_set_body(String(data.body), 29 if narrative else 34)
 	_body_fit_generation += 1
 	call_deferred("_fit_body", _body_fit_generation)
 	var art_name: String = data.art
 	if not _textures.has(art_name):
 		_textures[art_name] = load("res://assets/ui/tutorial_book/%s.png" % art_name)
 	illustration.texture = _textures[art_name]
-	(illustration.material as ShaderMaterial).set_shader_parameter("source_paper", ART_PAPER[art_name])
-	get_node("Volume/Content/LeftFolio").text = str(number * 2 + 1)
-	get_node("Volume/Content/RightFolio").text = str(number * 2 + 2)
-
-
-func _set_table(value: bool) -> void:
-	table_visible = value
-	if not is_instance_valid(numeral_table): return
-	numeral_table.visible = value
-	if value:
-		_body_fit_generation += 1
-		_displayed_chapter = 0
-		spread.texture = CONSULT_SPREAD
-		chapter_label.text = "CONSULTA"
-		title_label.text = "Números\nromanos"
-		_style_title(72)
-		body_label.hide()
-		initial_ornaments.hide()
-		controls.hide()
-		illustration.hide()
-		get_node("Volume/Content/LeftFolio").text = "1"
-		get_node("Volume/Content/RightFolio").text = "2"
-	else:
-		_set_chapter(current_chapter)
+	(illustration.material as ShaderMaterial).set_shader_parameter("source_paper", ART_PAPER.get(art_name, Color8(243, 223, 195)))
+	get_node("Volume/Content/LeftFolio").text = str(number * 2 - 1)
+	get_node("Volume/Content/RightFolio").text = str(number * 2)
 
 
 func _style_title(font_size: int) -> void:
@@ -408,12 +441,14 @@ func _style_title(font_size: int) -> void:
 
 
 func _set_body(plain_text: String, font_size: int) -> void:
+	body_label.narrative_layout = narrative
 	body_label.set_story(plain_text, font_size)
 	initial_ornaments.position = body_label.position + Vector2(4, 4)
 
 
 func _fit_body(run_id: int) -> void:
-	var plain_text: String = Chapters.chapter(_displayed_chapter).get("body", "")
+	if narrative: return
+	var plain_text: String = _page_data(_displayed_chapter).get("body", "")
 	for font_size in range(34, 28, -1):
 		if run_id != _body_fit_generation: return
 		_set_body(plain_text, font_size)
@@ -460,6 +495,16 @@ func _build() -> void:
 	volume.size = BOOK_SIZE
 	volume.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(volume)
+	border_fire = ColorRect.new()
+	border_fire.name = "ChaoticBorderFire"
+	border_fire.position = Vector2(-64, -64)
+	border_fire.size = Vector2(1728, 1195)
+	border_fire.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	border_fire.material = ShaderMaterial.new()
+	(border_fire.material as ShaderMaterial).shader = BORDER_FIRE
+	(border_fire.material as ShaderMaterial).set_shader_parameter("turbulence", FIRE_NOISE)
+	volume.add_child(border_fire)
+	border_fire.hide()
 	spread = _texture(volume, "Spread", SPREAD, Rect2(Vector2.ZERO, BOOK_SIZE))
 	right_stack = _texture(volume, "ClosingPageStack", null, Rect2(800, 0, 800, 1067))
 	right_stack.hide()
@@ -514,33 +559,6 @@ func _build() -> void:
 		glyph.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_label(content, "LeftFolio", "", Rect2(430, 973, 50, 34), BODY_FONT, 23).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_label(content, "RightFolio", "", Rect2(1140, 973, 50, 34), BODY_FONT, 23).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	numeral_table = Control.new()
-	numeral_table.name = "NumeralTable"
-	numeral_table.size = BOOK_SIZE
-	numeral_table.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	content.add_child(numeral_table)
-	var header_atlas := AtlasTexture.new()
-	header_atlas.atlas = preload("res://assets/ui/tutorial_book/initial_sources/numeral_header.png")
-	header_atlas.region = Rect2(814, 78, 615, 280)
-	var right_header := _texture(numeral_table, "RightAstronomy", header_atlas, Rect2(862, 93, 640, 292))
-	_header_ink = ShaderMaterial.new()
-	_header_ink.shader = PRINTED_INK
-	_header_ink.set_shader_parameter("source_paper", Color8(239, 216, 180))
-	right_header.material = _header_ink
-	for index in range(20):
-		var column := 0 if index < 10 else 1
-		var row := index % 10
-		var number := Control.new()
-		number.name = "Number%d" % index
-		number.position = Vector2(240 + column * 820, NUMERAL_ROW_Y + row * NUMERAL_ROW_STEP)
-		number.size = Vector2(405, 58)
-		number.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		numeral_table.add_child(number)
-		var roman := _label(number, "Roman", Chapters.ROMANS[index], Rect2(0, 0, 174, 58), NUMERAL_FONT, 42)
-		roman.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		roman.add_theme_color_override("font_color", RUBRIC)
-		_label(number, "Equals", "=", Rect2(190, 0, 70, 58), NUMERAL_FONT, 42).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		_label(number, "Arabic", str(index + 1), Rect2(285, 0, 86, 58), NUMERAL_FONT, 42).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	leaf = TurningPage.new()
 	leaf.name = "TurningLeaf"
 	leaf.position = Vector2(800, 43)
@@ -559,7 +577,6 @@ func _build() -> void:
 	cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	volume.add_child(cover)
 	cover_art = _texture(cover, "Cloth", COVER, Rect2(0, 0, 640, 960))
-	_set_table(false)
 
 
 func _texture(parent: Node, node_name: String, tex: Texture2D, rect: Rect2) -> TextureRect:

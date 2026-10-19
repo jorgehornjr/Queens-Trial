@@ -7,7 +7,6 @@ const Constants = preload("res://scripts/core/game_constants.gd")
 const ROOK_SCENE = preload("res://scenes/pieces/rook.tscn")
 const BISHOP_SCENE = preload("res://scenes/pieces/bishop.tscn")
 const DIRECTION_SHADER = preload("res://shaders/direction_neon.gdshader")
-const CELESTIAL_FONT = preload("res://assets/fonts/jupiter_pro.otf")
 const Numeral = preload("res://scripts/ui/piece_numeral.gd")
 const ARROW_STRIP_SIZE := Vector2(2.4, 6.7)
 const ARROW_NEAR_GAP := 5.5
@@ -67,6 +66,20 @@ func set_wave_active(active: bool) -> void:
 		_roman_label.modulate = Color.WHITE
 	for arrow in _arrows:
 		arrow.visible = active
+		(arrow.mesh.material as ShaderMaterial).set_shader_parameter("planning_strength", 1.0)
+
+
+func show_preparation() -> void:
+	set_wave_active(wave_index == 0)
+	# Exibe as duas direções antes da escolha da rota; o próximo par recebe mais destaque.
+	for arrow in _arrows:
+		arrow.show()
+		(arrow.mesh.material as ShaderMaterial).set_shader_parameter("planning_strength", 1.0 if wave_index == 0 else 0.4)
+
+
+func finish_wave() -> void:
+	set_wave_active(false)
+	_roman_label.suppressed = true
 
 
 func play_resolution() -> void:
@@ -110,8 +123,8 @@ func _create_edge_arrows() -> void:
 	arrow.name = "DirectionEtching"
 	var mesh := PlaneMesh.new()
 	mesh.orientation = PlaneMesh.FACE_Y
-	# This is a direction cue, not a ruler for the total move distance.
-	# Keep both its footprint and its clearance from the piece identical.
+
+
 	mesh.size = ARROW_STRIP_SIZE
 	var material := ShaderMaterial.new()
 	material.shader = DIRECTION_SHADER
@@ -119,20 +132,12 @@ func _create_edge_arrows() -> void:
 	material.set_shader_parameter("phase", float(wave_index) * 0.41)
 	mesh.material = material
 	arrow.mesh = mesh
-	# The painted trim sits above the frame's structural mesh; clear that trim.
+
 	arrow.position = flat_direction * (ARROW_NEAR_GAP + ARROW_STRIP_SIZE.y * 0.5) + Vector3(0.0, 0.035, 0.0)
 	arrow.rotation.y = atan2(flat_direction.x, flat_direction.z)
 	arrow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(arrow)
 	_arrows.append(arrow)
-
-
-func _outside_cell(side: String, slot: int) -> Vector2i:
-	match side:
-		"left": return Vector2i(-1, slot)
-		"right": return Vector2i(5, slot)
-		"top": return Vector2i(slot, -1)
-		_: return Vector2i(slot, 5)
 
 
 func _destination_cell(side: String, lane: int, value: int) -> Vector2i:

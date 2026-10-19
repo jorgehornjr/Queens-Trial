@@ -1,6 +1,6 @@
 class_name StarredGuide
 extends Node3D
-## Estrelas regulares seguem ondas simétricas sobre a rota lógica da fase.
+
 
 signal finished(completed: bool)
 

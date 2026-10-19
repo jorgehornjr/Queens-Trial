@@ -17,8 +17,8 @@ void vertex() {
 
 void fragment() {
     vec4 color = texture(base_color, UV) * tint;
-    // Continue the hood's darkness onto the upper collar, retaining its folds.
-    // The mesh's bind-pose gradient follows its existing neck/torso weights.
+
+
     ALBEDO = mix(color.rgb, vec3(0.0020, 0.0016, 0.0026), throat_shadow);
     NORMAL_MAP = texture(normal_map, UV).rgb;
     NORMAL_MAP_DEPTH = normal_strength;
@@ -26,8 +26,8 @@ void fragment() {
     SPECULAR = mix(0.16, 0.015, throat_shadow);
     METALLIC = 0.0;
     EMISSION = texture(emission_map, UV).rgb * emission_tint * (1.0 - throat_shadow);
-    // Preserve the original cutout exactly when fully revealed. Hash only
-    // the arrival opacity, so intermediate texture alpha never perforates cloth.
+    // Mantém o recorte original; a chegada altera apenas a opacidade.
+
     ALPHA = step(0.4, color.a) * reveal;
     ALPHA_HASH_SCALE = 1.0;
 }

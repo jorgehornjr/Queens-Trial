@@ -27,6 +27,8 @@ var _piece_root: Node3D
 var _pending_piece_movements := 0
 var _generation := 0
 var _intro_running := false
+var _preparing := false
+var _two_edicts := false
 
 
 func _ready() -> void:
@@ -35,6 +37,7 @@ func _ready() -> void:
 	_player = get_node(player_path)
 	_hud = get_node(hud_path)
 	_audio = get_node(audio_path) as GameAudio
+	_hud.position_confirmed.connect(confirm_preparation)
 
 	_edito_machine = EditoMachineModel.new()
 	add_child(_edito_machine)
@@ -53,6 +56,11 @@ func _ready() -> void:
 func _on_phase_started(phase_number: int, phase_data: Dictionary, _phase_seed: int) -> void:
 	_generation += 1
 	_intro_running = false
+	_preparing = false
+	_hud.end_preparation()
+	if _pending_piece_movements > 0:
+		_pending_piece_movements = 0
+		wave_movement_finished.emit()
 	_audio.stop_effects()
 	var run_id := _generation
 	if _player.cell_changed.is_connected(_on_player_moved):
@@ -64,8 +72,10 @@ func _on_phase_started(phase_number: int, phase_data: Dictionary, _phase_seed: i
 	_attack_visualizer.clear()
 	_board.clear_tutorial_path()
 	_current_phase_data = phase_data
-	_board.set_safe_spot_visible(phase_number <= 5)
-	if phase_number > 5:
+	_two_edicts = int(phase_data.get("edict_count", 0)) == 2
+	var is_board := String(phase_data.get("resolution", "")) == "moves"
+	_board.set_safe_spot_visible(is_board)
+	if not is_board:
 		return
 	call_deferred("_begin_phase", run_id)
 
@@ -88,23 +98,53 @@ func _begin_phase(run_id: int) -> void:
 		push_error(" ".join(border_errors))
 		return
 	_spawn_phase_pieces()
-	var editos := _build_editos(_current_phase_data)
 	_intro_running = true
-	if not _edito_machine.configurar_fase(editos, _player.current_cell):
-		push_error("Não foi possível configurar os éditos da fase atual.")
-		_intro_running = false
-		return
-	if not _player.cell_changed.is_connected(_on_player_moved):
-		_player.cell_changed.connect(_on_player_moved)
+	if _two_edicts:
+		for wave: Array in _waves:
+			for piece: EnemyPieceController in wave: piece.show_preparation()
+	elif not _start_edicts(): return
 	var values: Array = _current_phase_data.get("edict_values", [])
 	await _hud.play_phase_intro(values)
 	if run_id != _generation:
+		return
+	if _two_edicts:
+		_preparing = true
+		_hud.begin_preparation()
+		_player.set_input_enabled(true)
 		return
 	var tutorial_path: Array = _current_phase_data.get("tutorial_path", [])
 	if not tutorial_path.is_empty():
 		var completed := await _board.show_tutorial_path(tutorial_path, _player.current_cell)
 		if not completed or run_id != _generation or not is_inside_tree():
 			return
+	_intro_running = false
+	_player.set_input_enabled(true)
+
+
+func _start_edicts() -> bool:
+	if not _edito_machine.configurar_fase(_build_editos(_current_phase_data), _player.current_cell):
+		push_error("Não foi possível configurar os éditos da fase atual.")
+		return false
+	if not _player.cell_changed.is_connected(_on_player_moved):
+		_player.cell_changed.connect(_on_player_moved)
+	return true
+
+
+func confirm_preparation() -> void:
+	if not _preparing or get_tree().paused: return
+	_preparing = false
+	_hud.end_preparation()
+	_player.input_enabled = false
+	var run_id := _generation
+	while _player.movement_locked and run_id == _generation:
+		await get_tree().process_frame
+	if run_id != _generation: return
+	var attacked := await _play_wave(0, run_id)
+	if run_id != _generation: return
+	if _player.current_cell in attacked:
+		_on_falha(["O primeiro par atacou a posição que você escolheu."])
+		return
+	if not _start_edicts(): return
 	_intro_running = false
 	_player.set_input_enabled(true)
 
@@ -158,6 +198,22 @@ func _on_estado_mudou(estado: int) -> void:
 
 func _resolve_current_wave(run_id: int) -> void:
 	var wave_index: int = _edito_machine.indice_edito_atual
+	var attacked_cells: Array[Vector2i] = []
+	if _two_edicts and wave_index == 1:
+		_audio.play_effect(&"attack")
+		await _attack_visualizer.play_final_judgment()
+		if run_id != _generation: return
+		_audio.stop_effect(&"attack")
+	else:
+		attacked_cells = await _play_wave(wave_index + (1 if _two_edicts else 0), run_id)
+	if run_id != _generation: return
+	_edito_machine.avancar_primeira_peca()
+	_edito_machine.avancar_segunda_peca()
+	_edito_machine.avancar_ataque()
+	_edito_machine.julgar(attacked_cells, _board.state.safe_spot)
+
+
+func _play_wave(wave_index: int, run_id: int) -> Array[Vector2i]:
 	var pieces: Array = _waves[wave_index] if wave_index < _waves.size() else []
 	var attacked_cells: Array[Vector2i] = []
 	var origins: Array[Vector2i] = []
@@ -166,16 +222,16 @@ func _resolve_current_wave(run_id: int) -> void:
 	if not pieces.is_empty():
 		_pending_piece_movements = pieces.size()
 		for piece in pieces:
-			piece.movement_finished.connect(_on_piece_movement_finished, CONNECT_ONE_SHOT)
-			# Movimento das peças sem áudio nesta versão.
+			piece.movement_finished.connect(_on_piece_movement_finished.bind(run_id), CONNECT_ONE_SHOT)
+
 			piece.play_resolution()
-		# Every piece must be moving before the shared completion signal can fire.
+		# Dispara todas as peças antes de aguardar a conclusão do par.
 		await wave_movement_finished
 		if run_id != _generation:
-			return
+			return []
 		await get_tree().create_timer(0.32).timeout
 		if run_id != _generation:
-			return
+			return []
 		for piece in pieces:
 			origins.append(piece.destination_cell)
 			attack_paths.append(_board.state.attack_cells(piece.piece_type, piece.destination_cell))
@@ -189,20 +245,19 @@ func _resolve_current_wave(run_id: int) -> void:
 		await get_tree().create_timer(0.18).timeout
 
 	if run_id != _generation:
-		return
-	_edito_machine.avancar_primeira_peca()
-	_edito_machine.avancar_segunda_peca()
+		return []
 	if not pieces.is_empty():
 		_audio.play_effect(&"attack")
 	await _attack_visualizer.play_attack(attacked_cells, origins, attack_paths)
 	if run_id != _generation:
-		return
+		return []
 	_audio.stop_effect(&"attack")
-	_edito_machine.avancar_ataque()
-	_edito_machine.julgar(attacked_cells, _board.state.safe_spot)
+	for piece: EnemyPieceController in pieces: piece.finish_wave()
+	return attacked_cells
 
 
-func _on_piece_movement_finished(_piece: EnemyPieceController) -> void:
+func _on_piece_movement_finished(_piece: EnemyPieceController, run_id: int) -> void:
+	if run_id != _generation: return
 	_pending_piece_movements -= 1
 	if _pending_piece_movements <= 0:
 		wave_movement_finished.emit()
@@ -213,7 +268,7 @@ func _on_edito_iniciado(index: int, value: int) -> void:
 		_audio.play_effect(&"round_success")
 	for wave_index in range(_waves.size()):
 		for piece in _waves[wave_index]:
-			piece.set_wave_active(wave_index == index)
+			piece.set_wave_active(wave_index == index + (1 if _two_edicts else 0))
 	if index > 0 and not _intro_running:
 		call_deferred("_open_next_edict", _generation)
 
@@ -245,7 +300,7 @@ func _on_sucesso() -> void:
 
 func _advance_after_feedback(run_id: int) -> void:
 	await get_tree().create_timer(0.15).timeout
-	if run_id == _generation and _phase_manager.current_phase < 6:
+	if run_id == _generation:
 		_phase_manager.advance_phase()
 
 

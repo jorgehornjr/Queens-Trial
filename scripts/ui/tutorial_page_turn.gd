@@ -1,5 +1,5 @@
 extends Node2D
-## Uma folha subdividida dobra ao redor da lombada; a gravura viaja com ela.
+
 
 var paper: Texture2D
 var illustration: Texture2D
@@ -40,7 +40,7 @@ func _draw() -> void:
 	var projected_width := cos(angle) * WIDTH * direction
 	var curl := sin(angle) * 110.0
 	var back := progress > 0.5
-	# Narrow strips produce a curved leaf, rather than a flat disappearing card.
+
 	for strip in range(36):
 		var u0 := float(strip) / 36.0
 		var u1 := float(strip + 1) / 36.0
@@ -69,7 +69,7 @@ func _draw_ink(canvas: Node2D) -> void:
 	var direction := -1.0 if backwards else 1.0
 	var projected_width := cos(angle) * WIDTH * direction
 	var curl := sin(angle) * 110.0
-	# Pigment travels with the same fold, using the live-page print material.
+
 	if progress <= 0.5 and illustration != null:
 		for strip in range(28):
 			var u0 := float(strip) / 28.0

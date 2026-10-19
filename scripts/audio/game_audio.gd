@@ -2,6 +2,7 @@ class_name GameAudio
 extends Node
 
 const SOUNDS := {
+	&"preparation_tick": preload("res://assets/audio/sfx/preparation_tick.wav"),
 	&"paper_burn": preload("res://assets/audio/sfx/cards/paper_burn.wav"),
 	&"character_move": preload("res://assets/audio/sfx/user/character_move.wav"),
 	&"attack": preload("res://assets/audio/sfx/user/attack.wav"),
@@ -15,6 +16,7 @@ const SOUNDS := {
 }
 
 const LEVELS := {
+	&"preparation_tick": -8.0,
 	&"paper_burn": -4.0,
 	&"character_move": -10.0,
 	&"attack": -5.0,
@@ -59,17 +61,12 @@ func play_effect(sound: StringName) -> void:
 
 
 func play_character_move() -> void:
-	# A single keypress should have one footfall, even if input repeats rapidly.
+	# Evita repetir o som do passo quando a entrada se repete rapidamente.
 	var now := Time.get_ticks_msec()
 	if now - _last_step < 140:
 		return
 	_last_step = now
 	play_effect(&"character_move")
-
-
-func effect_duration(sound: StringName) -> float:
-	var stream: AudioStream = SOUNDS.get(sound)
-	return stream.get_length() if stream != null else 0.0
 
 
 func stop_effect(sound: StringName) -> void:

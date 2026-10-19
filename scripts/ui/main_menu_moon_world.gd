@@ -1,6 +1,6 @@
 class_name MainMenuMoonWorld
 extends Node3D
-## Plano contínuo: Terra em sombra, recuo orbital e revelação da Lua.
+
 
 signal intro_finished
 
@@ -34,7 +34,7 @@ var _board_light: DirectionalLight3D
 
 
 func _ready() -> void:
-	# Extract only the sky and Earth. The solar-system controller never enters the tree.
+
 	var source := SPACE.instantiate()
 	environment = (source.get_node("WorldEnvironment") as WorldEnvironment).environment.duplicate() as Environment
 	environment.sky = environment.sky.duplicate() as Sky
@@ -120,12 +120,12 @@ func _apply_shot() -> void:
 	camera.position = Vector3(0, 5.0, 16.0).lerp(Vector3(0, 9.0, 24.0), arrival)
 	camera.fov = lerpf(52.0, 48.0, arrival)
 	camera.look_at(Vector3(0, 25, -88))
-	# Opposite points on one orbital circle: the separation stays constant.
+
 	var pivot := Vector3(0, 13, -112).lerp(Vector3(0, 13, -136), arrival)
 	var orbit := Basis(ORBIT_AXIS.normalized(), lerpf(-PI, 0.0, arrival)) * ORBIT_OFFSET
 	earth.position = pivot - orbit
 	moon.position = pivot + orbit
-	# Preserve the approved orbit and ease only Earth's final composition to the right.
+
 	earth.position.x += 60.0 * smoothstep(6.2, 8.5, intro_time)
 	earth.scale = Vector3.ONE * lerpf(EARTH_START_SCALE, EARTH_END_SCALE, arrival)
 	var earth_sun := Vector3(0.93, 0.25, 0.28).lerp(Vector3(0.84, 0.28, -0.46), arrival).normalized()
@@ -142,12 +142,12 @@ func _apply_shot() -> void:
 		material.set_shader_parameter("light_tint", Color(0.82, 0.89, 1.0))
 		material.set_shader_parameter("rim_strength", light_reveal * 2.2)
 	_board_light.light_energy = lerpf(0.23, 0.44, light_reveal)
-	# A soft optical flare follows the light at the limb, then settles into a faint halo.
+
 	var view_size := get_viewport().get_visible_rect().size
 	var earth_limb := camera.unproject_position(earth.position + Vector3(earth.scale.x * 5.4, 10, -6)) / view_size
 	var moon_limb := camera.unproject_position(moon.position + Vector3(38, 12, -6)) / view_size
 	light_uv = earth_limb.lerp(moon_limb, arrival)
-	# Keep the source outside both silhouettes during the depth crossover.
+
 	light_uv.x = lerpf(maxf(earth_limb.x, moon_limb.x), moon_limb.x, smoothstep(7.6, 8.5, intro_time))
 	light_strength = (1.15 + sin(smoothstep(0.6, 9.0, intro_time) * PI) * 1.15) * smoothstep(0.2, 1.7, intro_time)
 

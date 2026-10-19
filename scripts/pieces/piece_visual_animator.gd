@@ -25,7 +25,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_idle_time += delta
 	if halo_pivot != null:
-		# O eixo Y local do pivô é perpendicular ao plano do halo.
+
 		halo_pivot.rotate_object_local(Vector3.UP, deg_to_rad(halo_turn_degrees_per_second) * delta)
 	position.y = sin(_idle_time * idle_float_speed) * idle_float_height + _motion_lift
 	rotation.x = _motion_lean
@@ -50,29 +50,6 @@ func play_move(duration: float) -> void:
 	_motion_tween.tween_property(self, "_motion_lift", 0.0, settle_duration)
 	_motion_tween.parallel().tween_property(self, "_motion_lean", 0.0, settle_duration)
 	_motion_tween.parallel().tween_property(self, "_motion_scale", 1.0, settle_duration)
-
-
-func play_blocked() -> void:
-	_stop_motion_tween()
-	_motion_lift = 0.0
-	_motion_lean = 0.0
-	_motion_scale = 1.0
-	_motion_tween = create_tween()
-	_motion_tween.set_trans(Tween.TRANS_BACK)
-	_motion_tween.set_ease(Tween.EASE_OUT)
-	_motion_tween.tween_property(self, "_motion_lean", deg_to_rad(3.0), 0.10)
-	_motion_tween.parallel().tween_property(self, "_motion_scale", 0.965, 0.10)
-	_motion_tween.set_trans(Tween.TRANS_SINE)
-	_motion_tween.set_ease(Tween.EASE_IN_OUT)
-	_motion_tween.tween_property(self, "_motion_lean", 0.0, 0.16)
-	_motion_tween.parallel().tween_property(self, "_motion_scale", 1.0, 0.16)
-
-
-func reset_presentation() -> void:
-	_stop_motion_tween()
-	_motion_lift = 0.0
-	_motion_lean = 0.0
-	_motion_scale = 1.0
 
 
 func _stop_motion_tween() -> void:

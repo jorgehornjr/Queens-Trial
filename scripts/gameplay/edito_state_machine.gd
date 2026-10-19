@@ -16,7 +16,7 @@ enum Estado {
 	FINALIZADO,
 }
 
-# Transições permitidas: de onde pode ir pra onde
+
 const TRANSICOES_VALIDAS := {
 	Estado.SELECAO_PAR: [Estado.AGUARDANDO_MOVIMENTO],
 	Estado.AGUARDANDO_MOVIMENTO: [Estado.PRIMEIRA_PECA],
@@ -28,7 +28,7 @@ const TRANSICOES_VALIDAS := {
 }
 
 var estado_atual: int = Estado.SELECAO_PAR
-var editos: Array = []          # [{valor: int, par: String}, ...]
+var editos: Array = []
 var indice_edito_atual: int = 0
 var origem_atual: Vector2i
 var posicao_jogador: Vector2i
@@ -52,9 +52,9 @@ func _validar_editos(lista: Array) -> bool:
 		return false
 	if lista.size() == 2:
 		if lista[0]["valor"] == lista[1]["valor"]:
-			return false # segundo édito não pode reutilizar o mesmo valor
+			return false
 		if lista[0]["par"] == lista[1]["par"]:
-			return false # segundo édito não pode reutilizar o mesmo par de peças
+			return false
 	for edito in lista:
 		if not edito["valor"] in [1, 2, 3, 4]:
 			return false
@@ -74,7 +74,7 @@ func registrar_movimento(direcao: Vector2i) -> bool:
 
 	var destino = posicao_jogador + direcao
 	if not _dentro_da_grade(destino):
-		return false # não consome passo, conforme a especificação
+		return false
 
 	posicao_jogador = destino
 	passos_dados += 1

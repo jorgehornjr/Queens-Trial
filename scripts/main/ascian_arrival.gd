@@ -1,6 +1,6 @@
 class_name AscianArrival
 extends Node3D
-## Arrival-only AVFX port: authored meshes, UVs, curves and original textures.
+
 
 const LIFE := 160.0 / 30.0
 const SHADER := preload("res://shaders/ascian_arrival.gdshader")
@@ -94,8 +94,8 @@ func _update_effect() -> void:
 		var alpha := _curve(part.color.get("A", []), age, 1.0) * _curve(part.color.get("SclA", []), age, 1.0)
 		material.set_shader_parameter("particle_tint", Color(color.x, color.y, color.z, alpha))
 		var scaling := _axes(part.scale, age, Vector3.ONE)
-		# Injection angles govern emission direction, not the billboard's Euler
-		# rotation. These point emitters have no authored launch velocity.
+		# Os ângulos de emissão não alteram a rotação do plano orientado à câmera.
+
 		var rotation := _axes(part.rotation, age, Vector3.ZERO)
 		rotation.z += _curve(part.rotation.get("ZR", []), age, 0.0) * (float(instance.clone) / maxf(1.0, float(instance.count)) - 0.5)
 		mesh.position = _axes(part.position, age, Vector3.ZERO) + _axes(instance.emitter.position, float(instance.birth), Vector3.ZERO)

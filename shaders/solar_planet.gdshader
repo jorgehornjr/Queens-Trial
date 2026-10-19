@@ -21,6 +21,6 @@ void fragment() {
 	}
 	vec3 normal_world = normalize((INV_VIEW_MATRIX * vec4(normal_view, 0.0)).xyz);
 	float daylight = max(dot(normal_world, normalize(sun_direction)), 0.0);
-	// Luz de preenchimento discreta; terminador definido pela direção do Sol.
+
 	ALBEDO = solar_emitter ? color * 3.3 : color * (vec3(0.014, 0.018, 0.028) + vec3(1.0, 0.96, 0.90) * daylight * exposure);
 }

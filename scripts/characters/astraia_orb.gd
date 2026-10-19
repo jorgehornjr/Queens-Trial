@@ -13,6 +13,10 @@ var ritual_reveal := 1.0:
 		if _ritual_material != null:
 			_ritual_material.set_shader_parameter("ritual_reveal", value)
 var _ritual_material: ShaderMaterial
+var release_charge := 0.0:
+	set(value):
+		release_charge = value
+		if _ritual_material != null: _ritual_material.set_shader_parameter("release_charge",value)
 
 
 func _ready() -> void:

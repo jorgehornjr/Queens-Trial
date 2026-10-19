@@ -15,7 +15,7 @@ const FRONTS := [
 ]
 const SURFACE = preload("res://shaders/card_surface.gdshader")
 const PAPER_TONE_ENABLED := true
-# Measured from the unpainted paper in each original JPG, in sRGB (0–255).
+# Tons do papel original em sRGB, de 0 a 255.
 const PAPER_TONES := [
 	Vector3(242.0, 233.9, 216.1), Vector3(218.2, 215.2, 200.0),
 	Vector3(224.3, 220.8, 202.3), Vector3(226.6, 226.5, 208.9),

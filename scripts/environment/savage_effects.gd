@@ -1,5 +1,5 @@
 extends Node3D
-## Instance-local atmosphere and internal embers on the queen's skinned fabric.
+
 const ClothFire = preload("res://scripts/environment/skinned_cloth_fire.gd")
 var active := false
 var _main: Node
@@ -48,7 +48,7 @@ func set_active(enabled: bool) -> void:
 		_fire.configure(dress,_skeleton)
 	else:
 		if is_instance_valid(_fire):
-			# Restore the fabric synchronously before another encounter can activate.
+
 			remove_child(_fire)
 			_fire.queue_free()
 		_fire = null

@@ -8,7 +8,7 @@ const SPACECRAFT = preload("res://scripts/environment/spacecraft.gd")
 @export var exact_rotation_period_ratios := false
 const ASSET_ROOT := "res://assets/environment/solar_system/"
 const SUN_POSITION := Vector3(-18000, -4000, 10000)
-# Distribuição cenográfica: ordem heliocêntrica com escalas de distância e tamanho independentes.
+
 const LAYOUT := [
 	{"id": "Sun", "asset": "sun", "position": SUN_POSITION, "radius": 5200.0, "speed": 0.18},
 	{"id": "Mercury", "asset": "mercury", "position": Vector3(-12000, -1800, 3000), "radius": 430.0, "speed": 0.16},
@@ -43,9 +43,9 @@ func _ready() -> void:
 		add_child(body)
 		body.configure(load(path) as PackedScene, data.radius, SUN_POSITION, axes.get(data.asset, Vector3.UP), data.speed)
 		if data.id == "Moon":
-			# Orientação inicial da face próxima da Lua.
+
 			body.model.rotation_degrees = Vector3(0, 240, 0)
-			# Ritmo visual sincronizado com a Terra, sem simulação do período lunar real.
+
 			body.spin_speed = ROTATION.speed_for("Earth", earth_turn_seconds, exact_rotation_period_ratios)
 		if ROTATION.PROFILES.has(data.id):
 			body.set_axial_rotation(ROTATION.axis_for(data.id), ROTATION.speed_for(data.id, earth_turn_seconds, exact_rotation_period_ratios))
@@ -54,12 +54,12 @@ func _ready() -> void:
 	earth.set_axial_rotation(ROTATION.axis_for("Earth"), ROTATION.speed_for("Earth", earth_turn_seconds, exact_rotation_period_ratios))
 	earth.illuminate_from(SUN_POSITION)
 	bodies["Earth"] = earth
-	# Buracos negros decorativos fora da região planetária.
+
 	_add_black_hole("BlackHoleA", Vector3(52000, -10000, 54000), 9000.0, 0.36, Vector3(32, 0, -18))
 	_add_black_hole("BlackHoleB", Vector3(-79000, -6500, -10000), 8000.0, -0.25, Vector3(25, 0, -48))
 	_add_spacecraft("SpaceStation", "space_station", Vector3(-910, -95, -1550), 300.0, Vector3(25, 0, -12), 8)
 	_add_spacecraft("SatelliteA", "basic_satellite", Vector3(850, -35, -1550), 45.0, Vector3(-55, -25, -18), 16)
-	# Satélite em primeiro plano, no intervalo angular entre Urano e Netuno.
+
 	_add_spacecraft("SatelliteB", "basic_satellite", Vector3(-425, -180, 1870), 65.0, Vector3(-30, 35, 25), 32)
 	var orbital_fill := DirectionalLight3D.new()
 	orbital_fill.name = "OrbitalFill"
@@ -87,5 +87,5 @@ func _add_black_hole(id: String, location: Vector3, radius: float, speed: float,
 	hole.accretion = true
 	add_child(hole)
 	hole.configure(load(ASSET_ROOT + "black_hole.glb") as PackedScene, radius, SUN_POSITION, Vector3.UP, speed)
-	# Inclinação do conjunto; a rotação ocorre no plano local do disco.
+
 	hole.rotation_degrees = tilt

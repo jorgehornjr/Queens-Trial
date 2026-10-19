@@ -24,7 +24,7 @@ void fragment() {
 	ROUGHNESS = clamp(texture(roughness_map, UV).g, 0.22, 1.0);
 	METALLIC = 0.0;
 	SPECULAR = specular_strength;
-	// Luzes noturnas limitadas pelo terminador no espaço global.
+
 	EMISSION = texture(city_map, UV).rgb * city_energy * night
 		+ surface * vec3(0.002, 0.004, 0.008);
 }
