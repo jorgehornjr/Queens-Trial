@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dw11klffylf2o"
+path="res://.godot/imported/5.21 Ascension.ogg-22c0d23fc5208885f19b171f5e133b9c.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/music/5.21 Ascension.ogg"
+dest_files=["res://.godot/imported/5.21 Ascension.ogg-22c0d23fc5208885f19b171f5e133b9c.oggvorbisstr"]
+
+[params]
+
+loop=true
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

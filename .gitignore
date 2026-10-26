@@ -1,0 +1,65 @@
+# Godot Generated Files
+.godot/
+/Deleted/
+__pycache__/
+*.py[cod]
+
+# Local files
+/tools/
+/tests/
+/art/
+/scenes/previews/
+/docs/*/
+
+# Export
+builds/
+exports/
+
+# Mono / C# generated files
+.mono/
+data_*/
+mono_crash.*.json
+
+# Editors
+.idea/
+.vscode/
+*.code-workspace
+
+# Operating systems
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary
+/tmp/
+.docx-review/
+*.tmp
+*.temp
+*.bak
+*.blend1
+*~
+
+# Local 3D
+!/assets/models/board/painter/
+/assets/models/pieces/*
+!/assets/models/pieces/.gitkeep
+!/assets/models/pieces/animated/
+!/assets/models/pieces/animated/**
+
+# Prototypes
+/scripts/pieces/*
+!/scripts/pieces/.gitkeep
+!/scripts/pieces/piece_visual_animator.gd
+!/scripts/pieces/piece_visual_animator.gd.uid
+!/scripts/pieces/enemy_piece_controller.gd
+!/scripts/pieces/enemy_piece_controller.gd.uid
+!/scripts/pieces/savage_enemy_piece.gd
+!/scripts/pieces/savage_enemy_piece.gd.uid
+
+# Logs
+/QT milestones/
+*.log
+
+# Preferências locais e credenciais de exportação.
+/AGENTS.md
+export_credentials.cfg

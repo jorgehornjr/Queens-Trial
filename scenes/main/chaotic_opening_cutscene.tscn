@@ -1,0 +1,70 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/main/chaotic_opening_cutscene.gd" id="1"]
+[ext_resource type="Shader" path="res://shaders/chaotic_tile_transition.gdshader" id="2"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/chaotic_announcement.wav" id="3"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/chaotic_reconstruction.wav" id="4"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/chaotic_simulation_intro.ogg" id="5"]
+
+[sub_resource type="ShaderMaterial" id="Tiles"]
+resource_local_to_scene = true
+shader = ExtResource("2")
+
+[node name="ChaoticOpeningCutscene" type="Node3D"]
+script = ExtResource("1")
+
+[node name="CinematicCamera" type="Camera3D" parent="."]
+near = 0.12
+far = 120000.0
+
+[node name="Announcement" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3")
+
+[node name="ReconstructionSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4")
+
+[node name="Score" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5")
+
+[node name="Overlay" type="CanvasLayer" parent="."]
+layer = 11
+
+[node name="Tiles" type="ColorRect" parent="Overlay"]
+material = SubResource("Tiles")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Bars" type="Control" parent="Overlay"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Top" type="ColorRect" parent="Overlay/Bars"]
+anchor_right = 1.0
+offset_bottom = 72.0
+mouse_filter = 2
+color = Color(0,0,0,1)
+
+[node name="Bottom" type="ColorRect" parent="Overlay/Bars"]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -72.0
+mouse_filter = 2
+color = Color(0,0,0,1)
+
+[node name="Fade" type="ColorRect" parent="Overlay"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0,0,0,1)

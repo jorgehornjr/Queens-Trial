@@ -1,0 +1,92 @@
+[gd_scene format=3 uid="uid://flj1ppppij5h"]
+
+[ext_resource type="Script" uid="uid://c57wflqttbgee" path="res://scripts/ui/hud.gd" id="1_hud"]
+[ext_resource type="FontFile" path="res://assets/fonts/CormorantSC-SemiBold.ttf" id="2_story"]
+[ext_resource type="PackedScene" path="res://scenes/ui/card_presentation.tscn" id="4_cards"]
+
+[sub_resource type="StyleBoxFlat" id="Style_phase"]
+content_margin_left = 22.0
+content_margin_top = 10.0
+content_margin_right = 22.0
+content_margin_bottom = 10.0
+bg_color = Color(0.025, 0.035, 0.11, 0.82)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.61, 1, 0.72)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0.05, 0.18, 0.65, 0.42)
+shadow_size = 12
+
+[node name="HUD" type="CanvasLayer" unique_id=1738850811]
+script = ExtResource("1_hud")
+
+[node name="PhasePanel" type="PanelContainer" parent="." unique_id=528574581]
+visible = false
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -150.0
+offset_top = 26.0
+offset_right = 150.0
+offset_bottom = 88.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("Style_phase")
+
+[node name="PhaseLabel" type="Label" parent="PhasePanel" unique_id=1385599177]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_story")
+theme_override_font_sizes/font_size = 25
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CardPresentation" parent="." instance=ExtResource("4_cards")]
+
+[node name="Announcement" type="Control" parent="." unique_id=267424525]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Halo" type="ColorRect" parent="Announcement" unique_id=1391232424]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -230.0
+offset_top = -2.0
+offset_right = 230.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.93, 0.66, 0.2, 0.76)
+
+[node name="EdictLabel" type="Label" parent="Announcement" unique_id=1331872741]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -720.0
+offset_top = -105.0
+offset_right = 720.0
+offset_bottom = 105.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 0
+theme_override_fonts/font = ExtResource("2_story")
+theme_override_font_sizes/font_size = 112
+text = "IV"
+horizontal_alignment = 1
+vertical_alignment = 1
