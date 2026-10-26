@@ -1,4 +1,4 @@
-# Créditos e licenças
+# CRÉDITOS E LICENÇAS
 
 Créditos dos recursos audiovisuais utilizados em Queen's Trial.
 
